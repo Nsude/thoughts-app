@@ -1,0 +1,42 @@
+button.my-classicButton path {
+  transition: stroke 200ms linear;
+}
+
+button.my-noBgButton,
+button.my-classicButton {
+  transition: transform 400ms ease-out, background 250ms linear;
+}
+
+button.my-classicButton:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+button.my-noBgButton:active,
+button.my-classicButton:active {
+  transform: scale(0.93);
+}
+
+button.my-noBgButton:hover {
+  background: var(--gray);
+}
+
+/* Tab Button */
+.my-tabButton button {
+  position: relative;
+  z-index: 1;
+  opacity: .4;
+  transition: opacity 200ms linear;
+}
+
+.my-tabButton button:hover {
+  opacity: 1;
+}
+
+.my-tabIndicator {
+  width: calc(50% - 3px);
+}
+
+.my-tabButton .selected-tab {
+  opacity: 1;
+}
