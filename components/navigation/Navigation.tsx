@@ -1,20 +1,20 @@
 "use client";
 
-import LogoMark from "@/public/LogoMark";
-import NoBgButton from "./buttons/NoBgButton";
+import NoBgButton from "../buttons/NoBgButton";
 import SearchIcon from "@/public/icons/SearchIcon";
 import DbArrowLeft from "@/public/icons/DbArrowLeft";
-import TabButton from "./buttons/TabButton";
+import TabButton from "../buttons/TabButton";
+import Logo from "../Logo";
+import NavMenuItem from "./NavMenuItem";
+import NewThoughtIcon from "@/public/icons/NewThoughtIcon";
+import ExploreIcon from "@/public/icons/ExploreIcon";
 
 export default function Naviation() {
   return (
     <div className="w-full h-full">
       {/* search & logo */}
       <div className="flex w-full h-fit justify-between items-center mb-[1.75rem]">
-        <div className="flex items-center gap-x-1.5 ">
-          <LogoMark size={18} />
-          <span className="text-[1.4rem] cursor-default">thoughts</span>
-        </div>
+        <Logo />
 
         <div className="flex">
           <NoBgButton icon={<SearchIcon />} />
@@ -28,6 +28,12 @@ export default function Naviation() {
           tab1="Public"
           tab2="Private"
         />
+      </div>
+
+      {/* Menu Items */}
+      <div className="flex flex-col w-full mt-[2.5rem]">
+        <NavMenuItem icon={<NewThoughtIcon />} label="New Thought" />
+        <NavMenuItem icon={<ExploreIcon />} label="Explore" />
       </div>
 
       {/* profile */}

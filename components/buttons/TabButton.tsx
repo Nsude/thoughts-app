@@ -12,7 +12,7 @@ interface Props {
   tab2: string;
 }
 
-const easeInOutCubic = CustomEase.create("custom", "0.65, 0, 0.35, 1");
+export const easeInOutCubic = CustomEase.create("custom", "0.65, 0, 0.35, 1");
 
 export default function TabButton({tab1, tab2}: Props) {
   const [tab, setTab] = useState(tab1);

@@ -40,3 +40,13 @@ button.my-noBgButton:hover {
 .my-tabButton .selected-tab {
   opacity: 1;
 }
+
+
+/* Nav Menu Item */
+button.my-navMenuItem {
+  transition: background 200ms linear;
+}
+
+button.my-navMenuItem:hover {
+  background: var(--gray);
+}
