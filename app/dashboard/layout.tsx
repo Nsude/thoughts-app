@@ -7,7 +7,7 @@ export default function DashboardLayout({children}: {children: React.ReactNode})
   return (
     <div className="relative w-full h-screen flex gap-x-[0.75rem] p-[0.75rem]">
       {/* navigation */}
-      <aside className="relative w-[16.5%] min-w-[18.5rem] h-full bg-myWhite rounded-[20px] border border-myGray p-[0.75rem] z-[5]">
+      <aside className="relative w-[16.5%] min-w-[18.5rem] h-full bg-myWhite rounded-[20px] border border-myGray p-[0.9375rem] z-[5]">
         <Naviation />
       </aside>
 

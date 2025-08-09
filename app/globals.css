@@ -5,7 +5,7 @@
   --white: #FFF;
   --black: #000;
   --gray: #EBEBEB;
-  --border-gray:#C7C7C7;
+  --border-gray: #C7C7C7;
   --tab-gray: #DDD;
   --accent: #FE7A33;
 }
@@ -35,4 +35,32 @@ button {
 ::selection {
   background: var(--accent);
   color: var(--black);
+}
+
+/* Hide scrollbar */
+*.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+*.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+*.slim-scrollbar::-webkit-scrollbar {
+  width: 2px;
+}
+
+*.slim-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  padding-block: 100px;
+}
+
+*.slim-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.4);
+  background-clip: padding-box;
+}
+
+*.slim-scrollbar.reduce-sb-height::-webkit-scrollbar-thumb {
+  border-block: 20px solid transparent;
 }

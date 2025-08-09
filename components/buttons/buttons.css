@@ -42,11 +42,19 @@ button.my-noBgButton:hover {
 }
 
 
-/* Nav Menu Item */
+/* Nav Menu Item | Thought Items */
+button.my-thoughtItem,
 button.my-navMenuItem {
   transition: background 200ms linear;
 }
 
+/* button.my-thoughtItem:hover, */
+button.my-thoughtItem[data-fresh="false"]:hover,
 button.my-navMenuItem:hover {
   background: var(--gray);
+}
+
+button.my-thoughtItem[data-fresh="true"] {
+  background: 
+  linear-gradient(150deg, var(--gray) 78%, var(--accent) );
 }

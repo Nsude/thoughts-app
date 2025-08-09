@@ -40,7 +40,7 @@ export default function TabButton({tab1, tab2}: Props) {
   }, {scope: container, dependencies: [tab]});
 
   return (
-    <div ref={container} className="my-tabButton relative flex items-center w-full bg-tab-gray rounded-[9px]">
+    <div ref={container} className="my-tabButton relative flex items-center w-full bg-tab-gray border border-border-gray rounded-[9px]">
       <button 
         onClick={() => setTab(tab1)}
         className="h-[2.7rem] w-full flex justify-center items-center">
