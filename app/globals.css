@@ -18,6 +18,10 @@
   --color-border-gray: var(--border-gray);
   --color-tab-gray: var(--tab-gray);
   --color-accent: var(--accent);
+
+  /* TYPOGRAPHY */
+  --text-label-small: 0.75rem;
+  --tracking-label-small: 0.03ch;
 }
 
 body {

@@ -9,6 +9,9 @@ import NavMenuItem from "./NavMenuItem";
 import NewThoughtIcon from "@/public/icons/NewThoughtIcon";
 import ExploreIcon from "@/public/icons/ExploreIcon";
 import Thought from "./Thought";
+import ClassicButton from "../buttons/ClassicButton";
+import SettingsIcon from "@/public/icons/SettingsIcon";
+import ProfileDisplay from "./ProfileDisplay";
 
 export default function Naviation() {
   return (
@@ -25,7 +28,7 @@ export default function Naviation() {
 
       {/* public/private filter */}
       <div>
-        <TabButton 
+        <TabButton
           tab1="Public"
           tab2="Private"
         />
@@ -71,8 +74,10 @@ export default function Naviation() {
       </div>
 
       {/* profile */}
-      <div className="flex bg-myWhite z-[2] justify-center items-center absolute border-t border-myGray bottom-0 left-0 w-full h-[4.5rem]">
-        profile/settings
+      <div className="flex bg-myWhite z-[2] items-center absolute border-t border-myGray bottom-0 left-0 w-full h-[4.5rem] p-[0.9375rem] justify-between">
+        {/* not logged in */}
+        <ProfileDisplay userName="Meshach" accoutType={{plan: "Freeloader"}} />
+        <NoBgButton icon={<SettingsIcon />} />
       </div>
     </div>
   )
