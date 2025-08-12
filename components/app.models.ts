@@ -4,6 +4,6 @@ interface Icon {
   color?: string;
 }
 
-export interface AccountTypes {
-  plan: "Freeloader" | "Premium"
-}
+export type AccountTypes = "Freeloader" | "Premium";
+
+export type AuthType = "signUp" | "login";

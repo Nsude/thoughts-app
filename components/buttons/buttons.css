@@ -2,9 +2,11 @@ button.my-classicButton path {
   transition: stroke 200ms linear;
 }
 
+button.my-authProviderButton,
 button.my-noBgButton,
 button.my-classicButton {
-  transition: transform 400ms ease-out, background 250ms linear;
+  transition: transform 400ms ease-out, 
+  background 250ms linear, color 200ms linear;
 }
 
 button.my-classicButton:hover {
@@ -55,6 +57,19 @@ button.my-navMenuItem:hover {
 }
 
 button.my-thoughtItem[data-fresh="true"] {
-  background: 
-  linear-gradient(150deg, var(--gray) 78%, var(--accent) );
+  background:
+    linear-gradient(150deg, var(--gray) 78%, var(--accent));
+}
+
+
+/* My Auth Provider Button */
+button.my-authProviderButton:hover {
+  background: var(--black);
+  border-color: var(--black);
+  color: white;
+}
+
+button.my-authProviderButton:hover path.make-white {
+  fill: var(--white);
+  stroke: var(--white);
 }

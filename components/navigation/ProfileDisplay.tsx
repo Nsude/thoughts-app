@@ -17,7 +17,7 @@ export default function ProfileDisplay ({userName, accoutType, avatarUrl}: Props
       </div>
       <div className="flex flex-col items-start gap-y-0.5">
         <span>{userName}</span>
-        <span className="text-label-small tracking-label-small opacity-40">{accoutType.plan}</span>
+        <span className="text-label-small tracking-label-small opacity-40">{accoutType}</span>
       </div>
     </div>
   )

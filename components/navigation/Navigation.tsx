@@ -76,7 +76,7 @@ export default function Naviation() {
       {/* profile */}
       <div className="flex bg-myWhite z-[2] items-center absolute border-t border-myGray bottom-0 left-0 w-full h-[4.5rem] p-[0.9375rem] justify-between">
         {/* not logged in */}
-        <ProfileDisplay userName="Meshach" accoutType={{plan: "Freeloader"}} />
+        <ProfileDisplay userName="Meshach" accoutType={"Freeloader"} />
         <NoBgButton icon={<SettingsIcon />} />
       </div>
     </div>

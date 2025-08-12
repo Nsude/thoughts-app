@@ -7,6 +7,7 @@
   --gray: #EBEBEB;
   --border-gray: #C7C7C7;
   --tab-gray: #DDD;
+  --fade-gray: #595959;
   --accent: #FE7A33;
 }
 
@@ -18,10 +19,14 @@
   --color-border-gray: var(--border-gray);
   --color-tab-gray: var(--tab-gray);
   --color-accent: var(--accent);
+  --color-fade-gray: var(--fade-gray);
 
   /* TYPOGRAPHY */
   --text-label-small: 0.75rem;
   --tracking-label-small: 0.03ch;
+  --text-h1: 2.8125rem;
+  --tracking-h1: -0.01ch;
+
 }
 
 body {
