@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import ConvexClientProvider from "./ConvexClientProvider";
 
 export const metadata: Metadata = {
   title: "thoughts-app",
@@ -18,10 +19,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${hostGrotesk.className} antialiased`}
-      >
-        {children}
+      <body className={`${hostGrotesk.className} antialiased`}>
+        <ConvexClientProvider>
+          {children}
+        </ConvexClientProvider>
       </body>
     </html>
   );

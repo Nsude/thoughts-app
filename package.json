@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
+    "convex": "^1.25.4",
     "gsap": "^3.13.0",
     "next": "15.4.6",
     "react": "19.1.0",
