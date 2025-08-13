@@ -8,6 +8,10 @@ import GithubIcon from "@/public/icons/GithubIcon";
 import Logo from "../Logo";
 import { AuthType } from "../app.models";
 import { useAuthActions } from "@convex-dev/auth/react";
+import { useState } from "react";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { useRouter } from "next/navigation";
 
 type AuthDetails = {
   label: string,
@@ -42,15 +46,28 @@ const authTypeMap: Record<AuthType, AuthDetails> = {
 
 interface Props {
   authType: AuthType;
-  onSubmit: () => void
+}
+
+interface myForm {
+  name: string;
+  email: string;
+  password: string;
 }
 
 export default function AuthForm({ authType }: Props) {
   const { signIn } = useAuthActions();
   const auth = authTypeMap[authType];
+  const [resetForm, setResetForm] = useState(false);
+  const [form, setForm] = useState<myForm>({name: "", email: "", password: ""});
+  const updateProfile = useMutation(api.users.updateProfile);
+  const flow = authType === "signUp" ? "signUp" : "signIn";
+  const router = useRouter();
 
-  const emailAuth = () => {
-
+  const emailAuth = async () => {
+    await signIn("password", {email: form.email, password: form.password, flow});
+    await updateProfile({name: form.name});
+    setResetForm(true);
+    router.replace("/dashboard");
   }
 
   return (
@@ -92,11 +109,24 @@ export default function AuthForm({ authType }: Props) {
         <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-y-[1.25rem] mb-[1.5625rem]">
           {
             authType === "signUp" &&
-            <InputComponent type={"firstName"} authType={authType} onChange={() => { }} />
+            <InputComponent 
+              type={"firstName"} 
+              authType={authType} 
+              reset={resetForm}
+              onChange={(value) => setForm({...form, name: value})} />
           }
 
-          <InputComponent type={"email"} authType={authType} onChange={() => { }} />
-          <InputComponent type={"password"} authType={authType} onChange={() => { }} />
+          <InputComponent 
+            type={"email"} 
+            authType={authType} 
+            reset={resetForm}
+            onChange={(value) => setForm({...form, email: value})} />
+
+          <InputComponent 
+            type={"password"} 
+            authType={authType} 
+            reset={resetForm}
+            onChange={(value) => setForm({...form, password: value})} />
 
           <AuthProviderButton label={auth.submitLabel} handleClick={emailAuth} />
         </form>

@@ -1,7 +1,7 @@
 // components/InputComponent.tsx
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import EyeClosed from "@/public/icons/EyeCloseIcon";
 import EyeOpenIcon from "@/public/icons/EyeOpenIcon";
 import { AuthType } from "../app.models";
@@ -13,6 +13,7 @@ interface InputComponentProps {
   onChange: (value: string) => void;
   authType: AuthType;
   required?: boolean;
+  reset: boolean;
 }
 
 const regexMap: Record<InputType, RegExp> = {
@@ -21,7 +22,7 @@ const regexMap: Record<InputType, RegExp> = {
   password: /^(?=.*[!@#$%^&*(),.?":{}|<>]).{9,}$/,
 };
 
-export default function InputComponent({ type, onChange, authType, required = true }: InputComponentProps) {
+export default function InputComponent({ type, onChange, authType, reset, required = true }: InputComponentProps) {
   const [value, setValue] = useState("");
   const [isValid, setIsValid] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
@@ -31,6 +32,11 @@ export default function InputComponent({ type, onChange, authType, required = tr
     email: "Email",
     password: authType === "signUp" ? "Password (8chars + special char)" : "Password",
   };
+
+  useEffect(() => {
+    if (!reset) return;
+    setValue("");
+  }, [reset])
 
   const handleBlur = () => {
     setIsValid(regexMap[type].test(value));
