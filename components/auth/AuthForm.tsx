@@ -7,6 +7,7 @@ import GoogleIcon from "@/public/icons/GoogleIcon";
 import GithubIcon from "@/public/icons/GithubIcon";
 import Logo from "../Logo";
 import { AuthType } from "../app.models";
+import { useAuthActions } from "@convex-dev/auth/react";
 
 type AuthDetails = {
   label: string,
@@ -45,7 +46,12 @@ interface Props {
 }
 
 export default function AuthForm({ authType }: Props) {
+  const { signIn } = useAuthActions();
   const auth = authTypeMap[authType];
+
+  const emailAuth = () => {
+
+  }
 
   return (
     <div className="flex w-full h-screen items-center p-[0.75rem]">
@@ -62,8 +68,15 @@ export default function AuthForm({ authType }: Props) {
 
         <div className="flex flex-col gap-y-[1.5625rem]">
           <div className="flex gap-x-1 items-center">
-            <AuthProviderButton label="Google" icon={<GoogleIcon />} />
-            <AuthProviderButton label="Github" icon={<GithubIcon />} />
+            <AuthProviderButton 
+              label="Google" 
+              icon={<GoogleIcon />} 
+              handleClick={() => signIn("google")} />
+
+            <AuthProviderButton 
+              label="Github" 
+              icon={<GithubIcon />} 
+              handleClick={() => signIn("github")} />
           </div>
 
           <div className="relative h-full w-full mb-[1.5625rem]">
@@ -81,11 +94,11 @@ export default function AuthForm({ authType }: Props) {
             authType === "signUp" &&
             <InputComponent type={"firstName"} authType={authType} onChange={() => { }} />
           }
-          
+
           <InputComponent type={"email"} authType={authType} onChange={() => { }} />
           <InputComponent type={"password"} authType={authType} onChange={() => { }} />
 
-          <AuthProviderButton label={auth.submitLabel} />
+          <AuthProviderButton label={auth.submitLabel} handleClick={emailAuth} />
         </form>
 
         <div className="flex items-center gap-x-1">
