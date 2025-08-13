@@ -1,4 +1,4 @@
-// components/InputComponent.tsx
+// Updated InputComponent with validation callback
 "use client";
 
 import { useEffect, useState } from "react";
@@ -11,6 +11,7 @@ type InputType = "firstName" | "email" | "password";
 interface InputComponentProps {
   type: InputType;
   onChange: (value: string) => void;
+  onValidationChange?: (isValid: boolean) => void; // New prop
   authType: AuthType;
   required?: boolean;
   reset: boolean;
@@ -22,30 +23,49 @@ const regexMap: Record<InputType, RegExp> = {
   password: /^(?=.*[!@#$%^&*(),.?":{}|<>]).{9,}$/,
 };
 
-export default function InputComponent({ type, onChange, authType, reset, required = true }: InputComponentProps) {
+export default function InputComponent({
+  type,
+  onChange,
+  onValidationChange,
+  authType,
+  reset,
+  required = true
+}: InputComponentProps) {
   const [value, setValue] = useState("");
-  const [isValid, setIsValid] = useState(true);
+  const [isValid, setIsValid] = useState(false); // Start as false
   const [showPassword, setShowPassword] = useState(false);
 
   const placeholderMap: Record<InputType, string> = {
     firstName: "First Name",
     email: "Email",
-    password: authType === "signUp" ? "Password (8chars + special char)" : "Password",
+    password: authType === "signUp" ? "Password (9chars + special char)" : "Password",
   };
 
   useEffect(() => {
     if (!reset) return;
     setValue("");
-  }, [reset])
+    setIsValid(false);
+    onValidationChange?.(false);
+  }, [reset, onValidationChange])
+
+  const validateInput = (inputValue: string) => {
+    const valid = regexMap[type].test(inputValue) && inputValue.length > 0;
+    setIsValid(valid);
+    onValidationChange?.(valid);
+    return valid;
+  };
 
   const handleBlur = () => {
-    setIsValid(regexMap[type].test(value));
+    validateInput(value);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setValue(val);
     onChange(val);
+
+    // Validate on change for immediate feedback
+    validateInput(val);
   };
 
   return (
@@ -62,7 +82,7 @@ export default function InputComponent({ type, onChange, authType, reset, requir
           outline-none transition-all
           focus:ring-4 focus:ring-border-gray
         `}
-        style={{borderColor: !isValid ? "#FE7A33" : ""}}
+        style={{ borderColor: !isValid && value.length > 0 ? "#FE7A33" : "" }}
       />
       {type === "password" && (
         <button

@@ -1,3 +1,4 @@
+// Updated AuthForm component
 "use client";
 
 import Link from "next/link";
@@ -54,21 +55,58 @@ interface myForm {
   password: string;
 }
 
+interface FormValidation {
+  name: boolean;
+  email: boolean;
+  password: boolean;
+}
+
 export default function AuthForm({ authType }: Props) {
   const { signIn } = useAuthActions();
   const auth = authTypeMap[authType];
   const [resetForm, setResetForm] = useState(false);
-  const [form, setForm] = useState<myForm>({name: "", email: "", password: ""});
+  const [form, setForm] = useState<myForm>({ name: "", email: "", password: "" });
+  const [formValidation, setFormValidation] = useState<FormValidation>({
+    name: false,
+    email: false,
+    password: false
+  });
+
   const updateProfile = useMutation(api.users.updateProfile);
   const flow = authType === "signUp" ? "signUp" : "signIn";
   const router = useRouter();
 
+  // Check if form is valid based on auth type
+  const isFormValid = () => {
+    if (authType === "signUp") {
+      return formValidation.name && formValidation.email && formValidation.password;
+    }
+    return formValidation.email && formValidation.password;
+  };
+
   const emailAuth = async () => {
-    await signIn("password", {email: form.email, password: form.password, flow});
-    await updateProfile({name: form.name});
-    setResetForm(true);
-    router.replace("/dashboard");
+    // Prevent execution if form is invalid
+    if (!isFormValid()) {
+      console.log("Form is invalid, cannot proceed");
+      return;
+    }
+
+    try {
+      await signIn("password", { email: form.email, password: form.password, flow });
+      await updateProfile({ name: form.name });
+      setResetForm(true);
+      router.replace("/dashboard");
+    } catch (error) {
+      console.error("Authentication failed:", error);
+    }
   }
+
+  const updateFormValidation = (field: keyof FormValidation, isValid: boolean) => {
+    setFormValidation(prev => ({
+      ...prev,
+      [field]: isValid
+    }));
+  };
 
   return (
     <div className="flex w-full h-screen items-center p-[0.75rem]">
@@ -85,14 +123,14 @@ export default function AuthForm({ authType }: Props) {
 
         <div className="flex flex-col gap-y-[1.5625rem]">
           <div className="flex gap-x-1 items-center">
-            <AuthProviderButton 
-              label="Google" 
-              icon={<GoogleIcon />} 
+            <AuthProviderButton
+              label="Google"
+              icon={<GoogleIcon />}
               handleClick={() => signIn("google")} />
 
-            <AuthProviderButton 
-              label="Github" 
-              icon={<GithubIcon />} 
+            <AuthProviderButton
+              label="Github"
+              icon={<GithubIcon />}
               handleClick={() => signIn("github")} />
           </div>
 
@@ -104,31 +142,36 @@ export default function AuthForm({ authType }: Props) {
           </div>
         </div>
 
-
         {/* Form */}
         <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-y-[1.25rem] mb-[1.5625rem]">
           {
             authType === "signUp" &&
-            <InputComponent 
-              type={"firstName"} 
-              authType={authType} 
+            <InputComponent
+              type={"firstName"}
+              authType={authType}
               reset={resetForm}
-              onChange={(value) => setForm({...form, name: value})} />
+              onChange={(value) => setForm({ ...form, name: value })}
+              onValidationChange={(isValid) => updateFormValidation('name', isValid)} />
           }
 
-          <InputComponent 
-            type={"email"} 
-            authType={authType} 
+          <InputComponent
+            type={"email"}
+            authType={authType}
             reset={resetForm}
-            onChange={(value) => setForm({...form, email: value})} />
+            onChange={(value) => setForm({ ...form, email: value })}
+            onValidationChange={(isValid) => updateFormValidation('email', isValid)} />
 
-          <InputComponent 
-            type={"password"} 
-            authType={authType} 
+          <InputComponent
+            type={"password"}
+            authType={authType}
             reset={resetForm}
-            onChange={(value) => setForm({...form, password: value})} />
+            onChange={(value) => setForm({ ...form, password: value })}
+            onValidationChange={(isValid) => updateFormValidation('password', isValid)} />
 
-          <AuthProviderButton label={auth.submitLabel} handleClick={emailAuth} />
+          <AuthProviderButton
+            label={auth.submitLabel}
+            handleClick={emailAuth}
+            disabled={!isFormValid()} />
         </form>
 
         <div className="flex items-center gap-x-1">

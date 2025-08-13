@@ -5,12 +5,14 @@ import "@/components/buttons/buttons.css";
 interface Props {
   label?: string;
   icon?: React.ReactNode;
+  disabled?: boolean;
   handleClick: () => void;
 }
 
-export default function AuthProviderButton({label, icon, handleClick}: Props) {
+export default function AuthProviderButton({label, icon, disabled,handleClick}: Props) {
   return (
     <button
+      disabled={disabled}
       onClick={handleClick}
       className={`my-authProviderButton
         flex items-center justify-center gap-x-[0.25rem] border border-myGray 
