@@ -78,6 +78,23 @@ export default function AuthForm({ authType }: Props) {
   const router = useRouter();
 
   const [emailOtp, setEmailOtp] = useState("");
+  const wait = 5;
+  const [resendTimer, setResendTimer] = useState(wait);
+  const [error, setError] = useState("");
+
+  const resendCountDown = () => {
+    setResendTimer(wait);
+    let count = wait;
+
+    let interval = setInterval(() => {
+      if (count <= 0) {
+        clearInterval(interval);
+        return;
+      };
+      count = count - 1;
+      setResendTimer(count);
+    }, 1000)
+  }
 
   // Check if form is valid based on auth type
   const isFormValid = () => {
@@ -91,17 +108,27 @@ export default function AuthForm({ authType }: Props) {
   const emailAuth = async () => {
     // Prevent execution if form is invalid
     if (!isFormValid()) return;
+    setError("");
 
-    await signIn("password", { email: form.email, password: form.password, flow });
-    if (flow !== "signUp") return router.replace("/dashboard");
-    setFlow("email-verification");
+    await signIn("password", { email: form.email, password: form.password, flow })
+      .then(() => {
+        resendCountDown();
+        setFlow("email-verification");
+      })
+      .catch((error) => {
+        // error logic
+        console.log(error);
+        setError("An error occured, please try again");
+      });
+
+    if (flow === "signIn") return router.replace("/dashboard");
   }
 
   // verify email
   const verifyEmail = async () => {
     if (emailOtp.length < OTPLength) return;
 
-    await signIn("password", {email: form.email, code: emailOtp, flow});
+    await signIn("password", { email: form.email, code: emailOtp, flow});
 
     await updateProfile({ name: form.name });
     setResetForm(true);
@@ -121,10 +148,14 @@ export default function AuthForm({ authType }: Props) {
   return (
     <div className="flex w-full h-screen items-center p-[0.75rem]">
       {/* Left side */}
-      <div className="w-full text-center flex flex-col items-center">
+      <div className="relative w-full text-center flex flex-col items-center">
         <span className="mb-[4.0625rem]">
           <Logo />
         </span>
+        
+        <div className="absolute">
+
+        </div>
 
         <div className="mb-[3.125rem]">
           <span className="text-fade-gray">Think out loud.</span>
@@ -185,15 +216,14 @@ export default function AuthForm({ authType }: Props) {
                 handleClick={emailAuth}
                 disabled={!isFormValid()} />
             </form>
-            : 
-            <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-y-[1.5625rem]">
-              <InputComponent 
+            : // ===== VERIFY EMAIL =====
+            <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-y-[1.5625rem] mb-[1.5625rem]">
+              <InputComponent
                 type={"text"}
                 placeholder="code"
                 authType={authType}
                 reset={true}
                 onChange={(value) => setEmailOtp(value)}
-
               />
 
               <AuthProviderButton
@@ -202,10 +232,21 @@ export default function AuthForm({ authType }: Props) {
             </form>
         }
 
-        <div className="flex items-center gap-x-1">
-          <span className="text-fade-gray">{auth.redirect.msg}</span>
-          <Link href={auth.redirect.link} className="underline text-accent">{auth.redirect.label}</Link>
-        </div>
+        {
+          flow === "signIn" || flow === "signUp" ?
+            <div className="flex items-center gap-x-1">
+              <span className="text-fade-gray">{auth.redirect.msg}</span>
+              <Link href={auth.redirect.link} className="underline text-accent">{auth.redirect.label}</Link>
+            </div>
+            : // ===== RESEND EMAIL =====
+            <div className="flex gap-x-1">
+              <button 
+                onClick={emailAuth}
+                disabled={resendTimer > 1} className="underline opacity-40 hover:opacity-100 transition-[opacity] duration-[200ms]" style={{pointerEvents: resendTimer > 1 ? "none" : "all"}}>Resend</button>
+              <span>in {resendTimer < 10 ? '0' : ''}{resendTimer}</span>
+            </div>
+        }
+
       </div>
 
       {/* Right side */}
