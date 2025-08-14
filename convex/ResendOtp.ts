@@ -20,7 +20,7 @@ export const ResendOTP = Resend({
   async sendVerificationRequest({ identifier: email, provider, token }) {
     const resend = new ResendAPI(provider.apiKey);
     const { error } = await resend.emails.send({
-      from: "onboarding@resend.dev",
+      from: "noreply@meshachnsude.com",
       to: [email],
       subject: `Sign in to Thoughts`,
       text: "Your code is " + token,

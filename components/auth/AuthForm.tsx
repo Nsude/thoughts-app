@@ -93,6 +93,7 @@ export default function AuthForm({ authType }: Props) {
     if (!isFormValid()) return;
 
     await signIn("password", { email: form.email, password: form.password, flow });
+    if (flow !== "signUp") return router.replace("/dashboard");
     setFlow("email-verification");
   }
 
@@ -188,8 +189,9 @@ export default function AuthForm({ authType }: Props) {
             <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-y-[1.5625rem]">
               <InputComponent 
                 type={"text"}
+                placeholder="code"
                 authType={authType}
-                reset={resetForm}
+                reset={true}
                 onChange={(value) => setEmailOtp(value)}
 
               />
