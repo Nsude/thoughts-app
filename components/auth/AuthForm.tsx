@@ -14,6 +14,8 @@ import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { OTPLength } from "@/convex/ResendOtp";
+import Toast from "../utils/Toast";
+import DefaultIcon from "@/public/icons/DefaultIcon";
 
 type AuthDetails = {
   label: string,
@@ -118,7 +120,7 @@ export default function AuthForm({ authType }: Props) {
       .catch((error) => {
         // error logic
         console.log(error);
-        setError("An error occured, please try again");
+        setError("Something went wrong, please try again.");
       });
 
     if (flow === "signIn") return router.replace("/dashboard");
@@ -147,12 +149,16 @@ export default function AuthForm({ authType }: Props) {
 
   return (
     <div className="flex w-full h-screen items-center p-[0.75rem]">
+      <Toast 
+        icon={<DefaultIcon color="white"/>} 
+        msg={error} 
+        showToast={error.trim() !== "" ? true : false} />
       {/* Left side */}
       <div className="relative w-full text-center flex flex-col items-center">
         <span className="mb-[4.0625rem]">
           <Logo />
         </span>
-        
+
         <div className="absolute">
 
         </div>

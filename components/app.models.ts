@@ -1,5 +1,5 @@
 // Icon models
-interface Icon {
+export interface Icon {
   size?: number;
   color?: string;
 }
