@@ -80,7 +80,7 @@ export default function AuthForm({ authType }: Props) {
   const router = useRouter();
 
   const [emailOtp, setEmailOtp] = useState("");
-  const wait = 5;
+  const wait = 30;
   const [resendTimer, setResendTimer] = useState(wait);
   const [error, setError] = useState("");
 
@@ -112,16 +112,14 @@ export default function AuthForm({ authType }: Props) {
     if (!isFormValid()) return;
     setError("");
 
-    await signIn("password", { email: form.email, password: form.password, flow })
-      .then(() => {
-        resendCountDown();
-        setFlow("email-verification");
-      })
-      .catch((error) => {
-        // error logic
-        console.log(error);
-        setError("Something went wrong, please try again.");
-      });
+    try {
+      await signIn("password", { email: form.email, password: form.password, flow })
+      resendCountDown();
+      setFlow("email-verification");
+    } catch (error) {
+      console.log(error);
+      setError("Something went wrong, please try again.");
+    }
 
     if (flow === "signIn") return router.replace("/dashboard");
   }
@@ -130,11 +128,16 @@ export default function AuthForm({ authType }: Props) {
   const verifyEmail = async () => {
     if (emailOtp.length < OTPLength) return;
 
-    await signIn("password", { email: form.email, code: emailOtp, flow});
-
-    await updateProfile({ name: form.name });
-    setResetForm(true);
-    router.replace("/dashboard");
+    try {
+      await signIn("password", { email: form.email, code: emailOtp, flow});
+      await new Promise<void>((resolve) => setTimeout(resolve, 1000)); // little delay to allow email verification
+      await updateProfile({ name: form.name });
+      setResetForm(true);
+      router.replace("/dashboard");
+    } catch (error) {
+      console.log(error);
+      setError("Couldn't verify email at this time, try again.");
+    }
   }
 
   // update the isValid status of each form field
