@@ -6,7 +6,7 @@ import EyeClosed from "@/public/icons/EyeCloseIcon";
 import EyeOpenIcon from "@/public/icons/EyeOpenIcon";
 import { AuthType } from "../app.models";
 
-type InputType = "firstName" | "email" | "password";
+type InputType = "firstName" | "email" | "password" | "text";
 
 interface InputComponentProps {
   type: InputType;
@@ -14,6 +14,7 @@ interface InputComponentProps {
   onValidationChange?: (isValid: boolean) => void; // New prop
   authType: AuthType;
   required?: boolean;
+  placeholder?: string;
   reset: boolean;
 }
 
@@ -21,6 +22,7 @@ const regexMap: Record<InputType, RegExp> = {
   firstName: /^[A-Za-z\s'-]+$/,
   email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   password: /^(?=.*[!@#$%^&*(),.?":{}|<>]).{9,}$/,
+  text: /./
 };
 
 export default function InputComponent({
@@ -29,6 +31,7 @@ export default function InputComponent({
   onValidationChange,
   authType,
   reset,
+  placeholder,
   required = true
 }: InputComponentProps) {
   const [value, setValue] = useState("");
@@ -39,6 +42,7 @@ export default function InputComponent({
     firstName: "First Name",
     email: "Email",
     password: authType === "signUp" ? "Password (9chars + special char)" : "Password",
+    text: placeholder ?? "type here"
   };
 
   useEffect(() => {

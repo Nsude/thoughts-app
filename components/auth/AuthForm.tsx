@@ -13,6 +13,7 @@ import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
+import { OTPLength } from "@/convex/ResendOtp";
 
 type AuthDetails = {
   label: string,
@@ -73,8 +74,10 @@ export default function AuthForm({ authType }: Props) {
   });
 
   const updateProfile = useMutation(api.users.updateProfile);
-  const flow = authType === "signUp" ? "signUp" : "signIn";
+  const [flow, setFlow] = useState(authType === "signUp" ? "signUp" : "signIn");
   const router = useRouter();
+
+  const [emailOtp, setEmailOtp] = useState("");
 
   // Check if form is valid based on auth type
   const isFormValid = () => {
@@ -84,29 +87,35 @@ export default function AuthForm({ authType }: Props) {
     return formValidation.email && formValidation.password;
   };
 
+  // initial email auth
   const emailAuth = async () => {
     // Prevent execution if form is invalid
-    if (!isFormValid()) {
-      console.log("Form is invalid, cannot proceed");
-      return;
-    }
+    if (!isFormValid()) return;
 
-    try {
-      await signIn("password", { email: form.email, password: form.password, flow });
-      await updateProfile({ name: form.name });
-      setResetForm(true);
-      router.replace("/dashboard");
-    } catch (error) {
-      console.error("Authentication failed:", error);
-    }
+    await signIn("password", { email: form.email, password: form.password, flow });
+    setFlow("email-verification");
   }
 
+  // verify email
+  const verifyEmail = async () => {
+    if (emailOtp.length < OTPLength) return;
+
+    await signIn("password", {email: form.email, code: emailOtp, flow});
+
+    await updateProfile({ name: form.name });
+    setResetForm(true);
+    router.replace("/dashboard");
+  }
+
+  // update the isValid status of each form field
   const updateFormValidation = (field: keyof FormValidation, isValid: boolean) => {
     setFormValidation(prev => ({
       ...prev,
       [field]: isValid
     }));
   };
+
+
 
   return (
     <div className="flex w-full h-screen items-center p-[0.75rem]">
@@ -142,37 +151,54 @@ export default function AuthForm({ authType }: Props) {
           </div>
         </div>
 
-        {/* Form */}
-        <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-y-[1.25rem] mb-[1.5625rem]">
-          {
-            authType === "signUp" &&
-            <InputComponent
-              type={"firstName"}
-              authType={authType}
-              reset={resetForm}
-              onChange={(value) => setForm({ ...form, name: value })}
-              onValidationChange={(isValid) => updateFormValidation('name', isValid)} />
-          }
+        {
+          flow === "signIn" || flow === "signUp" ?
+            <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-y-[1.25rem] mb-[1.5625rem]">
+              {/* only display firtname input on signup auth */}
+              {
+                authType === "signUp" &&
+                <InputComponent
+                  type={"firstName"}
+                  authType={authType}
+                  reset={resetForm}
+                  onChange={(value) => setForm({ ...form, name: value })}
+                  onValidationChange={(isValid) => updateFormValidation('name', isValid)} />
+              }
 
-          <InputComponent
-            type={"email"}
-            authType={authType}
-            reset={resetForm}
-            onChange={(value) => setForm({ ...form, email: value })}
-            onValidationChange={(isValid) => updateFormValidation('email', isValid)} />
+              <InputComponent
+                type={"email"}
+                authType={authType}
+                reset={resetForm}
+                onChange={(value) => setForm({ ...form, email: value })}
+                onValidationChange={(isValid) => updateFormValidation('email', isValid)} />
 
-          <InputComponent
-            type={"password"}
-            authType={authType}
-            reset={resetForm}
-            onChange={(value) => setForm({ ...form, password: value })}
-            onValidationChange={(isValid) => updateFormValidation('password', isValid)} />
+              <InputComponent
+                type={"password"}
+                authType={authType}
+                reset={resetForm}
+                onChange={(value) => setForm({ ...form, password: value })}
+                onValidationChange={(isValid) => updateFormValidation('password', isValid)} />
 
-          <AuthProviderButton
-            label={auth.submitLabel}
-            handleClick={emailAuth}
-            disabled={!isFormValid()} />
-        </form>
+              <AuthProviderButton
+                label={auth.submitLabel}
+                handleClick={emailAuth}
+                disabled={!isFormValid()} />
+            </form>
+            : 
+            <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-y-[1.5625rem]">
+              <InputComponent 
+                type={"text"}
+                authType={authType}
+                reset={resetForm}
+                onChange={(value) => setEmailOtp(value)}
+
+              />
+
+              <AuthProviderButton
+                label={auth.submitLabel}
+                handleClick={verifyEmail} />
+            </form>
+        }
 
         <div className="flex items-center gap-x-1">
           <span className="text-fade-gray">{auth.redirect.msg}</span>
