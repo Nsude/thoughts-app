@@ -2,7 +2,7 @@ import Resend from "@auth/core/providers/resend";
 import { Resend as ResendAPI } from "resend";
 import { RandomReader, generateRandomString } from "@oslojs/crypto/random";
 
-export const OTPLength = 8;
+export const OTPLength = 4;
 
 export const ResendOTP = Resend({
   id: "resend-otp",

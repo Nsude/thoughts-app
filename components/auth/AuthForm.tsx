@@ -130,7 +130,7 @@ export default function AuthForm({ authType }: Props) {
 
     try {
       await signIn("password", { email: form.email, code: emailOtp, flow});
-      await new Promise<void>((resolve) => setTimeout(resolve, 1000)); // little delay to allow email verification
+      await new Promise<void>((resolve) => setTimeout(resolve, 200)); // little delay to allow email verification
       await updateProfile({ name: form.name });
       setResetForm(true);
       router.replace("/dashboard");

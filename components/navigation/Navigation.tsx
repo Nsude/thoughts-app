@@ -8,12 +8,27 @@ import Logo from "../Logo";
 import NavMenuItem from "./NavMenuItem";
 import NewThoughtIcon from "@/public/icons/NewThoughtIcon";
 import ExploreIcon from "@/public/icons/ExploreIcon";
-import Thought from "./Thought";
-import ClassicButton from "../buttons/ClassicButton";
-import SettingsIcon from "@/public/icons/SettingsIcon";
 import ProfileDisplay from "./ProfileDisplay";
+import { useAction, useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import LogoutIcon from "@/public/icons/LogoutIcon";
+import { useRouter } from "next/navigation";
 
 export default function Naviation() {
+  const currentUser = useQuery(api.users.getCurrentUser);
+  const signOut = useAction(api.auth.signOut);
+  const router = useRouter();
+
+  const handleSignout = async () => {
+    try {
+      await signOut();
+      router.replace("/");
+    } catch (error) {
+      console.log("Error signing out: ", error);
+    }
+    
+  }
+
   return (
     <div className="w-full h-full">
       {/* search & logo */}
@@ -41,43 +56,28 @@ export default function Naviation() {
       </div>
 
       {/* Thoughts */}
-      <div className="w-full h-[38.5%]">
+      <div className="w-full max-h-[38.5%]">
         <span className="block mb-[0.75rem] opacity-40">Your Thoughts</span>
         <div className="flex flex-col h-[90%] overflow-y-scroll snap-y slim-scrollbar">
-          <Thought label="Stake start-up idea that sucks like your code" fresh={true} />
-          <Thought label="Stake start-up idea that sucks like your code" />
-          <Thought label="Stake start-up idea that sucks like your code" />
-          <Thought label="Stake start-up idea that sucks like your code" />
-          <Thought label="Stake start-up idea that sucks like your code" />
-          <Thought label="Stake start-up idea that sucks like your code" />
-          <Thought label="Stake start-up idea that sucks like your code" />
-          <Thought label="Stake start-up idea that sucks like your code" />
-          <Thought label="Stake start-up idea that sucks like your code" />
-          <Thought label="Stake start-up idea that sucks like your code" />
-          <Thought label="Stake start-up idea that sucks like your code" />
-          <Thought label="Stake start-up idea that sucks like your code" />
-          <Thought label="Stake start-up idea that sucks like your code" />
+          {/* Thoughts go here */}
         </div>
       </div>
 
       {/* Thoughts */}
-      <div className="w-full h-[14%] mt-[2.5rem]">
+      <div className="w-full max-h-[14%] mt-[2.5rem]">
         <span className="block mb-[0.75rem] opacity-40">Collaborations</span>
         <div className="flex flex-col h-[95%] overflow-y-scroll snap-y slim-scrollbar reduce-sb-height">
-          <Thought label="Dressing old apps as new" />
-          <Thought label="Create minimal roadmaps" />
-          <Thought label="Create minimal roadmaps" />
-          <Thought label="Create minimal roadmaps" />
-          <Thought label="Create minimal roadmaps" />
-          <Thought label="Create minimal roadmaps" />
+          {/* Thoughts go here */}
         </div>
       </div>
 
       {/* profile */}
       <div className="flex bg-myWhite z-[2] items-center absolute border-t border-myGray bottom-0 left-0 w-full h-[4.5rem] p-[0.9375rem] justify-between">
         {/* not logged in */}
-        <ProfileDisplay userName="Meshach" accoutType={"Freeloader"} />
-        <NoBgButton icon={<SettingsIcon />} />
+        <ProfileDisplay 
+          userName={currentUser?.name || currentUser?.email || "name"} 
+          accoutType={"Freeloader"} />
+        <NoBgButton icon={<LogoutIcon />} handleClick={handleSignout} />
       </div>
     </div>
   )
