@@ -1,4 +1,4 @@
-import { Id } from "@/convex/_generated/dataModel";
+import { DataModel, Id } from "@/convex/_generated/dataModel";
 
 // Icon models
 export interface Icon {
@@ -11,10 +11,10 @@ export type AccountTypes = "Freeloader" | "Premium";
 export type AuthType = "signUp" | "login";
 
 // thought documents
-export type ThoghtDocument = Id<"thought_documents">;
+export type ThoghtDocument = DataModel["thought_documents"]["document"]
 
 // thoughts
-export type Thought = Id<"thoughts">;
+export type Thought = DataModel["thoughts"]["document"];
 
 // versions
-export type Version = Id<"versions">;
+export type Version = DataModel["versions"]["document"];

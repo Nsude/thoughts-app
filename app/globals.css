@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --off-white: #F7F7F7;
+  --off-white: #F0F0F0;
   --white: #FFF;
   --black: #000;
   --gray: #EBEBEB;
@@ -26,6 +26,7 @@
   --tracking-label-small: 0.03ch;
   --text-h1: 2.8125rem;
   --tracking-h1: -0.01ch;
+  --text-title:  1.5625rem;
 
 }
 

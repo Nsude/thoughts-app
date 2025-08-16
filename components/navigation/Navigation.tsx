@@ -46,6 +46,7 @@ export default function Naviation() {
         <TabButton
           tab1="Public"
           tab2="Private"
+          handleClick={(tab) => {}}
         />
       </div>
 
@@ -65,7 +66,7 @@ export default function Naviation() {
 
       {/* Thoughts */}
       <div className="w-full max-h-[14%] mt-[2.5rem]">
-        <span className="block mb-[0.75rem] opacity-40">Collaborations</span>
+        <span className="block mb-[0.75rem] opacity-40">Shared</span>
         <div className="flex flex-col h-[95%] overflow-y-scroll snap-y slim-scrollbar reduce-sb-height">
           {/* Thoughts go here */}
         </div>
