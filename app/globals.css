@@ -7,7 +7,7 @@
   --gray: #EBEBEB;
   --border-gray: #C7C7C7;
   --tab-gray: #DDD;
-  --fade-gray: #595959;
+  --fade-gray: #727272;
   --accent: #FE7A33;
 }
 
@@ -73,4 +73,10 @@ button {
 
 *.slim-scrollbar.reduce-sb-height::-webkit-scrollbar-thumb {
   border-block: 20px solid transparent;
+}
+
+
+/* Slate container */
+.my-slateContainer {
+  height: calc(47.75rem - 6.5rem);
 }

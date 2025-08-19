@@ -12,19 +12,20 @@ interface Props {
   tab2?: string;
   tabIcon1?: React.ReactNode;
   tabIcon2?: React.ReactNode;
+  preselectTab?: number;
   handleClick: (tab: number) => void;
 }
 
 export const easeInOutCubic = CustomEase.create("custom", "0.65, 0, 0.35, 1");
 
-export default function TabButton({tab1, tab2, tabIcon1, tabIcon2, handleClick}: Props) {
+export default function TabButton({tab1, tab2, tabIcon1, tabIcon2, preselectTab, handleClick}: Props) {
   const [tab, setTab] = useState(0);
   const container = useRef(null);
   const indicator = useRef(null);
 
   useGSAP(() => {
     if (!container.current) return;
-    const translateFactor = tab;
+    const translateFactor = preselectTab || tab;
     const main = container.current as HTMLDivElement;
     const button1 = main.children[0];
     const button2 = main.children[1];
@@ -40,7 +41,7 @@ export default function TabButton({tab1, tab2, tabIcon1, tabIcon2, handleClick}:
     // animate indicator 
     gsap.to(indicator.current, { xPercent: 100 * translateFactor, duration: .4, ease: easeInOutCubic });
 
-  }, {scope: container, dependencies: [tab]});
+  }, {scope: container, dependencies: [tab, preselectTab]});
 
   return (
     <div ref={container} className={`

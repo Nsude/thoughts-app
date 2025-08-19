@@ -43,30 +43,11 @@ const schema = defineSchema({
   thought_documents: defineTable({
     title: v.string(),
     thoughtFileId: v.id("thoughts"),
-    blocks: v.array(
-      v.object({
-        id: v.string(),
-        type: v.union(
-          // can be one of these
-          v.literal("paragraph"),
-          v.literal("heading"),
-          v.literal("bulletList"),
-          v.literal("numberedList"),
-          v.literal("tip"),
-          v.literal("highlight")
-        ),
-        content: v.string(),
-        metadata: v.optional(
-          v.object({
-            level: v.optional(v.number()), // for headings
-            items: v.optional(v.array(v.string())), // for lists
-            highlighted: v.optional(v.boolean()),
-            comments: v.optional(v.array(v.string())),
-          })
-        ),
-      })
-    ),
-    sourceType: v.union(v.literal("audio"), v.literal("text")),
+
+    // raw slate JSON content
+    content: v.optional(v.any()),
+
+    sourceType: v.optional(v.union(v.literal("audio"), v.literal("text"))),
   })
     .index("thoughtFileId", ["thoughtFileId"])
     .index("title", ["title"]), // for search and auto-complete
