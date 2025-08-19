@@ -80,3 +80,8 @@ button {
 .my-slateContainer {
   height: calc(47.75rem - 6.5rem);
 }
+
+.my-slateContainer ::selection {
+  background-color: var(--color-border-gray);
+  color: var(--black);
+}

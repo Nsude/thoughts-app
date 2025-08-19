@@ -2,7 +2,7 @@
 
 import ClassicButton from "@/components/buttons/ClassicButton";
 import TabButton, { easeInOutCubic } from "@/components/buttons/TabButton";
-import SlateEditor from "@/components/SlateEditor";
+import SlateEditor from "@/components/rich-text-editor/SlateEditor";
 import LogoIcon from "@/public/icons/LogoIcon";
 import MicrophoneIcon from "@/public/icons/MicrophoneIcon";
 import PlusIcon from "@/public/icons/PlusIcon";
@@ -54,7 +54,7 @@ export default function ThoughtDocument() {
           <div className="relative my-slateContainer px-[1.125rem] mt-[2rem] w-full overflow-clip">
             {/* Placeholder msg */}
 
-            <div className="absolute w-full overflow-clip" 
+            <div className="absolute w-full overflow-y-scroll overflow-x-clip" 
             style={{
               pointerEvents: isEmpty ? "all" : 'none',
               opacity: isEmpty ? "1" : '0'
