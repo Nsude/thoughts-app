@@ -1,38 +1,49 @@
-import { Editor, Element, Text, Transforms } from "slate";
+import { Editor, Element, Path, Text, Transforms } from "slate";
+import { CustomText } from "./slate";
 
 export const handleKeyDown = (e: React.KeyboardEvent, editor: Editor) => {
   const { key } = e;
+
   if (e.ctrlKey) {
     switch (key) {
       case "`":
+        // turn to code block
         return CustomEditor.toggleCode(e, editor);
       case "b":
+        // make bold
         return CustomEditor.toggleBold(e, editor);
       case "h":
+        // highlight mark
         return CustomEditor.toggleHightlight(e, editor);
       case "i":
+        // italic mark
         return CustomEditor.toggleItalic(e, editor);
       case "u":
+        // underline mark
         return CustomEditor.toggleUnderline(e, editor);
       case "l":
+        // line-through mark
         return CustomEditor.toggleLineThroug(e, editor);
     }
   }
 
   // CTRL + SHIFT
-  if (e.ctrlKey && e.shiftKey) {
-    switch (key) {
+  if (e.ctrlKey && e.shiftKey && key) {
+    switch (key.toLowerCase()) {
       case "o":
-        return CustomEditor.toggleNumberedList(e, editor);
+        // ordered list
+        return CustomEditor.toggleNumberedList(editor, e);
+      case "b":
+        // bullet list
+        return CustomEditor.toggleBulletList(editor, e);
     }
   }
 };
 
 export const CustomEditor = {
   isBoldMarkActive(editor: Editor) {
-    const marks = Editor.marks(editor);
-    const isActive = marks && marks.bold === true;
-    return isActive;
+    const marks = Editor.marks(editor) as { bold?: boolean } | null;
+    return marks?.bold === true;
   },
 
   isCodeBlockActive(editor: Editor) {
@@ -43,23 +54,23 @@ export const CustomEditor = {
   },
 
   isHighlightActive(editor: Editor) {
-    const marks = Editor.marks(editor);
-    return marks ? marks.highlight === true : false;
+    const marks = Editor.marks(editor) as CustomText;
+    return marks.highlight === true;
   },
 
   isItalicActive(editor: Editor) {
-    const marks = Editor.marks(editor);
-    return marks ? marks.italic === true : false;
+    const marks = Editor.marks(editor) as CustomText;
+    return marks.italic === true;
   },
 
   isUnderlineActive(editor: Editor) {
-    const marks = Editor.marks(editor);
-    return marks ? marks.underline === true : false;
+    const marks = Editor.marks(editor) as CustomText;
+    return marks.underline === true;
   },
 
   isLinethroughActive(editor: Editor) {
-    const marks = Editor.marks(editor);
-    return marks ? marks.linethrough === true : false;
+    const marks = Editor.marks(editor) as CustomText;
+    return marks.linethrough === true;
   },
 
   // toggle line through
@@ -151,57 +162,71 @@ export const CustomEditor = {
   toggleHeadings(editor: Editor, level: number) {
     let match = this.isHeadingElement(editor, level);
 
-    const type = match ? 
-    {type: "paragraph"} : {type: "heading", level};
+    const type = match ? { type: "paragraph" } : { type: "heading", level };
 
-    Transforms.setNodes(
-      editor,
-      type as Partial<Element>,
-      { match: (n) => Element.isElement(n) && Editor.isBlock(editor, n) }
-    );
+    Transforms.setNodes(editor, type as Partial<Element>, {
+      match: (n) => Element.isElement(n) && Editor.isBlock(editor, n),
+    });
   },
-
 
   // bullet list
   isBulletlistActive(editor: Editor) {
-    const [match] = Editor.nodes(
-      editor,
-      {match: (n: any) => n.type === "bullet-list"}
-    )
-    
+    const [match] = Editor.nodes(editor, {
+      match: (n: any) => n.type === "bullet-list",
+    });
+
     return !!match;
   },
-  
-  toggleBulletList(editor: Editor) {
+
+  toggleBulletList(editor: Editor, e?: React.KeyboardEvent) {
+    if (e) e.preventDefault();
+
     const match = this.isBulletlistActive(editor);
-    Transforms.setNodes(
-      editor,
-      {type: match ? "paragraph" : "bullet-list"},
-      {match: n => Element.isElement(n) && Editor.isBlock(editor, n)}
-    )
+
+    if (match) {
+      Transforms.unwrapNodes(editor, {
+        match: (n) => Element.isElement(n) && n.type === "bullet-list",
+      });
+
+      Transforms.setNodes(editor, { type: "paragraph" });
+    } else {
+      Transforms.setNodes(editor, { type: "list-item" });
+
+      Transforms.wrapNodes(editor, { type: "bullet-list", children: [] });
+    }
   },
 
-  // numbered list 
+  // numbered list
   isNumberedlistActive(editor: Editor) {
-    const [match] = Editor.nodes(
-      editor,
-      {match: (n: any) => n.type === "numbered-list"}
-    )
+    const [match] = Editor.nodes(editor, {
+      match: (n: any) => n.type === "numbered-list",
+    });
 
     return !!match;
   },
 
-  toggleNumberedList(e: React.KeyboardEvent, editor: Editor) {
-    e.preventDefault();
-    
+  toggleNumberedList(editor: Editor, e?: React.KeyboardEvent) {
+    if (e) e.preventDefault();
     const match = this.isNumberedlistActive(editor);
 
-    console.log(match)
-
-    Transforms.setNodes(
-      editor,
-      {type: match ? "paragraph" : "numbered-list"},
-      {match: n => Element.isElement(n) && Editor.isBlock(editor, n)}
+    if (match) {
+    Transforms.setNodes(editor, 
+      {type: "paragraph"},
+      {match: n => Element.isElement(n) && n.type === "list-item", mode: "lowest"}
     )
-  }
+
+    Transforms.liftNodes(editor, {
+      match: n => Element.isElement(n) && n.type === "paragraph"
+    })
+    
+
+    } else {
+      // Creating list logic stays the same
+      Transforms.setNodes(editor, { type: "list-item" });
+      Transforms.wrapNodes(editor, {
+        type: "numbered-list",
+        children: [],
+      });
+    }
+  },
 };

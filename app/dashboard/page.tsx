@@ -68,8 +68,9 @@ export default function ThoughtDocument() {
             <SlateEditor 
               handleClick={() => setTab(1)} 
               handleValueChange={
-                (value) => {
-                  value[0].children[0].text.trim() === "" ? setIsEmpty(true) : setIsEmpty(false);
+                (value: any) => {
+                  value[0]?.children[0].text?.trim() === "" && value[0]?.type === "paragraph"
+                  ? setIsEmpty(true) : setIsEmpty(false);
                 }
               } />
 

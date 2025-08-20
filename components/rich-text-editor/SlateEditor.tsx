@@ -4,6 +4,7 @@ import { withHistory } from "slate-history"
 import {Editable, RenderElementProps, Slate, withReact} from "slate-react"
 import { BulletListElement, CodeElement, DefaultElement, HeadingElement, ListItemElement, NumberedListElement } from "./CustomElements";
 import { handleKeyDown } from "./CustomEditor";
+import SlateNavbar from "./Navbar";
 
 interface Props {
   handleClick?: () => void;
@@ -32,6 +33,8 @@ export default function SlateEditor({handleClick, handleValueChange}: Props) {
         return <BulletListElement {...props} />
       case "numbered-list":
         return <NumberedListElement {...props} />
+      case "list-item":
+        return <ListItemElement {...props} />
       default: 
         return <DefaultElement {...props} />
     }
@@ -56,6 +59,7 @@ export default function SlateEditor({handleClick, handleValueChange}: Props) {
 
   return (
     <Slate editor={editor} initialValue={initialValue} onValueChange={handleValueChange}>
+      <SlateNavbar />
       <Editable 
         className="focus:outline-none"
         onClick={handleClick}

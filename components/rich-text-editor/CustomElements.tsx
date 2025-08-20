@@ -25,11 +25,15 @@ export function HeadingElement(props: RenderElementProps) {
 }
 
 export function BulletListElement(props: RenderElementProps) {
-  return <ul className="list-item list-disc mx-[1.5625rem]"  {...props.attributes}>{props.children}</ul>
+  return <ul className="list-disc mx-[2.5rem] mt-2"  {...props.attributes}>{props.children}</ul>
 }
 
 export function NumberedListElement(props: RenderElementProps) {
-  return <ol className="list-item list-decimal mx-[1.5625rem]" {...props.attributes} >{props.children}</ol>
+  return <ol className="list-decimal mx-[2.5rem]" {...props.attributes} >{props.children}</ol>
+}
+
+export function ListItemElement(props: RenderElementProps) {
+  return <li className="list-item not-last:my-1.5" {...props.attributes} >{props.children}</li>
 }
 
 export function DefaultElement(props: RenderElementProps) {

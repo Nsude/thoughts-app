@@ -19,7 +19,7 @@ ParagraphElement
 | NumberedListElement
 | CodeElement;
 
-type CustomText = {
+export type CustomText = {
   text: string;
   bold?: boolean;
   highlight?: boolean;
