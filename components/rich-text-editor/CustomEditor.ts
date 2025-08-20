@@ -7,7 +7,7 @@ export const handleKeyDown = (e: React.KeyboardEvent, editor: Editor) => {
       case "`":
         return CustomEditor.toggleCode(e, editor);
       case "b":
-        return CustomEditor.toggleNumberedList(e, editor);
+        return CustomEditor.toggleBold(e, editor);
       case "h":
         return CustomEditor.toggleHightlight(e, editor);
       case "i":
