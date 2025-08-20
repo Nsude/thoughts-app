@@ -3,17 +3,20 @@ import { ReactEditor } from "slate-react";
 
 
 
-type ParagraphElement = {type: "paragraph", children: CustomText[]};
+export type ParagraphElement = {type: "paragraph", children: CustomText[]};
 export type HeadingElement = {type: "heading", level: 1 | 2 | 3, children: CustomText[]};
-type ListElement = {type: "bullet-list", children: CustomText[]};
-type ListItemElement = {type: "numbered-list", children: CustomText[]};
-type CodeElement = {type: "code", children: CustomText[]};
+export type BulletLisElement = {type: "bullet-list", children: ListItemElement[]};
+export type NumberedListElement = {type: "numbered-list", children: ListItemElement[]};
+export type CodeElement = {type: "code", children: CustomText[]};
+
+type ListItemElement = {type: "list-item", children: CustomText[]}
 
 type CustomElement = 
 ParagraphElement 
 | HeadingElement 
-| ListElement 
-| ListItemElement 
+| BulletLisElement 
+| ListItemElement
+| NumberedListElement
 | CodeElement;
 
 type CustomText = {
@@ -21,6 +24,8 @@ type CustomText = {
   bold?: boolean;
   highlight?: boolean;
   italic?: boolean;
+  underline?: boolean;
+  linethrough?: boolean;
 }
 
 

@@ -1,9 +1,9 @@
 import { RenderElementProps } from "slate-react";
-import { type HeadingElement } from "./slate.model";
+import { type HeadingElement } from "./slate";
 
 export function CodeElement(props: RenderElementProps) {
   return (
-    <pre {...props.attributes} className="leading-[1.3] text-wrap bg-myGray border-1 border-border-gray border-b-0 border-t-0 px-[0.75rem]">
+    <pre {...props.attributes} className="leading-[1.3] text-wrap bg-myGray border-1 border-border-gray border-b-0 border-t-0 px-[0.625rem]">
       <code>{props.children}</code>
     </pre>
   )
@@ -22,6 +22,14 @@ export function HeadingElement(props: RenderElementProps) {
     case 3:
       return <h3 {...attributes}>{children}</h3>
   }
+}
+
+export function BulletListElement(props: RenderElementProps) {
+  return <ul className="list-item list-disc"  {...props.attributes}>{props.children}</ul>
+}
+
+export function NumberedListElement(props: RenderElementProps) {
+  return <ol className="list-item list-decimal" {...props.attributes} >{props.children}</ol>
 }
 
 export function DefaultElement(props: RenderElementProps) {

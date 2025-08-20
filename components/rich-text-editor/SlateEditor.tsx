@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from "react"
 import { createEditor, Descendant, Editor, Element, Transforms } from "slate"
 import { withHistory } from "slate-history"
 import {Editable, RenderElementProps, Slate, withReact} from "slate-react"
-import { CodeElement, DefaultElement, HeadingElement } from "./CustomElements";
+import { BulletListElement, CodeElement, DefaultElement, HeadingElement, ListItemElement, NumberedListElement } from "./CustomElements";
 import { handleKeyDown } from "./CustomEditor";
 
 interface Props {
@@ -21,24 +21,32 @@ export default function SlateEditor({handleClick, handleValueChange}: Props) {
   ], []);
 
   const renderElement = useCallback((props: RenderElementProps) => {
-    const {element, attributes, children} = props;
+    const {element} = props;
 
     switch (element.type) {
       case "code":
         return <CodeElement {...props} />
       case "heading":
         return <HeadingElement {...props} />
+      case "bullet-list":
+        return <BulletListElement {...props} />
+      case "numbered-list":
+        return <NumberedListElement {...props} />
       default: 
         return <DefaultElement {...props} />
     }
   }, [])
 
   const renderLeaf = (props: any) => {
+    const leaf = props.leaf;
     return (
       <span {...props.attributes}
         style={{
-          fontWeight: props.leaf.bold ? '800' : 'normal',
-          backgroundColor: props.leaf.highlight ? "#FE7A33" : "unset"
+          fontWeight: leaf.bold ? '800' : 'normal',
+          backgroundColor: leaf.highlight ? "#FE7A33" : "unset",
+          fontStyle: leaf.italic ? "italic" : "normal",
+          textDecoration: leaf.underline ? "underline" : 
+            leaf.linethrough ? "line-through" : "unset",
         }}
       > 
         {props.children}
