@@ -4,6 +4,10 @@ import { CustomText } from "./slate";
 export const handleKeyDown = (e: React.KeyboardEvent, editor: Editor) => {
   const { key } = e;
 
+  if (key.toLowerCase() === "enter") {
+    CustomEditor.breaklist(editor);
+  }
+
   if (e.ctrlKey) {
     switch (key) {
       case "`":
@@ -184,11 +188,7 @@ export const CustomEditor = {
     const match = this.isBulletlistActive(editor);
 
     if (match) {
-      Transforms.unwrapNodes(editor, {
-        match: (n) => Element.isElement(n) && n.type === "bullet-list",
-      });
-
-      Transforms.setNodes(editor, { type: "paragraph" });
+      this.breaklist(editor);
     } else {
       Transforms.setNodes(editor, { type: "list-item" });
 
@@ -210,16 +210,7 @@ export const CustomEditor = {
     const match = this.isNumberedlistActive(editor);
 
     if (match) {
-    Transforms.setNodes(editor, 
-      {type: "paragraph"},
-      {match: n => Element.isElement(n) && n.type === "list-item", mode: "lowest"}
-    )
-
-    Transforms.liftNodes(editor, {
-      match: n => Element.isElement(n) && n.type === "paragraph"
-    })
-    
-
+      this.breaklist(editor);
     } else {
       // Creating list logic stays the same
       Transforms.setNodes(editor, { type: "list-item" });
@@ -228,5 +219,28 @@ export const CustomEditor = {
         children: [],
       });
     }
+  },
+
+  breaklist(editor: Editor) {
+    const match =
+      this.isBulletlistActive(editor) || this.isNumberedlistActive(editor);
+
+    if (!match) return;
+
+    Transforms.setNodes(
+      editor,
+      { type: "paragraph" },
+      {
+        match: (n) =>
+          Element.isElement(n) &&
+          n.type === "list-item" &&
+          Editor.isEmpty(editor, n),
+        mode: "lowest",
+      }
+    );
+
+    Transforms.liftNodes(editor, {
+      match: (n) => Element.isElement(n) && n.type === "paragraph",
+    });
   },
 };
