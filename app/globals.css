@@ -9,6 +9,10 @@
   --tab-gray: #DDD;
   --fade-gray: #727272;
   --accent: #FE7A33;
+  --dark-gray: #2C2C2C;
+  --dark-gray-hover: #474747;
+  --dark-gray-fg: #575757;
+  --dark-gray-label: #747474;
 }
 
 @theme inline {
@@ -20,10 +24,15 @@
   --color-tab-gray: var(--tab-gray);
   --color-accent: var(--accent);
   --color-fade-gray: var(--fade-gray);
+  --color-dark-gray: var(--dark-gray);
+  --color-dark-gray-hover: var(--dark-gray-hover);
+  --color-dark-gray-fg: var(--gray-fg);
+  --color-dark-label: var(--gray-label);
 
   /* TYPOGRAPHY */
   --text-label-small: 0.75rem;
   --tracking-label-small: 0.03ch;
+  --text-label-14: 0.875rem;
   --text-h1: 2.8125rem;
   --tracking-h1: -0.01ch;
   --text-title:  1.5625rem;
@@ -78,7 +87,7 @@ button {
 
 /* Slate container */
 .my-slateContainer {
-  height: calc(47.75rem - 6.5rem);
+  height: calc(47.75rem - 6.25rem);
 }
 
 .my-slateContainer ::selection {

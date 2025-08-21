@@ -12,22 +12,22 @@ export const handleKeyDown = (e: React.KeyboardEvent, editor: Editor) => {
     switch (key) {
       case "`":
         // turn to code block
-        return CustomEditor.toggleCode(e, editor);
+        return CustomEditor.toggleCode(editor, e);
       case "b":
         // make bold
-        return CustomEditor.toggleBold(e, editor);
+        return CustomEditor.toggleBold(editor, e);
       case "h":
         // highlight mark
-        return CustomEditor.toggleHightlight(e, editor);
+        return CustomEditor.toggleHightlight(editor, e);
       case "i":
         // italic mark
-        return CustomEditor.toggleItalic(e, editor);
+        return CustomEditor.toggleItalic(editor, e);
       case "u":
         // underline mark
-        return CustomEditor.toggleUnderline(e, editor);
+        return CustomEditor.toggleUnderline(editor, e);
       case "l":
         // line-through mark
-        return CustomEditor.toggleLineThroug(e, editor);
+        return CustomEditor.toggleLineThroug(editor, e);
     }
   }
 
@@ -78,8 +78,8 @@ export const CustomEditor = {
   },
 
   // toggle line through
-  toggleLineThroug(e: React.KeyboardEvent, editor: Editor) {
-    e.preventDefault();
+  toggleLineThroug(editor: Editor, e?: React.KeyboardEvent) {
+    if (e) e.preventDefault();
 
     const match = this.isLinethroughActive(editor);
 
@@ -91,8 +91,8 @@ export const CustomEditor = {
   },
 
   // toggle underline
-  toggleUnderline(e: React.KeyboardEvent, editor: Editor) {
-    e.preventDefault();
+  toggleUnderline(editor: Editor, e?: React.KeyboardEvent) {
+    if (e) e.preventDefault();
 
     const match = this.isUnderlineActive(editor);
 
@@ -104,8 +104,8 @@ export const CustomEditor = {
   },
 
   // toggle italic
-  toggleItalic(e: React.KeyboardEvent, editor: Editor) {
-    e.preventDefault();
+  toggleItalic(editor: Editor, e?: React.KeyboardEvent) {
+    if (e) e.preventDefault();
 
     const match = this.isItalicActive(editor);
 
@@ -117,8 +117,8 @@ export const CustomEditor = {
   },
 
   // toggle code block
-  toggleCode(e: React.KeyboardEvent, editor: Editor) {
-    e.preventDefault();
+  toggleCode(editor: Editor, e?: React.KeyboardEvent) {
+    if (e) e.preventDefault();
 
     const match = this.isCodeBlockActive(editor);
 
@@ -130,8 +130,8 @@ export const CustomEditor = {
   },
 
   // toggle bold leaf
-  toggleBold(e: React.KeyboardEvent, editor: Editor) {
-    e.preventDefault();
+  toggleBold(editor: Editor, e?: React.KeyboardEvent) {
+    if (e) e.preventDefault();
 
     const match = this.isBoldMarkActive(editor);
 
@@ -143,8 +143,8 @@ export const CustomEditor = {
   },
 
   // toggle highlight
-  toggleHightlight(e: React.KeyboardEvent, editor: Editor) {
-    e.preventDefault();
+  toggleHightlight(editor: Editor, e?: React.KeyboardEvent) {
+    if (e) e.preventDefault();
 
     const match = this.isHighlightActive(editor);
 

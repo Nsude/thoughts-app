@@ -39,7 +39,7 @@ export default function TabButton({tab1, tab2, tabIcon1, tabIcon2, preselectTab,
     }
 
     // animate indicator 
-    gsap.to(indicator.current, { xPercent: 100 * translateFactor, duration: .4, ease: easeInOutCubic });
+    gsap.to(indicator.current, { xPercent: 100 * translateFactor, duration: .25, ease: easeInOutCubic });
 
   }, {scope: container, dependencies: [tab, preselectTab]});
 

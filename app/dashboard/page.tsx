@@ -39,7 +39,7 @@ export default function ThoughtDocument() {
       </div>
 
       <div className="flex justify-center items-center">
-        <div className="relative h-[47.75rem] w-[39.375rem] bg-myWhite border border-border-gray/60 rounded-2xl pt-[4.25rem]">
+        <div className="relative h-[47.75rem] w-[39.375rem] bg-myWhite border border-border-gray/60 rounded-2xl pt-[6.25rem]">
 
           {/* Header */}
           <div className="absolute top-0 left-0 w-full px-[1.125rem] h-[4.25rem] flex justify-between items-center">
@@ -51,7 +51,7 @@ export default function ThoughtDocument() {
           </div>
 
           {/* ===== BODY ===== */}
-          <div className="relative my-slateContainer px-[1.125rem] mt-[2rem] w-full overflow-clip">
+          <div className="relative my-slateContainer px-[1.125rem] w-full overflow-clip">
             {/* Placeholder msg */}
 
             <div className="absolute w-full overflow-y-scroll overflow-x-clip" 

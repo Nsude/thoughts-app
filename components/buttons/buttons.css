@@ -73,3 +73,9 @@ button.my-authProviderButton:hover path.make-white {
   fill: var(--white);
   stroke: var(--white);
 }
+
+
+/* Rich text nav menu button */
+button.my-navMenuButton:hover {
+  background-color: var(--color-dark-gray-hover);
+}
