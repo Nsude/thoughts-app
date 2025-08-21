@@ -3,7 +3,6 @@
 import LogoIcon from "@/public/icons/LogoIcon";
 import NavMenuButton from "../buttons/NavmenuButton";
 import VerticalSlashIcon from "@/public/icons/VerticalSlashIcon";
-import DefaultIcon from "@/public/icons/DefaultIcon";
 import DropdownIcon from "@/public/icons/DropdownIcon";
 import BoldIcon from "@/public/icons/BoldIcon";
 import ItalicIcon from "@/public/icons/ItalicIcon";
@@ -16,8 +15,9 @@ import CloseIcon from "@/public/icons/CloseIcon";
 import { useEffect, useRef, useState } from "react";
 import { CustomEditor } from "./CustomEditor";
 import { useSlate } from "slate-react";
-import { Range } from "slate";
+import { Range, Transforms } from "slate";
 import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
 
 export default function SlateNavbar() {
   const [selectedElem, setSelectedElem] = useState("Text");
@@ -25,6 +25,7 @@ export default function SlateNavbar() {
   const editor = useSlate();
   const mainRef = useRef(null)
   const [display, setDisplay] = useState(false);
+  const [manuallyHidden, setManuallyHidden] = useState(false);
 
   useEffect(() => {
     if (!mainRef.current) return;
@@ -33,6 +34,10 @@ export default function SlateNavbar() {
     const {selection} = editor;
 
     if (selection && Range.isExpanded(selection)) {
+
+      // return if user close the navbar using the button
+      if (manuallyHidden) return;
+
       // get DOM selection 
       const domSelection = window.getSelection();
       if (domSelection && domSelection.rangeCount > 0) {
@@ -41,24 +46,76 @@ export default function SlateNavbar() {
         const selectionRect = currentSelection.getBoundingClientRect();
 
         if (!selectionRect) return console.info("No selection has been made");
-        const {width, left, top} = selectionRect;
+        const {left, top} = selectionRect;
         const {height: navHeight} = navbar.getBoundingClientRect();
 
 
         setPosition({
-          x: left, // center horizontally
+          x: left,
           y: top - (navHeight + 10)
         });
-      }
 
-      
+        const handleMouseup = () => {
+          setDisplay(true);
+          window.removeEventListener("mouseup", handleMouseup);
+        }
+
+        // only display menu when user is done selecting
+        window.addEventListener("mouseup", handleMouseup);
+
+      }
+    } else {
+      setManuallyHidden(false);
+      setDisplay(false);
     }
     
-  }, [editor.selection])
+  }, [editor.selection, manuallyHidden])
+
+  // handleClose
+  const handleClose = () => {
+    setDisplay(false);
+    setManuallyHidden(true);
+    // clear previous selection
+    Transforms.deselect(editor);
+  }
+
+  // handle clicks outside the navbar
+  useEffect(() => {
+    if (!mainRef.current) return;
+    const navbar = mainRef.current as HTMLDivElement;
+
+    const handleMouseDown = (e: MouseEvent) => {
+      if (display && !navbar.contains(e.target as Node)) {
+        handleClose();
+      }
+    }
+
+    document.addEventListener("mousedown", handleMouseDown);
+
+    return () => document.removeEventListener("mousedown", handleMouseDown);
+  }, [display])
 
 
   // display and hide navbar
   useGSAP(() => {
+    if (!mainRef.current) return;
+    const navbar = mainRef.current as HTMLDivElement;
+
+    if (display) {
+      gsap.set(navbar, {pointerEvents: "all"});
+
+      gsap.to(navbar, {
+        opacity: 1,
+        duration: .2,
+      })
+    } else {
+      gsap.set(navbar, { pointerEvents: "none" });
+      
+      gsap.to(navbar, {
+        opacity: 0,
+        duration: .2
+      })
+    }
 
   }, {scope: mainRef, dependencies: [display]})
 
@@ -69,10 +126,12 @@ export default function SlateNavbar() {
   return (
     <div
       ref={mainRef}
+      onClick={(e) => e.stopPropagation()}
       style={{left: `${position.x}px`, top: `${position.y}px`}}
       className="
       fixed z-10 -translate-x-1/5 bg-dark-gray p-1 rounded-[30px]
       flex gap-x-1.5 items-center border-2 border-border-gray
+      opacity-0 pointer-events-none
     ">
       <NavMenuButton 
         text="Refine" 
@@ -121,7 +180,7 @@ export default function SlateNavbar() {
 
       <NavMenuButton 
         icon={<CloseIcon />} 
-        handleClick={() => console.log("close")} />
+        handleClick={handleClose} />
     </div>
   )
 }
