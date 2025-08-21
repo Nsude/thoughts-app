@@ -18,20 +18,22 @@ import { useSlate } from "slate-react";
 import { Range, Transforms } from "slate";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import ElementsMenu from "./ElementsMenu";
 
 export default function SlateNavbar() {
   const [selectedElem, setSelectedElem] = useState("Text");
-  const [position, setPosition] = useState({x: 0, y: 0})
+  const [position, setPosition] = useState({ x: 0, y: 0 })
   const editor = useSlate();
   const mainRef = useRef(null)
   const [display, setDisplay] = useState(false);
   const [manuallyHidden, setManuallyHidden] = useState(false);
+  const [navHeight, setNavHeight] = useState(0);
 
   useEffect(() => {
     if (!mainRef.current) return;
     const navbar = mainRef.current as HTMLDivElement;
 
-    const {selection} = editor;
+    const { selection } = editor;
 
     if (selection && Range.isExpanded(selection)) {
 
@@ -46,14 +48,15 @@ export default function SlateNavbar() {
         const selectionRect = currentSelection.getBoundingClientRect();
 
         if (!selectionRect) return console.info("No selection has been made");
-        const {left, top} = selectionRect;
-        const {height: navHeight} = navbar.getBoundingClientRect();
-
+        const { left, top } = selectionRect;
+        const { height: navHeight } = navbar.getBoundingClientRect();
 
         setPosition({
           x: left,
           y: top - (navHeight + 10)
         });
+
+        setNavHeight(navHeight);
 
         const handleMouseup = () => {
           setDisplay(true);
@@ -66,17 +69,21 @@ export default function SlateNavbar() {
       }
     } else {
       setManuallyHidden(false);
+      setDisplayElemMenu(false);
       setDisplay(false);
+      console.log("else: close")
     }
-    
+
   }, [editor.selection, manuallyHidden])
 
   // handleClose
   const handleClose = () => {
     setDisplay(false);
+    setDisplayElemMenu(false);
     setManuallyHidden(true);
     // clear previous selection
     Transforms.deselect(editor);
+    console.log("close")
   }
 
   // handle clicks outside the navbar
@@ -87,6 +94,7 @@ export default function SlateNavbar() {
     const handleMouseDown = (e: MouseEvent) => {
       if (display && !navbar.contains(e.target as Node)) {
         handleClose();
+        console.log("inner close")
       }
     }
 
@@ -102,7 +110,7 @@ export default function SlateNavbar() {
     const navbar = mainRef.current as HTMLDivElement;
 
     if (display) {
-      gsap.set(navbar, {pointerEvents: "all"});
+      gsap.set(navbar, { pointerEvents: "all" });
 
       gsap.to(navbar, {
         opacity: 1,
@@ -110,76 +118,77 @@ export default function SlateNavbar() {
       })
     } else {
       gsap.set(navbar, { pointerEvents: "none" });
-      
+
       gsap.to(navbar, {
         opacity: 0,
         duration: .2
       })
     }
 
-  }, {scope: mainRef, dependencies: [display]})
+  }, { scope: mainRef, dependencies: [display] })
 
+  const [displayElemMenu, setDisplayElemMenu] = useState(false);
   const toggleElementsMenu = () => {
-
+    setDisplayElemMenu(prev => !prev);
   }
 
   return (
     <div
       ref={mainRef}
       onClick={(e) => e.stopPropagation()}
-      style={{left: `${position.x}px`, top: `${position.y}px`}}
+      style={{ left: `${position.x}px`, top: `${position.y}px` }}
       className="
       fixed z-10 -translate-x-1/5 bg-dark-gray p-1 rounded-[30px]
       flex gap-x-1.5 items-center border-2 border-border-gray
-      opacity-0 pointer-events-none
+      opacity-0 pointer-events-none text-label-14
     ">
-      <NavMenuButton 
-        text="Refine" 
-        icon={<LogoIcon color="#fff" />} 
+      <ElementsMenu display={displayElemMenu} navHeight={navHeight} />
+
+      <NavMenuButton
+        text="Refine"
+        icon={<LogoIcon color="#fff" />}
         handleClick={() => console.log("refine clicked")} />
 
       <VerticalSlashIcon />
 
-      <div>
-        <NavMenuButton 
-          text={selectedElem} 
-          icon={<DropdownIcon />} 
-          reverseRow={true} 
-          handleClick={toggleElementsMenu} />
-      </div>
-      
-      <NavMenuButton 
-        icon={<BoldIcon />} 
-        handleClick={() => CustomEditor.toggleBold(editor)} />
-      
-      <NavMenuButton 
-        icon={<ItalicIcon />} 
-        handleClick={() => CustomEditor.toggleItalic(editor)}/>
+      <NavMenuButton
+        text={selectedElem}
+        icon={<DropdownIcon />}
+        reverseRow={true}
+        handleClick={toggleElementsMenu} />
 
-      <NavMenuButton 
-        icon={<UnderlineIcon />} 
+      <NavMenuButton
+        icon={<BoldIcon />}
+        handleClick={() => CustomEditor.toggleBold(editor)} />
+
+      <NavMenuButton
+        icon={<ItalicIcon />}
+        handleClick={() => CustomEditor.toggleItalic(editor)} />
+
+      <NavMenuButton
+        icon={<UnderlineIcon />}
         handleClick={() => CustomEditor.toggleUnderline(editor)} />
 
-      <NavMenuButton 
-        icon={<LineThroughIcon />} 
+      <NavMenuButton
+        icon={<LineThroughIcon />}
         handleClick={() => CustomEditor.toggleLineThroug(editor)} />
 
-      <NavMenuButton 
-        icon={<CodeIcon />} 
+      <NavMenuButton
+        icon={<CodeIcon />}
         handleClick={() => CustomEditor.toggleCode(editor)} />
 
-      <NavMenuButton 
-        icon={<LinkIcon />} 
-        handleClick={() => console.log("make link") } />
+      <NavMenuButton
+        icon={<LinkIcon />}
+        handleClick={() => console.log("make link")} />
 
-      <NavMenuButton 
-        icon={<ColorIcon />} 
+      <NavMenuButton
+        icon={<ColorIcon />}
         handleClick={() => console.log("color")} />
 
       <VerticalSlashIcon />
 
-      <NavMenuButton 
-        icon={<CloseIcon />} 
+      <NavMenuButton
+        icon={<CloseIcon />}
         handleClick={handleClose} />
     </div>
   )

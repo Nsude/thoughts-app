@@ -14,7 +14,10 @@ export default function NavMenuButton({ text, icon, reverseRow, handleClick }: P
 
   return (
     <button
-    onClick={handleClick}
+    onClick={(e) => { 
+      e.stopPropagation(); 
+      handleClick()
+    }}
     className={` my-navMenuButton
     flex items-center justify-center gap-x-[0.25rem]
     ${text && !reverseRow ? 'pl-[0.3rem] pr-[0.5rem]' : ''}

@@ -27,7 +27,7 @@
   --color-dark-gray: var(--dark-gray);
   --color-dark-gray-hover: var(--dark-gray-hover);
   --color-dark-gray-fg: var(--gray-fg);
-  --color-dark-label: var(--gray-label);
+  --color-dark-gray-label: var(--dark-gray-label);
 
   /* TYPOGRAPHY */
   --text-label-small: 0.75rem;

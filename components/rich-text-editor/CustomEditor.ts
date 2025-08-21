@@ -188,7 +188,7 @@ export const CustomEditor = {
     const match = this.isBulletlistActive(editor);
 
     if (match) {
-      this.breaklist(editor);
+      this.breaklist(editor, true)
     } else {
       Transforms.setNodes(editor, { type: "list-item" });
 
@@ -210,7 +210,7 @@ export const CustomEditor = {
     const match = this.isNumberedlistActive(editor);
 
     if (match) {
-      this.breaklist(editor);
+      this.breaklist(editor, true);
     } else {
       // Creating list logic stays the same
       Transforms.setNodes(editor, { type: "list-item" });
@@ -221,7 +221,7 @@ export const CustomEditor = {
     }
   },
 
-  breaklist(editor: Editor) {
+  breaklist(editor: Editor, escape: boolean = false) {
     const match =
       this.isBulletlistActive(editor) || this.isNumberedlistActive(editor);
 
@@ -234,7 +234,7 @@ export const CustomEditor = {
         match: (n) =>
           Element.isElement(n) &&
           n.type === "list-item" &&
-          Editor.isEmpty(editor, n),
+          (escape ? !Editor.isEmpty(editor, n) : Editor.isEmpty(editor, n)),
         mode: "lowest",
       }
     );
@@ -243,4 +243,15 @@ export const CustomEditor = {
       match: (n) => Element.isElement(n) && n.type === "paragraph",
     });
   },
+
+  // turn the element to a paragraph
+  resetToParagraph(editor: Editor) {
+    const isParagraph = Editor.nodes(editor, {
+      match: n => Element.isElement(n) && n.type === "paragraph"
+    })
+
+    if (isParagraph) return;
+
+    Transforms.setNodes(editor, {type: "paragraph"})
+  }
 };
