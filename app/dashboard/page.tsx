@@ -39,7 +39,7 @@ export default function ThoughtDocument() {
       </div>
 
       <div className="flex justify-center items-center">
-        <div className="relative h-[49.75rem] w-[42.375rem] bg-myWhite border border-border-gray/60 rounded-2xl pt-[6.25rem]">
+        <div className="relative h-[49.75rem] w-[42.375rem] bg-myWhite border border-border-gray/60 rounded-2xl pt-[4.6rem]">
 
           {/* Header */}
           <div className="absolute top-0 left-0 w-full px-[1.125rem] h-[4.25rem] flex justify-between items-center">
@@ -59,7 +59,7 @@ export default function ThoughtDocument() {
               pointerEvents: isEmpty ? "all" : 'none',
               opacity: isEmpty ? "1" : '0'
               }}>
-              <div ref={placeholderRef} className=" relative flex flex-col">
+              <div ref={placeholderRef} className="leading-[1.5] relative flex flex-col">
                 <span className="text-fade-gray"> Let's hear it... </span>
                 <span className="text-fade-gray absolute -bottom-[150%]"> Write or type '/' for commands... </span>
               </div>

@@ -87,7 +87,7 @@ button {
 
 /* Slate container */
 .my-slateContainer {
-  height: calc(47.75rem - 6.25rem);
+  height: calc(47.75rem - 4.6rem);
 }
 
 .my-slateContainer ::selection {

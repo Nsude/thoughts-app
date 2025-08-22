@@ -10,7 +10,23 @@ export const metadata: Metadata = {
 };
 
 const hostGrotesk = localFont({
-  src: "../public/font/hg-Regular.ttf"
+  src: [
+    {
+      path: "../public/font/hg-Regular.ttf",
+      weight: "400",
+      style: "normal"
+    },
+    {
+      path: "../public/font/hg-Bold.ttf",
+      weight: "700",
+      style: "normal"
+    },
+    {
+      path: "../public/font/hg-ExtraBold.ttf",
+      weight: "800",
+      style: "normal"
+    },
+  ]
 })
 
 export default function RootLayout({

@@ -16,11 +16,11 @@ export function HeadingElement(props: RenderElementProps) {
 
   switch(elem.level) {
     case 1:
-      return <h1 {...attributes}>{children}</h1>
+      return <h1 {...attributes} className="text-[2.5rem] mt-[1.25rem] mb-[0.5rem]" >{children}</h1>
     case 2:
-      return <h2 {...attributes}>{children}</h2>
+      return <h2 {...attributes} className="text-[2.25rem] mt-[1.25rem] mb-[0.5rem]">{children}</h2>
     case 3:
-      return <h3 {...attributes}>{children}</h3>
+      return <h3 {...attributes} className="text-[1.75rem] mt-[1.25rem] mb-[0.5rem]">{children}</h3>
   }
 }
 
@@ -38,6 +38,6 @@ export function ListItemElement(props: RenderElementProps) {
 
 export function DefaultElement(props: RenderElementProps) {
   return (
-    <p {...props.attributes}>{props.children}</p>
+    <p {...props.attributes} className="leading-[1.5]">{props.children}</p>
   )
 }

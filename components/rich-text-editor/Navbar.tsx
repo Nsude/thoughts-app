@@ -7,7 +7,7 @@ import DropdownIcon from "@/public/icons/DropdownIcon";
 import BoldIcon from "@/public/icons/BoldIcon";
 import ItalicIcon from "@/public/icons/ItalicIcon";
 import UnderlineIcon from "@/public/icons/UnderlineIcon";
-import LineThroughIcon from "@/public/icons/LineThrougIcon";
+import LineThroughIcon from "@/public/icons/LineThroughIcon";
 import CodeIcon from "@/public/icons/CodeIcon";
 import LinkIcon from "@/public/icons/LinkIcon";
 import ColorIcon from "@/public/icons/ColorIcon";
@@ -15,7 +15,7 @@ import CloseIcon from "@/public/icons/CloseIcon";
 import { useEffect, useRef, useState } from "react";
 import { CustomEditor } from "./CustomEditor";
 import { useSlate } from "slate-react";
-import { Range, Transforms } from "slate";
+import { Editor, Range, Transforms } from "slate";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import ElementsMenu from "./ElementsMenu";
@@ -33,48 +33,38 @@ export default function SlateNavbar() {
     if (!mainRef.current) return;
     const navbar = mainRef.current as HTMLDivElement;
 
-    const { selection } = editor;
+    // Don't show menu if it was manually hidden
+    if (manuallyHidden || display) return;
 
-    if (selection && Range.isExpanded(selection)) {
+    const domSelection = document.getSelection();
 
-      // return if user close the navbar using the button
-      if (manuallyHidden) return;
+    if (domSelection && !domSelection.isCollapsed) {
+      const { left, top } = domSelection.getRangeAt(0).getBoundingClientRect();
+      const { height: navHeight } = navbar.getBoundingClientRect();
+      setNavHeight(navHeight);
+      setPosition({ x: left, y: top - (navHeight + 10) });
 
-      // get DOM selection 
-      const domSelection = window.getSelection();
-      if (domSelection && domSelection.rangeCount > 0) {
-        // get the latest selection
-        const currentSelection = domSelection.getRangeAt(0);
-        const selectionRect = currentSelection.getBoundingClientRect();
+      const handleMouseUp = (e: MouseEvent) => {
+        e.preventDefault();
+        setDisplay(true);
+        window.removeEventListener("mouseup", handleMouseUp);
+      };
 
-        if (!selectionRect) return console.info("No selection has been made");
-        const { left, top } = selectionRect;
-        const { height: navHeight } = navbar.getBoundingClientRect();
+      window.addEventListener("mouseup", handleMouseUp);
 
-        setPosition({
-          x: left,
-          y: top - (navHeight + 10)
-        });
-
-        setNavHeight(navHeight);
-
-        const handleMouseup = () => {
-          setDisplay(true);
-          window.removeEventListener("mouseup", handleMouseup);
-        }
-
-        // only display menu when user is done selecting
-        window.addEventListener("mouseup", handleMouseup);
-
-      }
-    } else {
-      setManuallyHidden(false);
-      setDisplayElemMenu(false);
-      setDisplay(false);
-      console.log("else: close")
+      return () => {
+        window.removeEventListener("mouseup", handleMouseUp);
+      };
     }
+  }, [editor.selection, manuallyHidden]);
 
-  }, [editor.selection, manuallyHidden])
+  // Reset manuallyHidden when selection actually changes (new selection made)
+  useEffect(() => {
+    const domSelection = document.getSelection();
+    if (domSelection && !domSelection.isCollapsed && !display) {
+      setManuallyHidden(false);
+    }
+  }, [editor.selection, display]);
 
   // handleClose
   const handleClose = () => {
@@ -83,7 +73,6 @@ export default function SlateNavbar() {
     setManuallyHidden(true);
     // clear previous selection
     Transforms.deselect(editor);
-    console.log("close")
   }
 
   // handle clicks outside the navbar
@@ -94,7 +83,6 @@ export default function SlateNavbar() {
     const handleMouseDown = (e: MouseEvent) => {
       if (display && !navbar.contains(e.target as Node)) {
         handleClose();
-        console.log("inner close")
       }
     }
 
@@ -108,6 +96,8 @@ export default function SlateNavbar() {
   useGSAP(() => {
     if (!mainRef.current) return;
     const navbar = mainRef.current as HTMLDivElement;
+
+    console.log("triggered")
 
     if (display) {
       gsap.set(navbar, { pointerEvents: "all" });
@@ -135,14 +125,17 @@ export default function SlateNavbar() {
   return (
     <div
       ref={mainRef}
-      onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.preventDefault()} // stop browser from clearing selections when the navbar is clicked
       style={{ left: `${position.x}px`, top: `${position.y}px` }}
       className="
       fixed z-10 -translate-x-1/5 bg-dark-gray p-1 rounded-[30px]
       flex gap-x-1.5 items-center border-2 border-border-gray
       opacity-0 pointer-events-none text-label-14
     ">
-      <ElementsMenu display={displayElemMenu} navHeight={navHeight} />
+      <ElementsMenu 
+        display={displayElemMenu} 
+        navHeight={navHeight}
+        closeMenu={handleClose} />
 
       <NavMenuButton
         text="Refine"
@@ -171,11 +164,14 @@ export default function SlateNavbar() {
 
       <NavMenuButton
         icon={<LineThroughIcon />}
-        handleClick={() => CustomEditor.toggleLineThroug(editor)} />
+        handleClick={() => {CustomEditor.toggleLineThrough(editor)}} />
 
       <NavMenuButton
         icon={<CodeIcon />}
-        handleClick={() => CustomEditor.toggleCode(editor)} />
+        handleClick={() => {
+          CustomEditor.toggleCode(editor); 
+          handleClose()
+        }} />
 
       <NavMenuButton
         icon={<LinkIcon />}

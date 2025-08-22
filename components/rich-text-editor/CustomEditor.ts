@@ -27,7 +27,7 @@ export const handleKeyDown = (e: React.KeyboardEvent, editor: Editor) => {
         return CustomEditor.toggleUnderline(editor, e);
       case "l":
         // line-through mark
-        return CustomEditor.toggleLineThroug(editor, e);
+        return CustomEditor.toggleLineThrough(editor, e);
     }
   }
 
@@ -78,7 +78,7 @@ export const CustomEditor = {
   },
 
   // toggle line through
-  toggleLineThroug(editor: Editor, e?: React.KeyboardEvent) {
+  toggleLineThrough(editor: Editor, e?: React.KeyboardEvent) {
     if (e) e.preventDefault();
 
     const match = this.isLinethroughActive(editor);
@@ -167,6 +167,9 @@ export const CustomEditor = {
     let match = this.isHeadingElement(editor, level);
 
     const type = match ? { type: "paragraph" } : { type: "heading", level };
+    !match
+      ? Editor.addMark(editor, "bold", true)
+      : Editor.removeMark(editor, "bold");
 
     Transforms.setNodes(editor, type as Partial<Element>, {
       match: (n) => Element.isElement(n) && Editor.isBlock(editor, n),
@@ -246,12 +249,13 @@ export const CustomEditor = {
 
   // turn the element to a paragraph
   resetToParagraph(editor: Editor) {
-    const isParagraph = Editor.nodes(editor, {
-      match: n => Element.isElement(n) && n.type === "paragraph"
+    const [match] = Editor.nodes(editor, {
+      match: n => Element.isElement(n) && n.type === "heading"
     })
 
-    if (isParagraph) return;
+    Transforms.setNodes(editor, {type: "paragraph"});
 
-    Transforms.setNodes(editor, {type: "paragraph"})
+    if (!match) return;
+    Editor.removeMark(editor, "bold");
   }
 };

@@ -8,10 +8,11 @@ import gsap from "gsap";
 
 interface Props {
   navHeight: number;
-  display: boolean
+  display: boolean;
+  closeMenu: () => void;
 }
 
-export default function ElementsMenu({navHeight, display}: Props) {
+export default function ElementsMenu({navHeight, display, closeMenu}: Props) {
   const editor = useSlate();
   const mainRef = useRef(null);
 
@@ -56,7 +57,10 @@ export default function ElementsMenu({navHeight, display}: Props) {
                 relative w-full text-left flex items-center h-[1.875rem]
                 gap-x-1.5 hover:bg-dark-gray-hover pl-1 rounded-[6px]
               "
-              onClick={() => handleClick(editor)} >
+              onClick={() => {
+                handleClick(editor);
+                closeMenu();
+              }} >
                 <Icon />
                 <span>{name}</span>
                 { shortCutLabel &&
