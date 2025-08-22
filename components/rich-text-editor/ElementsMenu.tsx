@@ -61,7 +61,7 @@ export default function ElementsMenu({navHeight, display, closeMenu}: Props) {
                 handleClick(editor);
                 closeMenu();
               }} >
-                <Icon />
+                <Icon small={true} />
                 <span>{name}</span>
                 { shortCutLabel &&
                   <span className="absolute text-[0.625rem] text-dark-gray-label right-1.5 top-1/2 -translate-y-1/2">

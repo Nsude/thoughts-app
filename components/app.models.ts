@@ -4,6 +4,7 @@ import { DataModel, Id } from "@/convex/_generated/dataModel";
 export interface Icon {
   size?: number;
   color?: string;
+  small?: boolean
 }
 
 export type AccountTypes = "Freeloader" | "Premium";
