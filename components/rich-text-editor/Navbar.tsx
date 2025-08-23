@@ -15,7 +15,7 @@ import CloseIcon from "@/public/icons/CloseIcon";
 import { useEffect, useRef, useState } from "react";
 import { CustomEditor } from "./CustomEditor";
 import { useSlate } from "slate-react";
-import { Editor, Range, Transforms } from "slate";
+import { Editor, Element, Range, Transforms } from "slate";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import ElementsMenu from "./ElementsMenu";
@@ -28,7 +28,37 @@ export default function SlateNavbar() {
   const [display, setDisplay] = useState(false);
   const [manuallyHidden, setManuallyHidden] = useState(false);
   const [navHeight, setNavHeight] = useState(0);
+  const [disableIndButtons, setDisableIndButtons] = useState(false);
 
+
+  // prevent menu when a heading Element is selected
+  useEffect(() => {
+    const { selection } = editor;
+
+    if (!(selection && Range.isExpanded(selection))) return;
+
+    const selectedBlocks = getSelectedBlocks(editor);
+    const hasMultiBlockTypes = selectedBlocks.length > 1;
+
+    if (!hasMultiBlockTypes) return setDisableIndButtons(false);
+
+    setDisableIndButtons(true);
+
+  }, [editor.selection])
+
+
+  const getSelectedBlocks = (editor: Editor) => {
+    const blocks = Array.from(Editor.nodes(editor, {
+      match: n => Element.isElement(n) && Editor.isBlock(editor, n)
+    }))
+
+    const blocksArray = Array.from(blocks.map(b => (b[0] as any).type));
+
+    // remove duplicates
+    return [...new Set(blocksArray)];
+  }
+
+  // handle selection
   useEffect(() => {
     if (!mainRef.current) return;
     const navbar = mainRef.current as HTMLDivElement;
@@ -97,8 +127,6 @@ export default function SlateNavbar() {
     if (!mainRef.current) return;
     const navbar = mainRef.current as HTMLDivElement;
 
-    console.log("triggered")
-
     if (display) {
       gsap.set(navbar, { pointerEvents: "all" });
 
@@ -132,8 +160,8 @@ export default function SlateNavbar() {
       flex gap-x-1.5 items-center border-2 border-border-gray
       opacity-0 pointer-events-none text-label-14
     ">
-      <ElementsMenu 
-        display={displayElemMenu} 
+      <ElementsMenu
+        display={displayElemMenu}
         navHeight={navHeight}
         closeMenu={handleClose} />
 
@@ -144,11 +172,13 @@ export default function SlateNavbar() {
 
       <VerticalSlashIcon />
 
-      <NavMenuButton
-        text={selectedElem}
-        icon={<DropdownIcon />}
-        reverseRow={true}
-        handleClick={toggleElementsMenu} />
+      <div className="my-nav-ind-button" data-disable={disableIndButtons}>
+        <NavMenuButton
+          text={selectedElem}
+          icon={<DropdownIcon />}
+          reverseRow={true}
+          handleClick={toggleElementsMenu} />
+      </div>
 
       <NavMenuButton
         icon={<BoldIcon />}
@@ -164,18 +194,22 @@ export default function SlateNavbar() {
 
       <NavMenuButton
         icon={<LineThroughIcon />}
-        handleClick={() => {CustomEditor.toggleLineThrough(editor)}} />
+        handleClick={() => { CustomEditor.toggleLineThrough(editor) }} />
 
-      <NavMenuButton
-        icon={<CodeIcon />}
-        handleClick={() => {
-          CustomEditor.toggleCode(editor); 
-          handleClose()
-        }} />
+      <div className="my-nav-ind-button" data-disable={disableIndButtons}>
+        <NavMenuButton
+          icon={<CodeIcon />}
+          handleClick={() => {
+            CustomEditor.toggleCode(editor);
+            handleClose()
+          }} />
+      </div>
 
-      <NavMenuButton
-        icon={<LinkIcon />}
-        handleClick={() => console.log("make link")} />
+      <div className="my-nav-ind-button" data-disable={disableIndButtons}>
+        <NavMenuButton
+          icon={<LinkIcon />}
+          handleClick={() => console.log("make link")} />
+      </div>
 
       <NavMenuButton
         icon={<ColorIcon />}

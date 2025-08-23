@@ -133,8 +133,14 @@ export const CustomEditor = {
   toggleBold(editor: Editor, e?: React.KeyboardEvent) {
     if (e) e.preventDefault();
 
-    const match = this.isBoldMarkActive(editor);
+    // prevent bold toggle on headers
+    const isHeading = [1, 2, 3].some((level) =>
+      this.isHeadingElement(editor, level)
+    );
+    
+    if (isHeading) return;
 
+    const match = this.isBoldMarkActive(editor);
     if (match) {
       return Editor.removeMark(editor, "bold");
     }

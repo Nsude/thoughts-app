@@ -79,3 +79,13 @@ button.my-authProviderButton:hover path.make-white {
 button.my-navMenuButton:hover {
   background-color: var(--color-dark-gray-hover);
 }
+
+.my-nav-ind-button[data-disable="true"] {
+  pointer-events: none;
+  opacity: .4;
+}
+
+.my-nav-ind-button[data-disable="false"] {
+  pointer-events: all;
+  opacity: 1;
+}
