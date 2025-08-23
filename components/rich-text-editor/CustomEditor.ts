@@ -122,11 +122,21 @@ export const CustomEditor = {
 
     const match = this.isCodeBlockActive(editor);
 
+    const isHeading = Editor.nodes(editor, {
+      match: (n) => Element.isElement(n) && n.type === "heading",
+    });
+
+    // remove bold mark from headers
+    if (isHeading) {
+      Editor.removeMark(editor, "bold");
+    }
+
     Transforms.setNodes(
       editor,
       { type: match ? "paragraph" : "code" },
       { match: (n) => Element.isElement(n) && Editor.isBlock(editor, n) }
     );
+
   },
 
   // toggle bold leaf

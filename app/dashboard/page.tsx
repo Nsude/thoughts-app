@@ -51,10 +51,10 @@ export default function ThoughtDocument() {
           </div>
 
           {/* ===== BODY ===== */}
-          <div className="relative my-slateContainer px-[1.125rem] w-full overflow-clip">
+          <div className="relative slim-scrollbar my-slateContainer px-[1.125rem] w-full overflow-y-scroll overflow-x-clip">
             {/* Placeholder msg */}
 
-            <div className="absolute w-full overflow-y-scroll overflow-x-clip" 
+            <div className="absolute w-full overflow-clip" 
             style={{
               pointerEvents: isEmpty ? "all" : 'none',
               opacity: isEmpty ? "1" : '0'
