@@ -5,6 +5,7 @@ import {Editable, RenderElementProps, Slate, withReact} from "slate-react"
 import { BulletListElement, CodeElement, DefaultElement, HeadingElement, ListItemElement, NumberedListElement } from "./CustomElements";
 import { handleKeyDown } from "./CustomEditor";
 import SlateNavbar from "./Navbar";
+import InlineMenu from "./InlineMenu";
 
 interface Props {
   handleClick?: () => void;
@@ -60,6 +61,8 @@ export default function SlateEditor({handleClick, handleValueChange}: Props) {
   return (
     <Slate editor={editor} initialValue={initialValue} onValueChange={handleValueChange}>
       <SlateNavbar />
+      <InlineMenu />
+      
       <Editable 
         className="focus:outline-none"
         onClick={handleClick}

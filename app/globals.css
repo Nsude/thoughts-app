@@ -12,7 +12,7 @@
   --dark-gray: #2C2C2C;
   --dark-gray-hover: #474747;
   --dark-gray-fg: #575757;
-  --dark-gray-label: #747474;
+  --dark-gray-label: #888888;
 }
 
 @theme inline {
@@ -26,7 +26,7 @@
   --color-fade-gray: var(--fade-gray);
   --color-dark-gray: var(--dark-gray);
   --color-dark-gray-hover: var(--dark-gray-hover);
-  --color-dark-gray-fg: var(--gray-fg);
+  --color-dark-gray-fg: var(--dark-gray-fg);
   --color-dark-gray-label: var(--dark-gray-label);
 
   /* TYPOGRAPHY */

@@ -163,6 +163,7 @@ export default function SlateNavbar() {
       <ElementsMenu
         display={displayElemMenu}
         navHeight={navHeight}
+        variant={"navbar"}
         closeMenu={handleClose} />
 
       <NavMenuButton

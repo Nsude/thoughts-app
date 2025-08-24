@@ -19,7 +19,7 @@ type ElementName =
   | "Code"
   | "Quote"
 
-interface MyElement {
+export interface MyElement {
   name: ElementName;
   icon: any;
   handleClick: (editor: Editor) => void;
