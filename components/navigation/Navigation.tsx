@@ -44,8 +44,8 @@ export default function Naviation() {
       {/* public/private filter */}
       <div>
         <TabButton
-          tab1="Public"
-          tab2="Private"
+          tab1="Private"
+          tab2="public"
           handleClick={(tab) => {}}
         />
       </div>

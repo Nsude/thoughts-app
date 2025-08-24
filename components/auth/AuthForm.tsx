@@ -133,7 +133,7 @@ export default function AuthForm({ authType }: Props) {
       await new Promise<void>((resolve) => setTimeout(resolve, 200)); // little delay to allow email verification
       await updateProfile({ name: form.name });
       setResetForm(true);
-      router.replace("/dashboard");
+      router.replace("/thoughts");
     } catch (error) {
       console.log(error);
       setError("Couldn't verify email at this time, try again.");

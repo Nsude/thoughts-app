@@ -1,7 +1,6 @@
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useRef } from "react";
-import { easeInOutCubic } from "../buttons/TabButton";
 
 interface Props {
   icon: React.ReactNode;
