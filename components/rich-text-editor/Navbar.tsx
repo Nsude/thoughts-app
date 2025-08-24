@@ -15,7 +15,7 @@ import CloseIcon from "@/public/icons/CloseIcon";
 import { useEffect, useRef, useState } from "react";
 import { CustomEditor } from "./CustomEditor";
 import { useSlate } from "slate-react";
-import { Editor, Element, Range, Transforms } from "slate";
+import { Editor, Element, Range, Text, Transforms } from "slate";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import ElementsMenu from "./ElementsMenu";
@@ -58,6 +58,33 @@ export default function SlateNavbar() {
     return [...new Set(blocksArray)];
   }
 
+  // close nav menu when block is empty
+  useEffect(() => {
+    const isBlockEmpty = (editor: Editor) => {
+      const [block] = Editor.nodes(editor, {
+        match: n => Element.isElement(n) && Editor.isBlock(editor, n),
+        mode: "lowest"
+      })
+
+      if (!block) return true;
+
+      const [textNode] = Editor.nodes(editor, {
+        match: n => Text.isText(n), mode: "lowest"
+      })
+
+      if (!textNode) return true;
+
+      const [text] = textNode;
+      if (text.text.length === 0) return true;
+
+      return false;
+    }
+
+    const isEmpty = isBlockEmpty(editor);
+    if (isEmpty && display) setDisplay(false);
+    
+  }, [editor.selection])
+
   // handle selection
   useEffect(() => {
     if (!mainRef.current) return;
@@ -86,6 +113,7 @@ export default function SlateNavbar() {
         window.removeEventListener("mouseup", handleMouseUp);
       };
     }
+
   }, [editor.selection, manuallyHidden]);
 
   // Reset manuallyHidden when selection actually changes (new selection made)
@@ -102,6 +130,8 @@ export default function SlateNavbar() {
     setDisplayElemMenu(false);
     setManuallyHidden(true);
     // clear previous selection
+    // i need this because after deselection the menu pops up again 
+    // because it hasn't been deselected in slate
     Transforms.deselect(editor);
   }
 
