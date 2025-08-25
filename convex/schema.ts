@@ -33,7 +33,7 @@ const schema = defineSchema({
         date: v.number(),
       })
     ),
-    owner: v.id("user"),
+    owner: v.id("users"),
   })
     .index("by_owner", ["owner"])
     .index("by_owner_lastModified", ["owner", "lastModified.date"])
@@ -45,7 +45,7 @@ const schema = defineSchema({
     thoughtFileId: v.id("thoughts"),
 
     // raw slate JSON content
-    content: v.optional(v.any()),
+    content: v.any(),
 
     sourceType: v.optional(v.union(v.literal("audio"), v.literal("text"))),
   })

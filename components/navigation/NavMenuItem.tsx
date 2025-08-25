@@ -4,10 +4,11 @@ import { useRef } from "react";
 
 interface Props {
   icon: React.ReactNode;
-  label: string
+  label: string;
+  handleClick: () => void;
 }
 
-export default function NavMenuItem({icon, label}: Props) {
+export default function NavMenuItem({icon, label, handleClick}: Props) {
   const container = useRef(null);
   const span = useRef(null);
   const delay = .2;
@@ -83,6 +84,7 @@ export default function NavMenuItem({icon, label}: Props) {
     <button 
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onClick={handleClick}
       ref={container}
       className="my-navMenuItem relative flex gap-x-1.5 items-center h-[2.5rem] w-full rounded-[0.375rem] px-2.5 overflow-clip">
       <span className="z-[1]">{icon}</span>

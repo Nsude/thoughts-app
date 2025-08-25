@@ -1,0 +1,95 @@
+import { v } from "convex/values";
+import { mutation, query } from "./_generated/server";
+import { Id } from "./_generated/dataModel";
+import { getCurrentUserHelper } from "./users";
+
+// create a new thought
+export const createNewThought = mutation({
+  args: {
+    isPrivate: v.boolean(),
+    description: v.optional(v.string())
+  }, 
+  handler: async (ctx, args) => {
+    const currentUser = await ctx.auth.getUserIdentity();
+    if (!currentUser) throw new Error("this User is not signed in");
+
+    const user = await getCurrentUserHelper(ctx);
+    if (!user) return;
+
+    return await ctx.db.insert("thoughts", {
+      owner: user._id,
+      isPrivate: args.isPrivate,
+      description: args.description,
+      lastModified: {
+        modifiedBy: currentUser.subject as Id<"users">,
+        date: Date.now()
+      }
+    })
+  }
+});
+
+
+// create a new thought document
+export const createNewDocument = mutation({
+  args: {
+    title: v.string(),
+    thoughtFileId: v.id("thoughts"),
+    content: v.any(),
+    sourceType: v.optional(v.union(v.literal("audio"), v.literal("text")))
+  }, 
+  handler: async (ctx, args) => {
+    const user = await getCurrentUserHelper(ctx);
+    if (!user) throw new Error("this user is not signed in");
+
+    return await ctx.db.insert("thought_documents", {
+      title: args.title,
+      thoughtFileId: args.thoughtFileId,
+      content: args.content, 
+      sourceType: args.sourceType || "text"
+    })
+  }
+})
+
+
+// auto save / update a thought file
+export const updateThought = mutation({
+  args: {
+    newContent: v.any(),
+    documentId: v.id("thought_documents"),
+    thoughtId: v.id("thoughts")
+  }, 
+  handler: async (ctx, args) => {
+    const user = await getCurrentUserHelper(ctx);
+    if (!user) throw new Error("this user is not signed in");
+
+    await ctx.db.patch(args.documentId, {
+      content: args.newContent
+    })
+
+    await ctx.db.patch(args.thoughtId, {
+      lastModified: {
+        modifiedBy: user._id,
+        date: Date.now()
+      }
+    })
+  }
+}) 
+
+// fetch user thoughts
+export const getUserThoughts = query({
+  args: {isPrivate: v.boolean()},
+  handler: async (ctx, {isPrivate}) => {
+    const user = await getCurrentUserHelper(ctx);
+    if (!user) throw new Error("this user is not signed in");
+
+    let thoughts = await ctx.db
+      .query("thoughts")
+      .withIndex("by_owner", (q) => q.eq("owner", user._id))
+      .filter((q) => q.eq(q.field("isPrivate"), isPrivate))
+      .collect();
+
+    if (!thoughts) return [];
+
+    return thoughts;
+  }
+}) 

@@ -13,11 +13,23 @@ import { useAction, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import LogoutIcon from "@/public/icons/LogoutIcon";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Naviation() {
   const currentUser = useQuery(api.users.getCurrentUser);
   const signOut = useAction(api.auth.signOut);
   const router = useRouter();
+
+  useEffect(() => {
+    if (currentUser !== undefined && !currentUser) {
+      router.replace("/login")
+    } 
+
+  }, [currentUser])
+
+  const handleNewThought = () => {
+    router.replace("/thoughts/new");
+  }
 
   const handleSignout = async () => {
     try {
@@ -26,7 +38,6 @@ export default function Naviation() {
     } catch (error) {
       console.log("Error signing out: ", error);
     }
-    
   }
 
   return (
@@ -52,8 +63,15 @@ export default function Naviation() {
 
       {/* Menu Items */}
       <div className="flex flex-col w-full my-[2.5rem]">
-        <NavMenuItem icon={<NewThoughtIcon />} label="New Thought" />
-        <NavMenuItem icon={<ExploreIcon />} label="Explore" />
+        <NavMenuItem 
+          icon={<NewThoughtIcon />} 
+          handleClick={handleNewThought}
+          label="New Thought" />
+
+        <NavMenuItem 
+          icon={<ExploreIcon />} 
+          handleClick={() => {}}
+          label="Explore" />
       </div>
 
       {/* Thoughts */}

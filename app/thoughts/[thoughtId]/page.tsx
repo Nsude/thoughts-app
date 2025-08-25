@@ -16,6 +16,16 @@ export default function ThoughtDocument() {
   const [isEmpty, setIsEmpty] = useState(true);
   const placeholderRef = useRef(null);
 
+  const handleSlateValueChange = (value: any[]) => {
+    if (!value) return;
+
+    // hide or display the placeholder text
+    value[0]?.children[0].text?.trim() === "" && value[0]?.type === "paragraph"
+      ? setIsEmpty(true) : setIsEmpty(false);
+
+    console.log("change detected")
+  }
+
   // switch placeholder depending on selected tab
   useGSAP(() => {
     const con = placeholderRef.current;
@@ -65,15 +75,10 @@ export default function ThoughtDocument() {
               </div>
             </div>
 
+            {/* ===== SLATE RICH TEXT EDITOR ===== */}
             <SlateEditor 
               handleClick={() => setTab(1)} 
-              handleValueChange={
-                (value: any) => {
-                  value[0]?.children[0].text?.trim() === "" && value[0]?.type === "paragraph"
-                  ? setIsEmpty(true) : setIsEmpty(false);
-                }
-              } />
-
+              handleValueChange={handleSlateValueChange} />
           </div>
 
           {/* Tabs */}

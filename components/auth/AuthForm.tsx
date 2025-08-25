@@ -115,13 +115,12 @@ export default function AuthForm({ authType }: Props) {
     try {
       await signIn("password", { email: form.email, password: form.password, flow })
       resendCountDown();
-      setFlow("email-verification");
+      if (flow === "signUp") setFlow("email-verification");
     } catch (error) {
-      console.log(error);
-      setError("Something went wrong, please try again.");
+      return setError("invalid email or password, please try again.");
     }
 
-    if (flow === "signIn") return router.replace("/dashboard");
+    if (flow === "signIn") return router.replace("/thoughts/new");
   }
 
   // verify email
@@ -133,7 +132,7 @@ export default function AuthForm({ authType }: Props) {
       await new Promise<void>((resolve) => setTimeout(resolve, 200)); // little delay to allow email verification
       await updateProfile({ name: form.name });
       setResetForm(true);
-      router.replace("/thoughts");
+      router.replace("/thoughts/new");
     } catch (error) {
       console.log(error);
       setError("Couldn't verify email at this time, try again.");
