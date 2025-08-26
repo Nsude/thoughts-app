@@ -17,7 +17,7 @@ The thoughts web app is designed to be a thinking companion of some sort, levera
 ---
 
 ## My Learnings
----
+
 About [Convex](https://docs.convex.dev)
 
 ---
