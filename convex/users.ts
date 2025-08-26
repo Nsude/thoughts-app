@@ -3,6 +3,7 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { User } from "./convex.model";
 
+// get user object
 export const getCurrentUserHelper = async (ctx: any): Promise<User | null> => {
   const currentUser = await ctx.auth.getUserIdentity();
   if (!currentUser) return null;
@@ -14,6 +15,7 @@ export const getCurrentUserHelper = async (ctx: any): Promise<User | null> => {
   return user as User;
 };
 
+// extract user id from currentUser.subject
 const getUserId = (subject: string) => {
   const userIdString = subject.split("|")[0]; // because the subject returns userID | accountID
   const userID = userIdString as Id<"users">;
@@ -28,6 +30,7 @@ export const getCurrentUser = query({
   },
 });
 
+// add username to user table
 export const updateProfile = mutation({
   args: { name: v.string() },
   handler: async (ctx, args) => {

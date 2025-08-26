@@ -21,7 +21,7 @@ export const createNewThought = mutation({
       isPrivate: args.isPrivate,
       description: args.description,
       lastModified: {
-        modifiedBy: currentUser.subject as Id<"users">,
+        modifiedBy: user._id,
         date: Date.now()
       }
     })
@@ -50,7 +50,6 @@ export const createNewDocument = mutation({
   }
 })
 
-
 // auto save / update a thought file
 export const updateThought = mutation({
   args: {
@@ -75,6 +74,33 @@ export const updateThought = mutation({
   }
 }) 
 
+// set the core thought document of each thought file
+export const setCoreThought = mutation({
+  args: {
+    thoughtId: v.id("thoughts"),
+    coreThought: v.id("thought_documents")
+  },
+  handler: async (ctx, {thoughtId, coreThought}) => {
+    const thought = await ctx.db.get(thoughtId);
+    if (!thought) throw new Error("Thought file does not exist");
+
+    const user = await getCurrentUserHelper(ctx);
+    if (!user) return;
+
+    try {
+      ctx.db.patch(thoughtId, {
+        coreThought,
+        lastModified: {
+          modifiedBy: user._id,
+          date: Date.now()
+        }
+      })
+    } catch (error) {
+      console.error("Error setting core thought", error);
+    }
+  }
+})
+
 // fetch user thoughts
 export const getUserThoughts = query({
   args: {isPrivate: v.boolean()},
@@ -93,3 +119,25 @@ export const getUserThoughts = query({
     return thoughts;
   }
 }) 
+
+
+// get the selected thought with it's core document
+export const getThoughtWithDocument = query({
+  args: {thoughtId: v.id("thoughts")},
+  handler: async (ctx, {thoughtId}) => {
+    const thought = await ctx.db.get(thoughtId);
+    if (!thought) throw new Error("Thought file does not exist");
+
+    let document = null;
+    if (thought.coreThought) {
+      document = await ctx.db.get(thought.coreThought);
+    }
+
+    // console.log("query document", document)
+
+    return {
+      ...thought,
+      document
+    }
+  } 
+})

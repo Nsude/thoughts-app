@@ -26,13 +26,11 @@ const schema = defineSchema({
     coreThought: v.optional(v.id("thought_documents")),
     versions: v.optional(v.array(v.id("versions"))),
     isPrivate: v.boolean(),
-    collaborators: v.optional(v.array(v.id("user"))),
-    lastModified: v.optional(
-      v.object({
-        modifiedBy: v.id("users"),
-        date: v.number(),
-      })
-    ),
+    collaborators: v.optional(v.array(v.id("users"))),
+    lastModified: v.object({
+      modifiedBy: v.id("users"),
+      date: v.number(),
+    }),
     owner: v.id("users"),
   })
     .index("by_owner", ["owner"])

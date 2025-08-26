@@ -13,18 +13,20 @@ import { useAction, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import LogoutIcon from "@/public/icons/LogoutIcon";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import Thought from "./Thought";
 
 export default function Naviation() {
+  const [isPrivate, setIsPrivate] = useState(true);
   const currentUser = useQuery(api.users.getCurrentUser);
+  const thoughts = useQuery(api.thoughts.getUserThoughts, { isPrivate });
   const signOut = useAction(api.auth.signOut);
   const router = useRouter();
 
   useEffect(() => {
     if (currentUser !== undefined && !currentUser) {
       router.replace("/login")
-    } 
-
+    }
   }, [currentUser])
 
   const handleNewThought = () => {
@@ -57,28 +59,43 @@ export default function Naviation() {
         <TabButton
           tab1="Private"
           tab2="public"
-          handleClick={(tab) => {}}
+          handleClick={(tab) => setIsPrivate(tab === 0 ? true : false)}
         />
       </div>
 
       {/* Menu Items */}
       <div className="flex flex-col w-full my-[2.5rem]">
-        <NavMenuItem 
-          icon={<NewThoughtIcon />} 
+        <NavMenuItem
+          icon={<NewThoughtIcon />}
           handleClick={handleNewThought}
           label="New Thought" />
 
-        <NavMenuItem 
-          icon={<ExploreIcon />} 
-          handleClick={() => {}}
+        <NavMenuItem
+          icon={<ExploreIcon />}
+          handleClick={() => { }}
           label="Explore" />
       </div>
 
       {/* Thoughts */}
       <div className="w-full max-h-[38.5%]">
-        <span className="block mb-[0.75rem] text-fade-gray">Your Thoughts</span>
+        <span
+          className="block mb-[0.75rem] text-fade-gray">
+          Your Thoughts
+        </span>
+
         <div className="flex flex-col h-[90%] overflow-y-scroll snap-y slim-scrollbar">
           {/* Thoughts go here */}
+          {
+            thoughts && thoughts.map((item, i) => (
+              <Thought 
+                key={"thought_" + i} 
+                fresh={item._creationTime > (Date.now() - 300000)} 
+                label={item.description || "Untitled Thought"} 
+                handleClick={() => {
+                  router.replace(`/thoughts/${item._id}`);
+                }} />
+            ))
+          }
         </div>
       </div>
 
@@ -93,8 +110,8 @@ export default function Naviation() {
       {/* profile */}
       <div className="flex bg-myWhite z-[2] items-center absolute border-t border-myGray bottom-0 left-0 w-full h-[4.5rem] p-[0.9375rem] justify-between">
         {/* not logged in */}
-        <ProfileDisplay 
-          userName={currentUser?.name || currentUser?.email || "name"} 
+        <ProfileDisplay
+          userName={currentUser?.name || currentUser?.email || "name"}
           accoutType={"Freeloader"} />
         <NoBgButton icon={<LogoutIcon />} handleClick={handleSignout} />
       </div>

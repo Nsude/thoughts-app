@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { createEditor, Descendant, Editor, Element, Transforms } from "slate"
 import { withHistory } from "slate-history"
 import {Editable, RenderElementProps, Slate, withReact} from "slate-react"
@@ -6,21 +6,39 @@ import { BulletListElement, CodeElement, DefaultElement, HeadingElement, ListIte
 import { handleKeyDown } from "./CustomEditor";
 import SlateNavbar from "./Navbar";
 import InlineMenu from "./InlineMenu";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 
 interface Props {
   handleClick?: () => void;
-  handleValueChange?: (value: Descendant[]) => void
+  handleValueChange?: (value: any[]) => void;
+  thoughtId: Id<"thoughts">
 }
 
-export default function SlateEditor({handleClick, handleValueChange}: Props) {
+export default function SlateEditor({handleClick, handleValueChange, thoughtId}: Props) {
   // editor instance 
   const editor = useMemo(() => withHistory(withReact(createEditor())), []);
-  const initialValue:Descendant[] = useMemo(() => [
-    {
+  const initialValue: Descendant[] = useMemo(() => [
+    { 
       type: "paragraph", 
-      children: [{text: ""}]
+      children: [{text: ""}] 
+    }], []);
+
+  const thoughtWithDocument = thoughtId !== "new" ? useQuery(api.thoughts.getThoughtWithDocument, {thoughtId}) : null;
+ 
+  useEffect(() => {
+    const document = thoughtWithDocument?.document;
+    
+    if (thoughtId === "new") {
+      Transforms.delete(editor, {at: [0], unit: "block"});
+      Transforms.insertNodes(editor, initialValue);
+    } else if (document?.content) {
+      Transforms.delete(editor, {at: [0], unit: "block" });
+      Transforms.insertNodes(editor, document.content);
     }
-  ], []);
+
+  }, [thoughtId, thoughtWithDocument])
 
   const renderElement = useCallback((props: RenderElementProps) => {
     const {element} = props;
@@ -59,7 +77,7 @@ export default function SlateEditor({handleClick, handleValueChange}: Props) {
   }
 
   return (
-    <Slate editor={editor} initialValue={initialValue} onValueChange={handleValueChange}>
+    <Slate key={thoughtId} editor={editor} initialValue={initialValue} onValueChange={handleValueChange}>
       <SlateNavbar />
       <InlineMenu />
       

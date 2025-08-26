@@ -3,27 +3,98 @@
 import ClassicButton from "@/components/buttons/ClassicButton";
 import TabButton, { easeInOutCubic } from "@/components/buttons/TabButton";
 import SlateEditor from "@/components/rich-text-editor/SlateEditor";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
+import { createNewThought } from "@/convex/thoughts";
 import LogoIcon from "@/public/icons/LogoIcon";
 import MicrophoneIcon from "@/public/icons/MicrophoneIcon";
 import PlusIcon from "@/public/icons/PlusIcon";
 import TextIcon from "@/public/icons/TextIcon";
 import { useGSAP } from "@gsap/react";
+import { useAction, useMutation, useQuery } from "convex/react";
 import gsap from "gsap";
-import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { use, useEffect, useRef, useState } from "react";
 
-export default function ThoughtDocument() {
+export default function ThoughtDocument({params}: {params: Promise<{thoughtId: Id<"thoughts">}>}) {
   const [tab, setTab] = useState(0);
   const [isEmpty, setIsEmpty] = useState(true);
   const placeholderRef = useRef(null);
+  const {thoughtId} = use(params) ;
 
-  const handleSlateValueChange = (value: any[]) => {
-    if (!value) return;
+  const createThought = useMutation(api.thoughts.createNewThought);
+  const createDocument = useMutation(api.thoughts.createNewDocument);
+  const setCoreThought = useMutation(api.thoughts.setCoreThought);
+  const router = useRouter();
+
+  const currentUser = useQuery(api.auth.isAuthenticated);
+  const [isDraft, setIsDraft] = useState(true);
+
+  const thoughtCreated = useRef(false);
+
+  // update isDraft
+  useEffect(() => {
+    if (location.href.includes("/new")) {
+      setIsDraft(true);
+      thoughtCreated.current = false;
+    } else {
+      setIsDraft(false);
+    }
+  }, [router])
+
+
+  // handle slate value change
+  const handleSlateValueChange = async (content: any[]) => {
+    if (!content) return;
 
     // hide or display the placeholder text
-    value[0]?.children[0].text?.trim() === "" && value[0]?.type === "paragraph"
+    content[0]?.children[0].text?.trim() === "" && content[0]?.type === "paragraph"
       ? setIsEmpty(true) : setIsEmpty(false);
 
-    console.log("change detected")
+    const isSlateEmpty = isContentPopulated(content);
+    
+    // if the thought is a fresh unsaved thought
+    if (currentUser && !isSlateEmpty && isDraft && !thoughtCreated.current) {
+      thoughtCreated.current = true;
+
+      try {
+        const thoughtId = await createThought({isPrivate: true});
+        if (!thoughtId) return console.error("error creating thought");
+
+        const coreThought = await createDocument({
+          title: "Core",
+          thoughtFileId: thoughtId,
+          content: content,
+        })
+
+        // set the document as the core thought document
+        await setCoreThought({ thoughtId, coreThought });
+
+        setIsDraft(false);
+        router.replace(`/thoughts/${thoughtId}`)
+
+      } catch (error) {
+        console.error("Error creating new thought: ", error);
+      }
+    }
+  }
+
+  // check if the editor has any content before saving
+  const isContentPopulated = (slateContent: any[]):boolean => {
+    if (!slateContent || slateContent.length === 0) return false;
+
+    // Check if there's any actual text content
+    const hasText = slateContent.some(node => {
+      if (node.children) {
+        const value = node.children.some((child: any) =>
+          child.text && child.text.trim().length > 50
+        );
+        if (value) return false;
+      }
+      return true;
+    });
+
+    return hasText;
   }
 
   // switch placeholder depending on selected tab
@@ -78,7 +149,8 @@ export default function ThoughtDocument() {
             {/* ===== SLATE RICH TEXT EDITOR ===== */}
             <SlateEditor 
               handleClick={() => setTab(1)} 
-              handleValueChange={handleSlateValueChange} />
+              handleValueChange={handleSlateValueChange} 
+              thoughtId={thoughtId} />
           </div>
 
           {/* Tabs */}
