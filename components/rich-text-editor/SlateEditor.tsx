@@ -1,47 +1,38 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { createEditor, Descendant, Editor, Element, Transforms } from "slate"
 import { withHistory } from "slate-history"
-import {Editable, RenderElementProps, Slate, withReact} from "slate-react"
+import { Editable, RenderElementProps, Slate, withReact } from "slate-react"
 import { BulletListElement, CodeElement, DefaultElement, HeadingElement, ListItemElement, NumberedListElement } from "./CustomElements";
 import { handleKeyDown } from "./CustomEditor";
 import SlateNavbar from "./Navbar";
 import InlineMenu from "./InlineMenu";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { useRouter } from "next/navigation";
 
 interface Props {
   handleClick?: () => void;
-  handleValueChange?: (value: any[]) => void;
+  handleValueChange: (value: any[]) => void;
   thoughtId: Id<"thoughts">
 }
 
-export default function SlateEditor({handleClick, handleValueChange, thoughtId}: Props) {
+export default function SlateEditor({ handleClick, handleValueChange, thoughtId }: Props) {
   // editor instance 
   const editor = useMemo(() => withHistory(withReact(createEditor())), []);
   const initialValue: Descendant[] = useMemo(() => [
-    { 
-      type: "paragraph", 
-      children: [{text: ""}] 
+    {
+      type: "paragraph",
+      children: [{ text: "" }]
     }], []);
 
-  const thoughtWithDocument = thoughtId !== "new" ? useQuery(api.thoughts.getThoughtWithDocument, {thoughtId}) : null;
- 
-  useEffect(() => {
-    const document = thoughtWithDocument?.document;
-    
-    if (thoughtId === "new") {
-      Transforms.delete(editor, {at: [0], unit: "block"});
-      Transforms.insertNodes(editor, initialValue);
-    } else if (document?.content) {
-      Transforms.delete(editor, {at: [0], unit: "block" });
-      Transforms.insertNodes(editor, document.content);
-    }
+  const handleSlateValueChange = useCallback(() => {
 
-  }, [thoughtId, thoughtWithDocument])
+  }, [])
 
+  // render the selected element type
   const renderElement = useCallback((props: RenderElementProps) => {
-    const {element} = props;
+    const { element } = props;
 
     switch (element.type) {
       case "code":
@@ -54,11 +45,12 @@ export default function SlateEditor({handleClick, handleValueChange, thoughtId}:
         return <NumberedListElement {...props} />
       case "list-item":
         return <ListItemElement {...props} />
-      default: 
+      default:
         return <DefaultElement {...props} />
     }
   }, [])
 
+  // apply styles to selected characters
   const renderLeaf = (props: any) => {
     const leaf = props.leaf;
     return (
@@ -67,27 +59,27 @@ export default function SlateEditor({handleClick, handleValueChange, thoughtId}:
           fontWeight: leaf.bold ? '800' : 'normal',
           backgroundColor: leaf.highlight ? "#FE7A33" : "unset",
           fontStyle: leaf.italic ? "italic" : "normal",
-          textDecoration: leaf.underline ? "underline" : 
+          textDecoration: leaf.underline ? "underline" :
             leaf.linethrough ? "line-through" : "unset",
         }}
-      > 
+      >
         {props.children}
       </span>
     )
   }
 
   return (
-    <Slate key={thoughtId} editor={editor} initialValue={initialValue} onValueChange={handleValueChange}>
+    <Slate key={thoughtId} editor={editor} initialValue={initialValue} onValueChange={handleSlateValueChange}>
       <SlateNavbar />
       <InlineMenu />
-      
-      <Editable 
+
+      <Editable
         className="focus:outline-none"
         onClick={handleClick}
         renderElement={renderElement}
         renderLeaf={renderLeaf}
         onKeyDown={(e) => handleKeyDown(e, editor)}
-       />
+      />
     </Slate>
   )
 }

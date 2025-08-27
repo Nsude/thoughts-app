@@ -22,80 +22,6 @@ export default function ThoughtDocument({params}: {params: Promise<{thoughtId: I
   const placeholderRef = useRef(null);
   const {thoughtId} = use(params) ;
 
-  const createThought = useMutation(api.thoughts.createNewThought);
-  const createDocument = useMutation(api.thoughts.createNewDocument);
-  const setCoreThought = useMutation(api.thoughts.setCoreThought);
-  const router = useRouter();
-
-  const currentUser = useQuery(api.auth.isAuthenticated);
-  const [isDraft, setIsDraft] = useState(true);
-
-  const thoughtCreated = useRef(false);
-
-  // update isDraft
-  useEffect(() => {
-    if (location.href.includes("/new")) {
-      setIsDraft(true);
-      thoughtCreated.current = false;
-    } else {
-      setIsDraft(false);
-    }
-  }, [router])
-
-
-  // handle slate value change
-  const handleSlateValueChange = async (content: any[]) => {
-    if (!content) return;
-
-    // hide or display the placeholder text
-    content[0]?.children[0].text?.trim() === "" && content[0]?.type === "paragraph"
-      ? setIsEmpty(true) : setIsEmpty(false);
-
-    const isSlateEmpty = isContentPopulated(content);
-    
-    // if the thought is a fresh unsaved thought
-    if (currentUser && !isSlateEmpty && isDraft && !thoughtCreated.current) {
-      thoughtCreated.current = true;
-
-      try {
-        const thoughtId = await createThought({isPrivate: true});
-        if (!thoughtId) return console.error("error creating thought");
-
-        const coreThought = await createDocument({
-          title: "Core",
-          thoughtFileId: thoughtId,
-          content: content,
-        })
-
-        // set the document as the core thought document
-        await setCoreThought({ thoughtId, coreThought });
-
-        setIsDraft(false);
-        router.replace(`/thoughts/${thoughtId}`)
-
-      } catch (error) {
-        console.error("Error creating new thought: ", error);
-      }
-    }
-  }
-
-  // check if the editor has any content before saving
-  const isContentPopulated = (slateContent: any[]):boolean => {
-    if (!slateContent || slateContent.length === 0) return false;
-
-    // Check if there's any actual text content
-    const hasText = slateContent.some(node => {
-      if (node.children) {
-        const value = node.children.some((child: any) =>
-          child.text && child.text.trim().length > 50
-        );
-        if (value) return false;
-      }
-      return true;
-    });
-
-    return hasText;
-  }
 
   // switch placeholder depending on selected tab
   useGSAP(() => {
@@ -149,7 +75,11 @@ export default function ThoughtDocument({params}: {params: Promise<{thoughtId: I
             {/* ===== SLATE RICH TEXT EDITOR ===== */}
             <SlateEditor 
               handleClick={() => setTab(1)} 
-              handleValueChange={handleSlateValueChange} 
+              handleValueChange={(content) => {
+                // hide or display the placeholder text
+                content[0]?.children[0].text?.trim() === "" && content[0]?.type === "paragraph"
+                  ? setIsEmpty(true) : setIsEmpty(false);
+              }} 
               thoughtId={thoughtId} />
           </div>
 
