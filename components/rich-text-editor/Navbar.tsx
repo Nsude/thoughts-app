@@ -12,7 +12,7 @@ import CodeIcon from "@/public/icons/CodeIcon";
 import LinkIcon from "@/public/icons/LinkIcon";
 import ColorIcon from "@/public/icons/ColorIcon";
 import CloseIcon from "@/public/icons/CloseIcon";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { CustomEditor } from "./CustomEditor";
 import { useSlate } from "slate-react";
 import { Editor, Element, Range, Text, Transforms } from "slate";
@@ -125,7 +125,7 @@ export default function SlateNavbar() {
   }, [editor.selection, display]);
 
   // handleClose
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setDisplay(false);
     setDisplayElemMenu(false);
     setManuallyHidden(true);
@@ -133,7 +133,7 @@ export default function SlateNavbar() {
     // i need this because after deselection the menu pops up again 
     // because it hasn't been deselected in slate
     Transforms.deselect(editor);
-  }
+  }, [])
 
   // handle clicks outside the navbar
   useEffect(() => {
@@ -176,9 +176,9 @@ export default function SlateNavbar() {
   }, { scope: mainRef, dependencies: [display] })
 
   const [displayElemMenu, setDisplayElemMenu] = useState(false);
-  const toggleElementsMenu = () => {
+  const toggleElementsMenu = useCallback(() => {
     setDisplayElemMenu(prev => !prev);
-  }
+  }, [])
 
   return (
     <div
@@ -213,27 +213,27 @@ export default function SlateNavbar() {
 
       <NavMenuButton
         icon={<BoldIcon />}
-        handleClick={() => CustomEditor.toggleBold(editor)} />
+        handleClick={useCallback(() => CustomEditor.toggleBold(editor), [])} />
 
       <NavMenuButton
         icon={<ItalicIcon />}
-        handleClick={() => CustomEditor.toggleItalic(editor)} />
+        handleClick={useCallback(() => CustomEditor.toggleItalic(editor), [])} />
 
       <NavMenuButton
         icon={<UnderlineIcon />}
-        handleClick={() => CustomEditor.toggleUnderline(editor)} />
+        handleClick={useCallback(() => CustomEditor.toggleUnderline(editor), [])} />
 
       <NavMenuButton
         icon={<LineThroughIcon />}
-        handleClick={() => { CustomEditor.toggleLineThrough(editor) }} />
+        handleClick={useCallback(() => { CustomEditor.toggleLineThrough(editor)}, [])} />
 
       <div className="my-nav-ind-button" data-disable={disableIndButtons}>
         <NavMenuButton
           icon={<CodeIcon />}
-          handleClick={() => {
+          handleClick={useCallback(() => {
             CustomEditor.toggleCode(editor);
             handleClose()
-          }} />
+          }, [])} />
       </div>
 
       <div className="my-nav-ind-button" data-disable={disableIndButtons}>

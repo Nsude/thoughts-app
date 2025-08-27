@@ -9,7 +9,7 @@ import GithubIcon from "@/public/icons/GithubIcon";
 import Logo from "../Logo";
 import { AuthType } from "../app.models";
 import { useAuthActions } from "@convex-dev/auth/react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
@@ -124,7 +124,7 @@ export default function AuthForm({ authType }: Props) {
   }
 
   // verify email
-  const verifyEmail = async () => {
+  const verifyEmail = useCallback(async () => {
     if (emailOtp.length < OTPLength) return;
 
     try {
@@ -137,7 +137,7 @@ export default function AuthForm({ authType }: Props) {
       console.log(error);
       setError("Couldn't verify email at this time, try again.");
     }
-  }
+  }, [])
 
   // update the isValid status of each form field
   const updateFormValidation = (field: keyof FormValidation, isValid: boolean) => {
@@ -175,12 +175,12 @@ export default function AuthForm({ authType }: Props) {
             <AuthProviderButton
               label="Google"
               icon={<GoogleIcon />}
-              handleClick={() => signIn("google")} />
+              handleClick={useCallback(() => signIn("google"), [])} />
 
             <AuthProviderButton
               label="Github"
               icon={<GithubIcon />}
-              handleClick={() => signIn("github")} />
+              handleClick={useCallback(() => signIn("github"), [])} />
           </div>
 
           <div className="relative h-full w-full mb-[1.5625rem]">

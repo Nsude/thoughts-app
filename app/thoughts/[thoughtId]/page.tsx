@@ -14,7 +14,7 @@ import { useGSAP } from "@gsap/react";
 import { useAction, useMutation, useQuery } from "convex/react";
 import gsap from "gsap";
 import { useRouter } from "next/navigation";
-import { use, useEffect, useRef, useState } from "react";
+import { use, useCallback, useEffect, useRef, useState } from "react";
 
 export default function ThoughtDocument({params}: {params: Promise<{thoughtId: Id<"thoughts">}>}) {
   const [tab, setTab] = useState(0);
@@ -74,7 +74,7 @@ export default function ThoughtDocument({params}: {params: Promise<{thoughtId: I
 
             {/* ===== SLATE RICH TEXT EDITOR ===== */}
             <SlateEditor 
-              handleClick={() => setTab(1)} 
+              handleClick={useCallback(() => setTab(1), [])} 
               handleValueChange={(content) => {
                 // hide or display the placeholder text
                 content[0]?.children[0].text?.trim() === "" && content[0]?.type === "paragraph"
@@ -88,7 +88,7 @@ export default function ThoughtDocument({params}: {params: Promise<{thoughtId: I
             <TabButton
               tabIcon1={<MicrophoneIcon />}
               tabIcon2={<TextIcon />}
-              handleClick={(tab) => setTab(tab)}
+              handleClick={useCallback((tab) => setTab(tab), [])}
               preselectTab={tab}
             />
           </div>

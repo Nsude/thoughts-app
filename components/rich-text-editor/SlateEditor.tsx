@@ -26,8 +26,8 @@ export default function SlateEditor({ handleClick, handleValueChange, thoughtId 
       children: [{ text: "" }]
     }], []);
 
-  const handleSlateValueChange = useCallback(() => {
-
+  const handleSlateValueChange = useCallback((content: any[]) => {
+    handleValueChange(content); // call external value change
   }, [])
 
   // render the selected element type
