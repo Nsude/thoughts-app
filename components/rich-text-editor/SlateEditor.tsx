@@ -10,6 +10,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useRouter } from "next/navigation";
+import { debounce } from "lodash";
 
 interface Props {
   handleClick?: () => void;
@@ -20,7 +21,6 @@ interface Props {
 // central state 
 type EditorState = {
   status: "idle" | "loading" | "saving" | "error";
-  lastSavedContent: any[] | null;
   isInitialised: boolean;
   isCreatingThought: boolean;
 }
@@ -30,11 +30,12 @@ type EditorAction =
 | {type: "INIT_CONTENT"}
 | {type: "CONTENT_LOADED", content: any[]}
 | {type: "CREATING_THOUGHT"}
+| {type: "SAVE_START"}
+| {type: "SAVE_SUCCESS"}
 | {type: "ERROR", msg: any};
 
 const initialState:EditorState = {
   status: "idle",
-  lastSavedContent: null,
   isInitialised: false,
   isCreatingThought: false
 }
@@ -60,7 +61,17 @@ const editorReducer = (state: EditorState, action: EditorAction) => {
         ...state,
         status: "idle",
         lastSavedContent: action.content,
-        isInitialised: true
+        isInitialised: true,
+      } as EditorState;
+    case "SAVE_START":
+      return {
+        ...state,
+        status: "saving"
+      } as EditorState;
+    case "SAVE_SUCCESS":
+      return {
+        ...state,
+        status: "idle",
       } as EditorState;
     case "ERROR": 
       return {
@@ -92,11 +103,69 @@ export default function SlateEditor({ handleClick, handleValueChange, thoughtId 
   const initialValue: Descendant[] = useMemo(() => [{ type: "paragraph", children: [{ text: "" }]}], []);
   const router = useRouter();
 
-  // convex mutations
+  // convex mutations and queries
   const createThought = useMutation(api.thoughts.createNewThought);
   const createDocument = useMutation(api.thoughts.createNewDocument);
   const setCoreThought = useMutation(api.thoughts.setCoreThought);
+  const updateThought = useMutation(api.thoughts.updateThought);
+  const thoughtWithDocument = useQuery(api.thoughts.getThoughtWithDocument, thoughtId !== "new" ? {thoughtId} : "skip");
 
+  // compare content
+  const hasContentChanged = useCallback((oldContent: any[], newContent: any[]) => {
+    if (!oldContent) return true;
+    return JSON.stringify(newContent) !== JSON.stringify(oldContent);
+  }, [])
+
+  const lastSavedContent = useRef<any[]>(null);
+
+  // ===== DISPLAY THE RIGHT DOCUMENT =====
+  useEffect(() => {
+    if (state.isInitialised) return;
+    const document = thoughtWithDocument?.document;
+
+    dispatch({type: "INIT_CONTENT"});
+
+    if (thoughtId === "new") {
+      editor.children = initialValue;
+      Editor.normalize(editor);
+      dispatch({type: "CONTENT_LOADED", content: initialValue});
+    } else if (document?.content && thoughtId !== "new") {
+      handleValueChange(document.content);
+      editor.children = document.content;
+      Editor.normalize(editor);
+      dispatch({type: "CONTENT_LOADED", content: document.content});
+      lastSavedContent.current = document.content;
+    }
+
+  }, [thoughtId, thoughtWithDocument?.document?.content, lastSavedContent])
+
+  // ===== AUTO SAVE =====
+  const debounceAutosave = useMemo(() => {
+    return debounce(async (content: any[]) => {
+      const document = thoughtWithDocument?.document;
+      if (!document || !lastSavedContent.current) return;
+      
+      if (!hasContentChanged(lastSavedContent.current, content)) return;
+
+      dispatch({type: "SAVE_START"});
+      try {
+        await updateThought({
+          newContent: content,
+          documentId: document._id,
+          thoughtId
+        })
+
+        dispatch({type: "SAVE_SUCCESS"});
+        lastSavedContent.current = content;
+      } catch (error) {
+        console.error("Error saving content: ", error);
+        dispatch({type: "ERROR", msg: error});
+      }
+      
+    }, 3000)
+  }, [thoughtId, thoughtWithDocument?.document?._id, hasContentChanged])
+
+  // ===== CREATE A NEW THOUGHT =====
   const handleNewThought = useCallback(async (content: any[]) => {
     const contentLength = getContentLength(content);
     if (contentLength < 10) return;
@@ -116,6 +185,9 @@ export default function SlateEditor({ handleClick, handleValueChange, thoughtId 
       // init document as the core thought of the created thought
       await setCoreThought({coreThought: coreThought, thoughtId: newThoughtId});
       dispatch({type: "CONTENT_LOADED", content});
+
+      // update last saved ref
+      lastSavedContent.current = content;
       router.replace(`/thoughts/${newThoughtId}`);
     } catch (error) {
       console.error("Error creating new thought: ", error);
@@ -123,12 +195,17 @@ export default function SlateEditor({ handleClick, handleValueChange, thoughtId 
     }
   }, [thoughtId, router])
 
+  // ===== HANDLE VALUE CHANGE =====
   const handleSlateValueChange = useCallback(async (content: any[]) => {
     if (!content) return;
 
     handleValueChange(content); // call external value change
 
-    if (state.isInitialised || state.isCreatingThought) return;
+    if (thoughtId !== "new" && state.isInitialised) {
+      await debounceAutosave(content);
+    }
+
+    if (state.isCreatingThought) return;
 
     if (thoughtId === "new") {
       await handleNewThought(content);

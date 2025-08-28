@@ -133,8 +133,6 @@ export const getThoughtWithDocument = query({
       document = await ctx.db.get(thought.coreThought);
     }
 
-    // console.log("query document", document)
-
     return {
       ...thought,
       document
