@@ -1,9 +1,10 @@
 import ClassicButton from "@/components/buttons/ClassicButton";
+import SlateStatusContextProvider from "@/components/contexts/SlateStatusContext";
 import Naviation from "@/components/navigation/Navigation";
 import NotificationIcon from "@/public/icons/NotificationIcon";
 import ShareIcon from "@/public/icons/ShareIcon";
 
-export default function DashboardLayout({children}: {children: React.ReactNode}) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative w-full h-screen flex gap-x-[0.75rem] p-[0.75rem]">
       {/* navigation */}
@@ -12,9 +13,11 @@ export default function DashboardLayout({children}: {children: React.ReactNode})
       </aside>
 
       {/* content */}
-      <div className="w-full h-full flex justify-center items-center">
-        {children}
-      </div>
+      <SlateStatusContextProvider>
+        <div className="w-full h-full flex justify-center items-center">
+          {children}
+        </div>
+      </SlateStatusContextProvider>
 
       {/* top-right-buttons */}
       <div className="absolute top-[0.75rem] right-[1.38rem] w-fit h-fit flex gap-x-[0.38rem]">

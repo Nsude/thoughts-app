@@ -2,7 +2,9 @@
 
 import ClassicButton from "@/components/buttons/ClassicButton";
 import TabButton, { easeInOutCubic } from "@/components/buttons/TabButton";
+import SlateStatusContextProvider from "@/components/contexts/SlateStatusContext";
 import SlateEditor from "@/components/rich-text-editor/SlateEditor";
+import SlateStatusDisplay from "@/components/rich-text-editor/Status";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { createNewThought } from "@/convex/thoughts";
@@ -52,6 +54,7 @@ export default function ThoughtDocument({params}: {params: Promise<{thoughtId: I
           <div className="absolute top-0 left-0 w-full px-[1.125rem] h-[4.25rem] flex justify-between items-center">
             <h3 className="text-title text-fade-gray">Core</h3>
             <span className="flex items-center gap-x-1.5">
+              <SlateStatusDisplay />
               <ClassicButton icon={<LogoIcon />} text="Refine" />
               <ClassicButton icon={<PlusIcon />} />
             </span>

@@ -11,6 +11,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useRouter } from "next/navigation";
 import { debounce } from "lodash";
+import { SlateStatusTypes, useSlateStatusContext } from "../contexts/SlateStatusContext";
 
 interface Props {
   handleClick?: () => void;
@@ -20,7 +21,7 @@ interface Props {
 
 // central state 
 type EditorState = {
-  status: "idle" | "loading" | "saving" | "error";
+  status: SlateStatusTypes;
   isInitialised: boolean;
   isCreatingThought: boolean;
 }
@@ -28,11 +29,10 @@ type EditorState = {
 // all editor actions
 type EditorAction = 
 | {type: "INIT_CONTENT"}
-| {type: "CONTENT_LOADED", content: any[]}
+| {type: "CONTENT_LOADED"}
 | {type: "CREATING_THOUGHT"}
 | {type: "SAVE_START"}
-| {type: "SAVE_SUCCESS"}
-| {type: "ERROR", msg: any};
+| {type: "SAVE_SUCCESS"};
 
 const initialState:EditorState = {
   status: "idle",
@@ -60,7 +60,6 @@ const editorReducer = (state: EditorState, action: EditorAction) => {
       return {
         ...state,
         status: "idle",
-        lastSavedContent: action.content,
         isInitialised: true,
       } as EditorState;
     case "SAVE_START":
@@ -72,11 +71,6 @@ const editorReducer = (state: EditorState, action: EditorAction) => {
       return {
         ...state,
         status: "idle",
-      } as EditorState;
-    case "ERROR": 
-      return {
-        ...state,
-        status: 'error'
       } as EditorState;
   }
 }
@@ -95,6 +89,7 @@ const getContentLength = (content: any[]):number => {
   }, 0)
 }
 
+// ==== MAIN EDITOR COMPONENT ====
 export default function SlateEditor({ handleClick, handleValueChange, thoughtId }: Props) {
   const [state, dispatch] = useReducer(editorReducer, initialState);
 
@@ -117,6 +112,7 @@ export default function SlateEditor({ handleClick, handleValueChange, thoughtId 
   }, [])
 
   const lastSavedContent = useRef<any[]>(null);
+  const {setStatus} = useSlateStatusContext();
 
   // ===== DISPLAY THE RIGHT DOCUMENT =====
   useEffect(() => {
@@ -124,20 +120,23 @@ export default function SlateEditor({ handleClick, handleValueChange, thoughtId 
     const document = thoughtWithDocument?.document;
 
     dispatch({type: "INIT_CONTENT"});
+    setStatus("loading");
 
     if (thoughtId === "new") {
       editor.children = initialValue;
       Editor.normalize(editor);
-      dispatch({type: "CONTENT_LOADED", content: initialValue});
+      dispatch({type: "CONTENT_LOADED"});
+      lastSavedContent.current = initialValue;
     } else if (document?.content && thoughtId !== "new") {
       handleValueChange(document.content);
       editor.children = document.content;
       Editor.normalize(editor);
-      dispatch({type: "CONTENT_LOADED", content: document.content});
+      dispatch({type: "CONTENT_LOADED"});
       lastSavedContent.current = document.content;
     }
 
-  }, [thoughtId, thoughtWithDocument?.document?.content, lastSavedContent])
+    setStatus("idle");
+  }, [thoughtId, thoughtWithDocument?.document?.content])
 
   // ===== AUTO SAVE =====
   const debounceAutosave = useMemo(() => {
@@ -148,6 +147,8 @@ export default function SlateEditor({ handleClick, handleValueChange, thoughtId 
       if (!hasContentChanged(lastSavedContent.current, content)) return;
 
       dispatch({type: "SAVE_START"});
+      setStatus("saving");
+      
       try {
         await updateThought({
           newContent: content,
@@ -156,10 +157,10 @@ export default function SlateEditor({ handleClick, handleValueChange, thoughtId 
         })
 
         dispatch({type: "SAVE_SUCCESS"});
+        setStatus("saved");
         lastSavedContent.current = content;
       } catch (error) {
         console.error("Error saving content: ", error);
-        dispatch({type: "ERROR", msg: error});
       }
       
     }, 3000)
@@ -171,6 +172,7 @@ export default function SlateEditor({ handleClick, handleValueChange, thoughtId 
     if (contentLength < 10) return;
 
     dispatch({type: "CREATING_THOUGHT"});
+    setStatus("saving");
 
     try {
       const newThoughtId = await createThought({isPrivate: true});
@@ -184,14 +186,15 @@ export default function SlateEditor({ handleClick, handleValueChange, thoughtId 
 
       // init document as the core thought of the created thought
       await setCoreThought({coreThought: coreThought, thoughtId: newThoughtId});
-      dispatch({type: "CONTENT_LOADED", content});
+      dispatch({type: "CONTENT_LOADED"});
 
       // update last saved ref
       lastSavedContent.current = content;
       router.replace(`/thoughts/${newThoughtId}`);
+      setStatus("saved");
     } catch (error) {
       console.error("Error creating new thought: ", error);
-      dispatch({type: "ERROR", msg: error});
+      setStatus("error");
     }
   }, [thoughtId, router])
 
