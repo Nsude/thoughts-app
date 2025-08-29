@@ -120,7 +120,6 @@ export const getUserThoughts = query({
   }
 }) 
 
-
 // get the selected thought with it's core document
 export const getThoughtWithDocument = query({
   args: {thoughtId: v.id("thoughts")},
@@ -138,4 +137,15 @@ export const getThoughtWithDocument = query({
       document
     }
   } 
+})
+
+// delete a thought
+export const deleleThought = mutation({
+  args: {thoughtId: v.id("thoughts")},
+  handler: async (ctx, {thoughtId}) => {
+    const thought = await ctx.db.get(thoughtId);
+    if (!thought) throw new Error("Thought file does not exist");
+
+    await ctx.db.delete(thoughtId);
+  }
 })

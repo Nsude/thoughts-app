@@ -6,8 +6,10 @@ import EditIcon from "@/public/icons/EditIcon";
 import ShareIcon from "@/public/icons/ShareIcon";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { easeInOutCubic } from "../buttons/TabButton";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 type OptionItem = {
   label: string;
@@ -25,6 +27,9 @@ interface OptionsModalProps {
 export default function OptionsModal({ 
   thoughtId, y, display }: OptionsModalProps
 ) {
+  // const {setError} = useErrorContext();
+  const deleteThought = useMutation(api.thoughts.deleleThought);
+
   const mainRef = useRef(null);
   const firstCall = useRef(true);
 
@@ -56,15 +61,24 @@ export default function OptionsModal({
   }, {scope: mainRef, dependencies: [y, display]})
 
   const handleShare = useCallback((thoughtId: Id<"thoughts">) => {
-    console.log("share clicked")
+    console.log("share clicked");
   }, [])
 
   const handleRename = useCallback((thoughtId: Id<"thoughts">) => {
-    console.log("rename clicked")
+    console.log("rename clicked");
   }, [])
 
-  const handleDelete = useCallback((thoughtId: Id<"thoughts">) => {
-    console.log("delete clicked")
+  const handleDelete = useCallback(async (thoughtId: Id<"thoughts">) => {
+    console.log("delete clicked");
+
+    try {
+      await deleteThought({
+        thoughtId
+      })
+      console.log("thought deleted")
+    } catch (error) {
+      console.error("Error deleting thought: ", error);
+    }
   }, [])
 
   const optionsItems: OptionItem[] = useMemo(() => [

@@ -39,6 +39,19 @@ export default function Naviation() {
   const prevThoughtId = useRef<Id<"thoughts">>(null);
   let modalTimeout:NodeJS.Timeout;
 
+  // close options modal when the user clicks outside
+  useEffect(() => {
+    const handleOutsideMouseDown = (e: MouseEvent) => {
+      if (!optionsModal.display) return;
+      setOptionsModal(prev => {return {...prev, display: false}});
+
+      return window.removeEventListener("mousedown", handleOutsideMouseDown);
+    }
+
+    window.addEventListener("mousedown", handleOutsideMouseDown);
+    
+  }, [optionsModal.display])
+
   // ==== Display and hide thought edit options ====
   const handleThoughtEditOptions = useCallback((e: React.MouseEvent) => {
     const { target } = e;
