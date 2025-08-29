@@ -12,11 +12,11 @@ import ProfileDisplay from "./ProfileDisplay";
 import { useAction, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import LogoutIcon from "@/public/icons/LogoutIcon";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { redirect, useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Thought from "./Thought";
 import { Id } from "@/convex/_generated/dataModel";
-import OptionsModal, { OptionsModalProps } from "./OptionsModal";
+import OptionsModal from "./OptionsModal";
 
 export default function Naviation() {
   const [isPrivate, setIsPrivate] = useState(true);
@@ -24,20 +24,43 @@ export default function Naviation() {
   const thoughts = useQuery(api.thoughts.getUserThoughts, { isPrivate });
   const signOut = useAction(api.auth.signOut);
   const router = useRouter();
-  const [optionsModal, setOptionsModal] = useState<OptionsModalProps>({
-    display: false, x: 0, y: 0,
-    thoughtId: "" as Id<"thoughts">
+  const [optionsModal, setOptionsModal] = useState({
+    display: false, y: 0,
   });
+
+  const currentThoughtId = useRef<Id<"thoughts">>(null);
 
   useEffect(() => {
     if (currentUser !== undefined && !currentUser) {
-      router.replace("/login")
+      redirect("/login");
     }
   }, [currentUser])
 
-  // ==== Display and hide thought edit options ====
-  const handleThoughtEditOptions = useCallback(() => {
+  const prevThoughtId = useRef<Id<"thoughts">>(null);
+  let modalTimeout:NodeJS.Timeout;
 
+  // ==== Display and hide thought edit options ====
+  const handleThoughtEditOptions = useCallback((e: React.MouseEvent) => {
+    const { target } = e;
+    const svg = target as SVGElement;
+    const button = svg.parentElement?.parentElement;
+    if (!button) return;
+
+    const { top, height } = button.getBoundingClientRect();
+    const prevId = prevThoughtId.current;
+    const currentId = currentThoughtId.current;
+    setOptionsModal((prev) => {
+      return { 
+        display: prevId === currentId || prevId === null ? !prev.display : true, 
+        y: top + (height - 5) 
+      }
+    });
+
+    // reset the prev pos
+    clearTimeout(modalTimeout)
+    modalTimeout = setTimeout(() => {
+      prevThoughtId.current = currentThoughtId.current
+    }, 10)
   }, [])
 
   const handleNewThought = () => {
@@ -88,7 +111,7 @@ export default function Naviation() {
       </div>
 
       {/* Thoughts */}
-      <div className="w-full max-h-[38.5%]">
+      <div className="w-full max-h-[38.5%] overflow-y-scroll">
         <span
           className="block mb-[0.75rem] text-fade-gray">
           Your Thoughts
@@ -104,23 +127,125 @@ export default function Naviation() {
                 label={item.description || "Untitled Thought"} 
                 handleClick={() => {
                   router.replace(`/thoughts/${item._id}`);
-                  setOptionsModal((prev) => {
-                    return {...prev, thoughtId: item._id}
-                  })
+                  currentThoughtId.current = item._id;
                 }} 
-                handleEditClick={() => {
-                  handleThoughtEditOptions();
-                  setOptionsModal((prev) => {
-                    return { ...prev, thoughtId: item._id }
-                  })
+                handleEditClick={(e) => {
+                  currentThoughtId.current = item._id;
+                  handleThoughtEditOptions(e);
                 }} />
             ))
           }
+
+          <Thought 
+            label="Hello"
+            handleClick={() => {}}
+            handleEditClick={(e) => {
+              handleThoughtEditOptions(e);
+            }}
+          />
+          <Thought 
+            label="Hello"
+            handleClick={() => {}}
+            handleEditClick={(e) => {
+              handleThoughtEditOptions(e);
+            }}
+          />
+          <Thought 
+            label="Hello"
+            handleClick={() => {}}
+            handleEditClick={(e) => {
+              handleThoughtEditOptions(e);
+            }}
+          />
+          <Thought 
+            label="Hello"
+            handleClick={() => {}}
+            handleEditClick={(e) => {
+              handleThoughtEditOptions(e);
+            }}
+          />
+          <Thought 
+            label="Hello"
+            handleClick={() => {}}
+            handleEditClick={(e) => {
+              handleThoughtEditOptions(e);
+            }}
+          />
+          <Thought 
+            label="Hello"
+            handleClick={() => {}}
+            handleEditClick={(e) => {
+              handleThoughtEditOptions(e);
+            }}
+          />
+          <Thought 
+            label="Hello"
+            handleClick={() => {}}
+            handleEditClick={(e) => {
+              handleThoughtEditOptions(e);
+            }}
+          />
+          <Thought 
+            label="Hello"
+            handleClick={() => {}}
+            handleEditClick={(e) => {
+              handleThoughtEditOptions(e);
+            }}
+          />
+          <Thought 
+            label="Hello"
+            handleClick={() => {}}
+            handleEditClick={(e) => {
+              handleThoughtEditOptions(e);
+            }}
+          />
+          <Thought 
+            label="Hello"
+            handleClick={() => {}}
+            handleEditClick={(e) => {
+              handleThoughtEditOptions(e);
+            }}
+          />
+          <Thought 
+            label="Hello"
+            handleClick={() => {}}
+            handleEditClick={(e) => {
+              handleThoughtEditOptions(e);
+            }}
+          />
+          <Thought 
+            label="Hello"
+            handleClick={() => {}}
+            handleEditClick={(e) => {
+              handleThoughtEditOptions(e);
+            }}
+          />
+          <Thought 
+            label="Hello"
+            handleClick={() => {}}
+            handleEditClick={(e) => {
+              handleThoughtEditOptions(e);
+            }}
+          />
+          <Thought 
+            label="Hello"
+            handleClick={() => {}}
+            handleEditClick={(e) => {
+              handleThoughtEditOptions(e);
+            }}
+          />
+          <Thought 
+            label="Hello"
+            handleClick={() => {}}
+            handleEditClick={(e) => {
+              handleThoughtEditOptions(e);
+            }}
+          />
         </div>
       </div>
 
       {/* ==== Options Modal ==== */}
-      <OptionsModal {...optionsModal} />
+      <OptionsModal {...optionsModal} thoughtId={currentThoughtId.current as Id<"thoughts">} />
 
       {/* Shared Thoughts */}
       <div className="w-full max-h-[14%] mt-[2.5rem]">

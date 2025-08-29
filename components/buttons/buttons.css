@@ -4,7 +4,8 @@ button.my-classicButton path {
 
 button.my-authProviderButton,
 button.my-noBgButton,
-button.my-classicButton {
+button.my-classicButton,
+button.my-optionsModalBtn {
   transition: transform 400ms ease-out, 
   background 250ms linear, color 200ms linear;
 }
@@ -88,4 +89,14 @@ button.my-navMenuButton:hover {
 .my-nav-ind-button[data-disable="false"] {
   pointer-events: all;
   opacity: 1;
+}
+
+
+/* Options modal button for the dashboard navigation */
+button.my-optionsModalBtn:hover {
+  background: var(--gray);
+}
+
+button.my-optionsModalBtn[data-index="3"]:hover {
+  background: var(--accent);
 }

@@ -1,8 +1,13 @@
+"use client";
+
 import { Id } from "@/convex/_generated/dataModel";
 import DeleteIcon from "@/public/icons/DeleteIcon";
 import EditIcon from "@/public/icons/EditIcon";
 import ShareIcon from "@/public/icons/ShareIcon";
-import { useCallback, useEffect, useMemo } from "react";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { useCallback, useEffect, useMemo, useRef } from "react";
+import { easeInOutCubic } from "../buttons/TabButton";
 
 type OptionItem = {
   label: string;
@@ -11,14 +16,44 @@ type OptionItem = {
 }
 
 
-export interface OptionsModalProps {
+interface OptionsModalProps {
   thoughtId: Id<"thoughts">;
   display: boolean;
-  x: number;
   y: number;
 }
 
-export default function OptionsModal({ thoughtId, x, y, display }: OptionsModalProps) {
+export default function OptionsModal({ 
+  thoughtId, y, display }: OptionsModalProps
+) {
+  const mainRef = useRef(null);
+  const firstCall = useRef(true);
+
+  useGSAP(() => {
+    const main = mainRef.current;
+
+    if (display) {
+      gsap.set(main, { opacity: 1, pointerEvents: "all"})
+
+      // make the modal animate from a 20px offset
+      if (firstCall.current) {
+        gsap.set(main, {top: y + 20 + "px"});
+      }
+
+
+      gsap.to(main, {
+        top: y + "px",
+        duration: .25,
+        ease: easeInOutCubic 
+      })
+
+      firstCall.current = false;
+    } else {
+      gsap.set(main, {opacity: 0, pointerEvents: "none"});
+      firstCall.current = true;
+    }
+
+
+  }, {scope: mainRef, dependencies: [y, display]})
 
   const handleShare = useCallback((thoughtId: Id<"thoughts">) => {
     console.log("share clicked")
@@ -52,15 +87,17 @@ export default function OptionsModal({ thoughtId, x, y, display }: OptionsModalP
 
   return (
     <div
+      ref={mainRef}
       className="
-        absolute top-0 right-0 w-[9.375rem] p-[0.75rem] bg-myWhite border border-myGray z-10 translate-x-[60%]
+        absolute top-0 right-0 w-[9.375rem] p-[0.75rem] bg-myWhite border border-myGray z-10 translate-x-[60%] opacity-0 pointer-events-none
         rounded-[15px] flex flex-col">
       {
         optionsItems.map(({ label, icon: Icon, handleClick }, i) => (
           <span key={`options_${i}`}>
           <button
-            className="
-              w-full py-[0.375rem] px-1 flex gap-x-1 items-center h-[2.25rem]
+              data-index={i + 1}
+              className="my-optionsModalBtn
+              w-full py-[0.375rem] px-1 flex gap-x-1 items-center h-[2.25rem] rounded-[6px]
             "
             onClick={() => handleClick(thoughtId)}>
             <Icon />
