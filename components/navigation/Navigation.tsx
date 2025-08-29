@@ -13,10 +13,51 @@ import { useAction, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import LogoutIcon from "@/public/icons/LogoutIcon";
 import { redirect, useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import Thought from "./Thought";
 import { Id } from "@/convex/_generated/dataModel";
 import OptionsModal from "./OptionsModal";
+import { ThoughtId } from "../app.models";
+
+
+
+type ModalState = {
+  display: boolean;
+  y: number;
+  isEditing: ThoughtId
+}
+
+export type ModalActions = 
+| {type: "TOGGLE_DISPLAY", value: boolean}
+| {type: "SET_EDITING", thoughtId: ThoughtId}
+| {type: "SET_POS", pos: number};
+
+const initialState:ModalState = {
+  display: false,
+  y: 0,
+  isEditing: "" as ThoughtId
+}
+
+// modal state reducer
+const modalReducer = (state: ModalState, action: ModalActions) => {
+  switch(action.type) {
+    case "TOGGLE_DISPLAY":
+      return {
+        ...state,
+        display: action.value
+      } as ModalState;
+    case "SET_POS":
+      return {
+        ...state,
+        y: action.pos
+      } as ModalState;
+    case "SET_EDITING":
+      return {
+        ...state,
+        isEditing: action.thoughtId
+      } as ModalState;
+  }
+}
 
 export default function Naviation() {
   const [isPrivate, setIsPrivate] = useState(true);
@@ -24,11 +65,10 @@ export default function Naviation() {
   const thoughts = useQuery(api.thoughts.getUserThoughts, { isPrivate });
   const signOut = useAction(api.auth.signOut);
   const router = useRouter();
-  const [optionsModal, setOptionsModal] = useState({
-    display: false, y: 0,
-  });
 
-  const currentThoughtId = useRef<Id<"thoughts">>(null);
+  // modal central state 
+  const [modalState, modalDispath] = useReducer(modalReducer, initialState);
+  const currentThoughtId = useRef<ThoughtId>(null);
 
   useEffect(() => {
     if (currentUser !== undefined && !currentUser) {
@@ -42,15 +82,15 @@ export default function Naviation() {
   // close options modal when the user clicks outside
   useEffect(() => {
     const handleOutsideMouseDown = (e: MouseEvent) => {
-      if (!optionsModal.display) return;
-      setOptionsModal(prev => {return {...prev, display: false}});
-
+      if (!modalState.display) return;
+      modalDispath({type: "TOGGLE_DISPLAY", value: false});
+      // clearn up event listener
       return window.removeEventListener("mousedown", handleOutsideMouseDown);
     }
 
     window.addEventListener("mousedown", handleOutsideMouseDown);
     
-  }, [optionsModal.display])
+  }, [modalState.display])
 
   // ==== Display and hide thought edit options ====
   const handleThoughtEditOptions = useCallback((e: React.MouseEvent) => {
@@ -62,19 +102,20 @@ export default function Naviation() {
     const { top, height } = button.getBoundingClientRect();
     const prevId = prevThoughtId.current;
     const currentId = currentThoughtId.current;
-    setOptionsModal((prev) => {
-      return { 
-        display: prevId === currentId || prevId === null ? !prev.display : true, 
-        y: top + (height - 5) 
-      }
-    });
+    
+    modalDispath({ 
+      type: "TOGGLE_DISPLAY", 
+      value: prevId === currentId || prevId === null ? !modalState.display : true 
+    })
+    
+    modalDispath({type: "SET_POS", pos: top + height});
 
     // reset the prev pos
     clearTimeout(modalTimeout)
     modalTimeout = setTimeout(() => {
-      prevThoughtId.current = currentThoughtId.current
+      prevThoughtId.current = currentThoughtId.current;
     }, 10)
-  }, [])
+  }, [modalState])
 
   const handleNewThought = () => {
     router.replace("/thoughts/new");
@@ -128,8 +169,8 @@ export default function Naviation() {
         className="w-full max-h-[38.5%] overflow-y-scroll" 
         onScroll={(e) => {
           // hide modal on scroll
-          if (!optionsModal.display) return
-          setOptionsModal((prev) => { return {...prev, display: false} });
+          if (!modalState.display) return
+          modalDispath({type: "TOGGLE_DISPLAY", value: false});
           }}>
 
         <span
@@ -143,8 +184,9 @@ export default function Naviation() {
             thoughts && thoughts.slice().reverse().map((item, i) => (
               <Thought 
                 key={"thought_" + i} 
-                fresh={item._creationTime > (Date.now() - 300000)} 
-                label={item.description || "Untitled Thought"} 
+                thought={item}
+                editing={modalState.isEditing === item._id}
+                modalDispath={modalDispath}
                 handleClick={() => {
                   router.replace(`/thoughts/${item._id}`);
                   currentThoughtId.current = item._id;
@@ -159,7 +201,10 @@ export default function Naviation() {
       </div>
 
       {/* ==== Options Modal ==== */}
-      <OptionsModal {...optionsModal} thoughtId={currentThoughtId.current as Id<"thoughts">} />
+      <OptionsModal 
+        display={modalState.display} y={modalState.y}
+        thoughtId={currentThoughtId.current as ThoughtId} 
+        modalDispath={modalDispath} />
 
       {/* Shared Thoughts */}
       <div className="w-full max-h-[14%] mt-[2.5rem]">

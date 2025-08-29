@@ -1,4 +1,4 @@
-import { Doc } from "@/convex/_generated/dataModel";
+import { Doc, Id } from "@/convex/_generated/dataModel";
 
 // Icon models
 export interface Icon {
@@ -16,6 +16,7 @@ export type ThoghtDocument = Doc<"thought_documents">;
 
 // thoughts
 export type Thought = Doc<"thoughts">;
+export type ThoughtId = Id<"thoughts">;
 
 // versions
 export type Version = Doc<"versions">;

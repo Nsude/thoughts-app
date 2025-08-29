@@ -149,3 +149,24 @@ export const deleleThought = mutation({
     await ctx.db.delete(thoughtId);
   }
 })
+
+// rename a thought 
+export const renameThought = mutation({
+  args: {
+    newTitle: v.string(),
+    thoughtId: v.id("thoughts")
+  },
+  handler: async (ctx, {newTitle, thoughtId}) => {
+    const thought = await ctx.db.get(thoughtId);
+    const user = await getCurrentUserHelper(ctx);
+    if (!thought || !user) throw new Error("Thought file does not exist");
+
+    await ctx.db.patch(thoughtId, {
+      description: newTitle,
+      lastModified: {
+        modifiedBy: user._id,
+        date: Date.now()
+      }
+    })
+  }
+})

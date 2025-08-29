@@ -6,10 +6,11 @@ import EditIcon from "@/public/icons/EditIcon";
 import ShareIcon from "@/public/icons/ShareIcon";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { useCallback, useMemo, useRef } from "react";
+import { ActionDispatch, useCallback, useMemo, useRef } from "react";
 import { easeInOutCubic } from "../buttons/TabButton";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { ModalActions } from "./Navigation";
 
 type OptionItem = {
   label: string;
@@ -22,10 +23,11 @@ interface OptionsModalProps {
   thoughtId: Id<"thoughts">;
   display: boolean;
   y: number;
+  modalDispath: ActionDispatch<[action: ModalActions]>
 }
 
 export default function OptionsModal({ 
-  thoughtId, y, display }: OptionsModalProps
+  thoughtId, y, display, modalDispath }: OptionsModalProps
 ) {
   // const {setError} = useErrorContext();
   const deleteThought = useMutation(api.thoughts.deleleThought);
@@ -44,7 +46,6 @@ export default function OptionsModal({
         gsap.set(main, {top: y + 20 + "px"});
       }
 
-
       gsap.to(main, {
         top: y + "px",
         duration: .25,
@@ -57,7 +58,6 @@ export default function OptionsModal({
       firstCall.current = true;
     }
 
-
   }, {scope: mainRef, dependencies: [y, display]})
 
   const handleShare = useCallback((thoughtId: Id<"thoughts">) => {
@@ -66,6 +66,7 @@ export default function OptionsModal({
 
   const handleRename = useCallback((thoughtId: Id<"thoughts">) => {
     console.log("rename clicked");
+    modalDispath({type: "SET_EDITING", thoughtId})
   }, [])
 
   const handleDelete = useCallback(async (thoughtId: Id<"thoughts">) => {
@@ -101,6 +102,7 @@ export default function OptionsModal({
 
   return (
     <div
+      onMouseDown={(e) => e.stopPropagation()}
       ref={mainRef}
       className="
         absolute top-0 right-0 w-[9.375rem] p-[0.75rem] bg-myWhite border border-myGray z-10 translate-x-[60%] opacity-0 pointer-events-none
