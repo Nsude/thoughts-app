@@ -111,7 +111,14 @@ export default function Naviation() {
       </div>
 
       {/* Thoughts */}
-      <div className="w-full max-h-[38.5%] overflow-y-scroll">
+      <div 
+        className="w-full max-h-[38.5%] overflow-y-scroll" 
+        onScroll={(e) => {
+          // hide modal on scroll
+          if (!optionsModal.display) return
+          setOptionsModal((prev) => { return {...prev, display: false} });
+          }}>
+
         <span
           className="block mb-[0.75rem] text-fade-gray">
           Your Thoughts
@@ -135,112 +142,6 @@ export default function Naviation() {
                 }} />
             ))
           }
-
-          <Thought 
-            label="Hello"
-            handleClick={() => {}}
-            handleEditClick={(e) => {
-              handleThoughtEditOptions(e);
-            }}
-          />
-          <Thought 
-            label="Hello"
-            handleClick={() => {}}
-            handleEditClick={(e) => {
-              handleThoughtEditOptions(e);
-            }}
-          />
-          <Thought 
-            label="Hello"
-            handleClick={() => {}}
-            handleEditClick={(e) => {
-              handleThoughtEditOptions(e);
-            }}
-          />
-          <Thought 
-            label="Hello"
-            handleClick={() => {}}
-            handleEditClick={(e) => {
-              handleThoughtEditOptions(e);
-            }}
-          />
-          <Thought 
-            label="Hello"
-            handleClick={() => {}}
-            handleEditClick={(e) => {
-              handleThoughtEditOptions(e);
-            }}
-          />
-          <Thought 
-            label="Hello"
-            handleClick={() => {}}
-            handleEditClick={(e) => {
-              handleThoughtEditOptions(e);
-            }}
-          />
-          <Thought 
-            label="Hello"
-            handleClick={() => {}}
-            handleEditClick={(e) => {
-              handleThoughtEditOptions(e);
-            }}
-          />
-          <Thought 
-            label="Hello"
-            handleClick={() => {}}
-            handleEditClick={(e) => {
-              handleThoughtEditOptions(e);
-            }}
-          />
-          <Thought 
-            label="Hello"
-            handleClick={() => {}}
-            handleEditClick={(e) => {
-              handleThoughtEditOptions(e);
-            }}
-          />
-          <Thought 
-            label="Hello"
-            handleClick={() => {}}
-            handleEditClick={(e) => {
-              handleThoughtEditOptions(e);
-            }}
-          />
-          <Thought 
-            label="Hello"
-            handleClick={() => {}}
-            handleEditClick={(e) => {
-              handleThoughtEditOptions(e);
-            }}
-          />
-          <Thought 
-            label="Hello"
-            handleClick={() => {}}
-            handleEditClick={(e) => {
-              handleThoughtEditOptions(e);
-            }}
-          />
-          <Thought 
-            label="Hello"
-            handleClick={() => {}}
-            handleEditClick={(e) => {
-              handleThoughtEditOptions(e);
-            }}
-          />
-          <Thought 
-            label="Hello"
-            handleClick={() => {}}
-            handleEditClick={(e) => {
-              handleThoughtEditOptions(e);
-            }}
-          />
-          <Thought 
-            label="Hello"
-            handleClick={() => {}}
-            handleEditClick={(e) => {
-              handleThoughtEditOptions(e);
-            }}
-          />
         </div>
       </div>
 
