@@ -15,7 +15,6 @@ export default function SlateStatusDisplay () {
   }, [status])();
 
   useEffect(() => {
-    console.log(status)
     debounceResetStatus();
   }, [status])
 

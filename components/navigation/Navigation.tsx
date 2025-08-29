@@ -13,8 +13,10 @@ import { useAction, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import LogoutIcon from "@/public/icons/LogoutIcon";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Thought from "./Thought";
+import { Id } from "@/convex/_generated/dataModel";
+import OptionsModal, { OptionsModalProps } from "./OptionsModal";
 
 export default function Naviation() {
   const [isPrivate, setIsPrivate] = useState(true);
@@ -22,12 +24,21 @@ export default function Naviation() {
   const thoughts = useQuery(api.thoughts.getUserThoughts, { isPrivate });
   const signOut = useAction(api.auth.signOut);
   const router = useRouter();
+  const [optionsModal, setOptionsModal] = useState<OptionsModalProps>({
+    display: false, x: 0, y: 0,
+    thoughtId: "" as Id<"thoughts">
+  });
 
   useEffect(() => {
     if (currentUser !== undefined && !currentUser) {
       router.replace("/login")
     }
   }, [currentUser])
+
+  // ==== Display and hide thought edit options ====
+  const handleThoughtEditOptions = useCallback(() => {
+
+  }, [])
 
   const handleNewThought = () => {
     router.replace("/thoughts/new");
@@ -83,23 +94,35 @@ export default function Naviation() {
           Your Thoughts
         </span>
 
-        <div className="flex flex-col h-[90%] overflow-y-scroll snap-y slim-scrollbar">
+        <div className="relative flex flex-col h-[90%] overflow-y-scroll snap-y slim-scrollbar">
           {/* Thoughts go here */}
           {
-            thoughts && thoughts.map((item, i) => (
+            thoughts && thoughts.slice().reverse().map((item, i) => (
               <Thought 
                 key={"thought_" + i} 
                 fresh={item._creationTime > (Date.now() - 300000)} 
                 label={item.description || "Untitled Thought"} 
                 handleClick={() => {
                   router.replace(`/thoughts/${item._id}`);
+                  setOptionsModal((prev) => {
+                    return {...prev, thoughtId: item._id}
+                  })
+                }} 
+                handleEditClick={() => {
+                  handleThoughtEditOptions();
+                  setOptionsModal((prev) => {
+                    return { ...prev, thoughtId: item._id }
+                  })
                 }} />
             ))
           }
         </div>
       </div>
 
-      {/* Thoughts */}
+      {/* ==== Options Modal ==== */}
+      <OptionsModal {...optionsModal} />
+
+      {/* Shared Thoughts */}
       <div className="w-full max-h-[14%] mt-[2.5rem]">
         <span className="block mb-[0.75rem] text-fade-gray">Shared</span>
         <div className="flex flex-col h-[95%] overflow-y-scroll snap-y slim-scrollbar reduce-sb-height">
@@ -108,7 +131,9 @@ export default function Naviation() {
       </div>
 
       {/* profile */}
-      <div className="flex bg-myWhite z-[2] items-center absolute border-t border-myGray bottom-0 left-0 w-full h-[4.5rem] p-[0.9375rem] justify-between">
+      <div className="
+        rounded-[20px]
+        flex bg-myWhite z-[2] items-center absolute border-t border-myGray bottom-0 left-0 w-full h-[4.5rem] p-[0.9375rem] justify-between">
         {/* not logged in */}
         <ProfileDisplay
           userName={currentUser?.name?.split(" ")[0] || currentUser?.email || "name"}

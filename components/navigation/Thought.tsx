@@ -5,10 +5,11 @@ import ThreeDotIcon from "@/public/icons/ThreeDotsIcon";
 interface Props {
   fresh?: boolean;
   label: string;
-  handleClick: () => void
+  handleClick: () => void;
+  handleEditClick: (e: React.MouseEvent) => void;
 }
 
-export default function Thought({ label, handleClick, fresh = false}: Props) {
+export default function Thought({ label, handleClick, fresh = false, handleEditClick}: Props) {
   return (
     <div className="snap-start">
       <button
@@ -28,7 +29,9 @@ export default function Thought({ label, handleClick, fresh = false}: Props) {
 
         {
           !fresh &&
-          <span role="button">
+          <span 
+            role="button" 
+            onClick={(e) => {e.stopPropagation(); handleEditClick(e)}} >
             <ThreeDotIcon />
           </span>
         }
