@@ -32,4 +32,4 @@ That said, here are a few concepts to ease that learning curve:
 
 About [NextJS](https://nextjs.org/docs):
 
-- When rendering lists in _NextJS/React_, you probably shouldn't use the index as the key prop because it is very unreliable. If the list is updated in any way that affects the length of the array, that becomes problematic in very weird ways (and ofcourse I didn't make this rookie mistake... just sharing it 🥲).
+- When rendering lists in _NextJS/React_, you probably shouldn't use the index as the key prop, it is quite unreliable. If the list is updated in any way that affects it's length, that becomes problematic in very weird ways (and ofcourse I didn't make this rookie mistake... just sharing it 🥲).
