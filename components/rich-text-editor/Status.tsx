@@ -6,28 +6,28 @@ import LoadingIcon from "@/public/icons/LoadingIcon";
 import { debounce } from "lodash";
 
 export default function SlateStatusDisplay () {
-  const {status, setStatus} = useSlateStatusContext();
+  const {slateStatus, setSlateStatus} = useSlateStatusContext();
 
   const debounceResetStatus = useCallback(() => {
     return debounce(() => {
-      setStatus("idle");
+      setSlateStatus("idle");
     }, 2000)
-  }, [status])();
+  }, [slateStatus])();
 
   useEffect(() => {
     debounceResetStatus();
-  }, [status])
+  }, [slateStatus])
 
-  if (status === "idle") return null;
+  if (slateStatus === "idle") return null;
 
   return (
     <div className="text-dark-gray-label flex items-center gap-x-1 mr-2">
       <span style={{
-        opacity: status === "saved" ? 0 : 1
+        opacity: slateStatus === "saved" ? 0 : 1
       }}> <LoadingIcon /> </span>
       <span style={{
-        color: status === "saved" ? "var(--black)" : ""
-      }}>{status || "Idle"}</span>
+        color: slateStatus === "saved" ? "var(--black)" : ""
+      }}>{slateStatus || "Idle"}</span>
     </div>
   )
 }

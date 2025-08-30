@@ -125,7 +125,7 @@ export const getThoughtWithDocument = query({
   args: {thoughtId: v.id("thoughts")},
   handler: async (ctx, {thoughtId}) => {
     const thought = await ctx.db.get(thoughtId);
-    if (!thought) throw new Error("Thought file does not exist");
+    if (!thought) return;
 
     let document = null;
     if (thought.coreThought) {
@@ -144,7 +144,7 @@ export const deleleThought = mutation({
   args: {thoughtId: v.id("thoughts")},
   handler: async (ctx, {thoughtId}) => {
     const thought = await ctx.db.get(thoughtId);
-    if (!thought) throw new Error("Thought file does not exist");
+    if (!thought) throw new Error("Delete error, thought file does not exist");
 
     await ctx.db.delete(thoughtId);
   }
@@ -159,7 +159,7 @@ export const renameThought = mutation({
   handler: async (ctx, {newTitle, thoughtId}) => {
     const thought = await ctx.db.get(thoughtId);
     const user = await getCurrentUserHelper(ctx);
-    if (!thought || !user) throw new Error("Thought file does not exist");
+    if (!thought || !user) throw new Error("Rename error, thought file does not exist");
 
     await ctx.db.patch(thoughtId, {
       description: newTitle,

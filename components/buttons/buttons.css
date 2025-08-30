@@ -52,16 +52,10 @@ button.my-navMenuItem {
 }
 
 /* button.my-thoughtItem:hover, */
-button.my-thoughtItem[data-fresh="false"]:hover,
+button.my-thoughtItem:hover,
 button.my-navMenuItem:hover {
   background: var(--gray);
 }
-
-button.my-thoughtItem[data-fresh="true"] {
-  background:
-    linear-gradient(150deg, var(--gray) 78%, var(--accent));
-}
-
 
 /* My Auth Provider Button */
 button.my-authProviderButton:hover {

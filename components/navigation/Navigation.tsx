@@ -13,7 +13,7 @@ import { useAction, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import LogoutIcon from "@/public/icons/LogoutIcon";
 import { redirect, useRouter } from "next/navigation";
-import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import Thought from "./Thought";
 import { Id } from "@/convex/_generated/dataModel";
 import OptionsModal from "./OptionsModal";
@@ -77,26 +77,30 @@ export default function Naviation() {
   }, [currentUser])
 
   const prevThoughtId = useRef<Id<"thoughts">>(null);
-  let modalTimeout:NodeJS.Timeout;
+  let modalTimeout = useRef<NodeJS.Timeout>(null);
+
+  // reverse thoughts array to be last-thought-first display
+  const reversedThoughts = useMemo(() => 
+      thoughts ? thoughts.slice().reverse() : []
+    , [thoughts]);
 
   // close options modal when the user clicks outside
   useEffect(() => {
     const handleOutsideMouseDown = (e: MouseEvent) => {
       if (!modalState.display) return;
-      modalDispath({type: "TOGGLE_DISPLAY", value: false});
-      // clearn up event listener
-      return window.removeEventListener("mousedown", handleOutsideMouseDown);
+      modalDispath({ type: "TOGGLE_DISPLAY", value: false });
     }
 
-    window.addEventListener("mousedown", handleOutsideMouseDown);
-    
+    if (modalState.display) {
+      window.addEventListener("mousedown", handleOutsideMouseDown);
+      return () => window.removeEventListener("mousedown", handleOutsideMouseDown);
+    }
   }, [modalState.display])
 
   // ==== Display and hide thought edit options ====
   const handleThoughtEditOptions = useCallback((e: React.MouseEvent) => {
-    const { target } = e;
-    const svg = target as SVGElement;
-    const button = svg.parentElement?.parentElement;
+    const target = e.target as HTMLElement;
+    const button = target.closest("button");
     if (!button) return;
 
     const { top, height } = button.getBoundingClientRect();
@@ -111,8 +115,8 @@ export default function Naviation() {
     modalDispath({type: "SET_POS", pos: top + height});
 
     // reset the prev pos
-    clearTimeout(modalTimeout)
-    modalTimeout = setTimeout(() => {
+    if (modalTimeout.current) clearTimeout(modalTimeout.current);
+    modalTimeout.current = setTimeout(() => {
       prevThoughtId.current = currentThoughtId.current;
     }, 10)
   }, [modalState])
@@ -181,9 +185,9 @@ export default function Naviation() {
         <div className="relative flex flex-col h-[90%] overflow-y-scroll snap-y slim-scrollbar">
           {/* Thoughts go here */}
           {
-            thoughts && thoughts.slice().reverse().map((item, i) => (
+            reversedThoughts.map((item) => (
               <Thought 
-                key={"thought_" + i} 
+                key={item._id} 
                 thought={item}
                 editing={modalState.isEditing === item._id}
                 modalDispath={modalDispath}

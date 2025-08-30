@@ -112,7 +112,7 @@ export default function SlateEditor({ handleClick, handleValueChange, thoughtId 
   }, [])
 
   const lastSavedContent = useRef<any[]>(null);
-  const {setStatus} = useSlateStatusContext();
+  const {setSlateStatus} = useSlateStatusContext();
 
   // ===== DISPLAY THE RIGHT DOCUMENT =====
   useEffect(() => {
@@ -120,22 +120,24 @@ export default function SlateEditor({ handleClick, handleValueChange, thoughtId 
     const document = thoughtWithDocument?.document;
 
     dispatch({type: "INIT_CONTENT"});
-    setStatus("loading");
+    setSlateStatus("loading");
 
     if (thoughtId === "new") {
       editor.children = initialValue;
       Editor.normalize(editor);
       dispatch({type: "CONTENT_LOADED"});
       lastSavedContent.current = initialValue;
+      
     } else if (document?.content && thoughtId !== "new") {
       handleValueChange(document.content);
       editor.children = document.content;
       Editor.normalize(editor);
+      
       dispatch({type: "CONTENT_LOADED"});
       lastSavedContent.current = document.content;
     }
 
-    setStatus("idle");
+    setSlateStatus("idle");
   }, [thoughtId, thoughtWithDocument?.document?.content])
 
   // ===== AUTO SAVE =====
@@ -147,7 +149,7 @@ export default function SlateEditor({ handleClick, handleValueChange, thoughtId 
       if (!hasContentChanged(lastSavedContent.current, content)) return;
 
       dispatch({type: "SAVE_START"});
-      setStatus("saving");
+      setSlateStatus("saving");
       
       try {
         await updateThought({
@@ -157,7 +159,7 @@ export default function SlateEditor({ handleClick, handleValueChange, thoughtId 
         })
 
         dispatch({type: "SAVE_SUCCESS"});
-        setStatus("saved");
+        setSlateStatus("saved");
         lastSavedContent.current = content;
       } catch (error) {
         console.error("Error saving content: ", error);
@@ -172,7 +174,7 @@ export default function SlateEditor({ handleClick, handleValueChange, thoughtId 
     if (contentLength < 10) return;
 
     dispatch({type: "CREATING_THOUGHT"});
-    setStatus("saving");
+    setSlateStatus("saving");
 
     try {
       const newThoughtId = await createThought({isPrivate: true});
@@ -191,10 +193,10 @@ export default function SlateEditor({ handleClick, handleValueChange, thoughtId 
       // update last saved ref
       lastSavedContent.current = content;
       router.replace(`/thoughts/${newThoughtId}`);
-      setStatus("saved");
+      setSlateStatus("saved");
     } catch (error) {
       console.error("Error creating new thought: ", error);
-      setStatus("error");
+      setSlateStatus("error");
     }
   }, [thoughtId, router])
 

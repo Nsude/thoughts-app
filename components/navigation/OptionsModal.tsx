@@ -11,6 +11,7 @@ import { easeInOutCubic } from "../buttons/TabButton";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { ModalActions } from "./Navigation";
+import { useRouter } from "next/navigation";
 
 type OptionItem = {
   label: string;
@@ -29,11 +30,11 @@ interface OptionsModalProps {
 export default function OptionsModal({ 
   thoughtId, y, display, modalDispath }: OptionsModalProps
 ) {
-  // const {setError} = useErrorContext();
   const deleteThought = useMutation(api.thoughts.deleleThought);
 
   const mainRef = useRef(null);
   const firstCall = useRef(true);
+  const router = useRouter();
 
   useGSAP(() => {
     const main = mainRef.current;
@@ -61,22 +62,23 @@ export default function OptionsModal({
   }, {scope: mainRef, dependencies: [y, display]})
 
   const handleShare = useCallback((thoughtId: Id<"thoughts">) => {
-    console.log("share clicked");
   }, [])
 
   const handleRename = useCallback((thoughtId: Id<"thoughts">) => {
-    console.log("rename clicked");
     modalDispath({type: "SET_EDITING", thoughtId})
+    modalDispath({type: "TOGGLE_DISPLAY", value: false})
   }, [])
 
   const handleDelete = useCallback(async (thoughtId: Id<"thoughts">) => {
-    console.log("delete clicked");
-
     try {
-      await deleteThought({
-        thoughtId
-      })
-      console.log("thought deleted")
+      const displayedThoughtId = location.href.split("/thoughts/")[1];
+      const isDisplayed = displayedThoughtId === thoughtId;
+      await deleteThought({thoughtId});
+      modalDispath({ type: "TOGGLE_DISPLAY", value: false })
+
+      // navigate to new thought
+      if (isDisplayed) router.replace("/thoughts/new");
+
     } catch (error) {
       console.error("Error deleting thought: ", error);
     }
