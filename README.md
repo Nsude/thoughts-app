@@ -25,3 +25,11 @@ About [Convex](https://docs.convex.dev)
 About [Slate](https://docs.slatejs.org):
 
 As opposed to other rich text editors, _slate_ provides a more flexible approach, they provide you with the tools you need to build whatever, it's then up to you what you do with them. This ofcourse is a gift and a curse as it has a bit of a learning curve, but it's relatively well documented and once you get a grasp of the concepts, it's incredibly easy to work with.
+
+That said, here are a few concepts to ease that learning curve:
+
+---
+
+About [NextJS](https://nextjs.org/docs):
+
+- When rendering lists in _NextJS/React_, you probably shouldn't use the index as the key prop because it is very unreliable. If the list is updated in any way that affects the length of the array, that becomes problematic in very weird ways (and ofcourse I didn't make this rookie mistake... just sharing it 🥲).
