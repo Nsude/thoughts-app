@@ -1,6 +1,7 @@
 import ClassicButton from "@/components/buttons/ClassicButton";
 import SlateStatusContextProvider from "@/components/contexts/SlateStatusContext";
 import Naviation from "@/components/navigation/Navigation";
+import Versions from "@/components/versions/Versions";
 import NotificationIcon from "@/public/icons/NotificationIcon";
 import ShareIcon from "@/public/icons/ShareIcon";
 
@@ -26,7 +27,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </div>
 
       {/* version indicator */}
-      <div className="absolute"></div>
+      <div className="absolute right-[1.5rem] top-[10rem]">
+        <Versions />
+      </div>
     </div>
   )
 }

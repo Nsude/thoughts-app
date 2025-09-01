@@ -81,13 +81,13 @@ export const setCoreThought = mutation({
     coreThought: v.id("thought_documents")
   },
   handler: async (ctx, {thoughtId, coreThought}) => {
-    const thought = await ctx.db.get(thoughtId);
-    if (!thought) throw new Error("Thought file does not exist");
-
-    const user = await getCurrentUserHelper(ctx);
-    if (!user) return;
-
     try {
+      const thought = await ctx.db.get(thoughtId);
+      if (!thought) throw new Error("Core thought error: Thought file does not exist");
+  
+      const user = await getCurrentUserHelper(ctx);
+      if (!user) throw new Error("Auth error: user not signed in");
+
       ctx.db.patch(thoughtId, {
         coreThought,
         lastModified: {
@@ -96,7 +96,7 @@ export const setCoreThought = mutation({
         }
       })
     } catch (error) {
-      console.error("Error setting core thought", error);
+      console.error(error);
     }
   }
 })
@@ -105,18 +105,22 @@ export const setCoreThought = mutation({
 export const getUserThoughts = query({
   args: {isPrivate: v.boolean()},
   handler: async (ctx, {isPrivate}) => {
-    const user = await getCurrentUserHelper(ctx);
-    if (!user) throw new Error("this user is not signed in");
-
-    let thoughts = await ctx.db
-      .query("thoughts")
-      .withIndex("by_owner", (q) => q.eq("owner", user._id))
-      .filter((q) => q.eq(q.field("isPrivate"), isPrivate))
-      .collect();
-
-    if (!thoughts) return [];
-
-    return thoughts;
+    try {
+      const user = await getCurrentUserHelper(ctx);
+      if (!user) throw new Error("this user is not signed in");
+  
+      let thoughts = await ctx.db
+        .query("thoughts")
+        .withIndex("by_owner", (q) => q.eq("owner", user._id))
+        .filter((q) => q.eq(q.field("isPrivate"), isPrivate))
+        .collect();
+  
+      if (!thoughts) return [];
+  
+      return thoughts;
+    } catch (error) {
+      console.error("Error fetching thoughts: ", error);
+    }
   }
 }) 
 
@@ -143,10 +147,14 @@ export const getThoughtWithDocument = query({
 export const deleleThought = mutation({
   args: {thoughtId: v.id("thoughts")},
   handler: async (ctx, {thoughtId}) => {
-    const thought = await ctx.db.get(thoughtId);
-    if (!thought) throw new Error("Delete error, thought file does not exist");
-
-    await ctx.db.delete(thoughtId);
+    try {   
+      const thought = await ctx.db.get(thoughtId);
+      if (!thought) throw new Error("Delete error, thought file does not exist");
+  
+      await ctx.db.delete(thoughtId);
+    } catch (error) {
+      console.error(error) ;
+    }
   }
 })
 
@@ -157,16 +165,20 @@ export const renameThought = mutation({
     thoughtId: v.id("thoughts")
   },
   handler: async (ctx, {newTitle, thoughtId}) => {
-    const thought = await ctx.db.get(thoughtId);
-    const user = await getCurrentUserHelper(ctx);
-    if (!thought || !user) throw new Error("Rename error, thought file does not exist");
-
-    await ctx.db.patch(thoughtId, {
-      description: newTitle,
-      lastModified: {
-        modifiedBy: user._id,
-        date: Date.now()
-      }
-    })
+    try {
+      const thought = await ctx.db.get(thoughtId);
+      const user = await getCurrentUserHelper(ctx);
+      if (!thought || !user) throw new Error("Rename error, thought file does not exist");
+  
+      await ctx.db.patch(thoughtId, {
+        description: newTitle,
+        lastModified: {
+          modifiedBy: user._id,
+          date: Date.now()
+        }
+      })
+    } catch (error) {
+      console.error(error);
+    }
   }
 })

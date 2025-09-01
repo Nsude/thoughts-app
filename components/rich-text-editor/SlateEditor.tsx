@@ -12,11 +12,17 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useRouter } from "next/navigation";
 import { debounce } from "lodash";
 import { SlateStatusTypes, useSlateStatusContext } from "../contexts/SlateStatusContext";
+import { BlockType } from "./slate";
 
 interface Props {
   handleClick?: () => void;
-  handleValueChange: (value: any[]) => void;
+  handleValueChange: (
+    value: any[], 
+    checkIsBlockSlashOnly: (editor: Editor) => boolean, 
+    editor: Editor
+  ) => void;
   thoughtId: Id<"thoughts">
+  handleBlockTypeChange: (blockType: BlockType, isBlockEmpty: boolean, headingLevel?: number) => void;
 }
 
 // central state 
@@ -27,14 +33,14 @@ type EditorState = {
 }
 
 // all editor actions
-type EditorAction = 
-| {type: "INIT_CONTENT"}
-| {type: "CONTENT_LOADED"}
-| {type: "CREATING_THOUGHT"}
-| {type: "SAVE_START"}
-| {type: "SAVE_SUCCESS"};
+type EditorAction =
+  | { type: "INIT_CONTENT" }
+  | { type: "CONTENT_LOADED" }
+  | { type: "CREATING_THOUGHT" }
+  | { type: "SAVE_START" }
+  | { type: "SAVE_SUCCESS" };
 
-const initialState:EditorState = {
+const initialState: EditorState = {
   status: "idle",
   isInitialised: false,
   isCreatingThought: false
@@ -42,7 +48,7 @@ const initialState:EditorState = {
 
 // central reducer
 const editorReducer = (state: EditorState, action: EditorAction) => {
-  switch(action.type) {
+  switch (action.type) {
     case "INIT_CONTENT":
       return {
         ...state,
@@ -76,7 +82,7 @@ const editorReducer = (state: EditorState, action: EditorAction) => {
 }
 
 // function to get the length of the charactes on the page not counting spaces
-const getContentLength = (content: any[]):number => {
+const getContentLength = (content: any[]): number => {
   if (!content || content.length === 0) return 0;
 
   return content.reduce((total, node) => {
@@ -89,13 +95,76 @@ const getContentLength = (content: any[]):number => {
   }, 0)
 }
 
+// function to get current block type
+const getCurrentBlockType = (editor: Editor) => {
+  const [match] = Editor.nodes(editor, {
+    match: n => Element.isElement(n) && Editor.isBlock(editor, n),
+  });
+
+  if (match) {
+    const [node] = match;
+    return Element.isElement(node) ? node.type : 'paragraph';
+  }
+  return 'paragraph';
+};
+
+// function to get heading level
+const getCurrentHeadingLevel = (editor: Editor) => {
+  const [match] = Editor.nodes(editor, {
+    match: n => Element.isElement(n) && n.type === 'heading',
+  });
+
+  if (match) {
+    const [node] = match;
+    return Element.isElement(node) ? (node as any).level || 1 : 1;
+  }
+  return 0;
+};
+
+// check if the current block is empty
+const checkIsCurrentBlockEmpty = (editor: Editor):boolean => {
+  const [match] = Editor.nodes(editor, {
+    match: n => Element.isElement(n) && Editor.isBlock(editor, n), 
+    mode: "lowest"
+  })
+  
+  if (!match) return false;
+
+  const [node] = match;
+  return Editor.isEmpty(editor, node as Element);
+}
+
+// check if the block only has a "/"
+const checkIsBlockSlashOnly = (editor: Editor): boolean => {
+  if (!editor.selection) return false;
+
+  // Get current block
+  const [match] = Editor.nodes(editor, {
+    match: n => Element.isElement(n) && Editor.isBlock(editor, n),
+    mode: "lowest"
+  });
+
+  if (!match) return false;
+
+  const [, path] = match;
+
+  // Get the text content of the current block
+  const blockText = Editor.string(editor, Editor.range(editor, path));
+
+  // Remove all spaces and check if only "/" remains
+  const textWithoutSpaces = blockText.replace(/\s/g, '');
+
+  return textWithoutSpaces === '/';
+};
+
 // ==== MAIN EDITOR COMPONENT ====
-export default function SlateEditor({ handleClick, handleValueChange, thoughtId }: Props) {
+export default function SlateEditor({ 
+  handleClick, handleValueChange, thoughtId, handleBlockTypeChange }: Props) {
   const [state, dispatch] = useReducer(editorReducer, initialState);
 
   // editor instance 
-  const editor = useMemo(() => withHistory(withReact(createEditor())), []); 
-  const initialValue: Descendant[] = useMemo(() => [{ type: "paragraph", children: [{ text: "" }]}], []);
+  const editor = useMemo(() => withHistory(withReact(createEditor())), []);
+  const initialValue: Descendant[] = useMemo(() => [{ type: "paragraph", children: [{ text: "" }] }], []);
   const router = useRouter();
 
   // convex mutations and queries
@@ -103,7 +172,7 @@ export default function SlateEditor({ handleClick, handleValueChange, thoughtId 
   const createDocument = useMutation(api.thoughts.createNewDocument);
   const setCoreThought = useMutation(api.thoughts.setCoreThought);
   const updateThought = useMutation(api.thoughts.updateThought);
-  const thoughtWithDocument = useQuery(api.thoughts.getThoughtWithDocument, thoughtId !== "new" ? {thoughtId} : "skip");
+  const thoughtWithDocument = useQuery(api.thoughts.getThoughtWithDocument, thoughtId !== "new" ? { thoughtId } : "skip");
 
   // compare content
   const hasContentChanged = useCallback((oldContent: any[], newContent: any[]) => {
@@ -112,28 +181,28 @@ export default function SlateEditor({ handleClick, handleValueChange, thoughtId 
   }, [])
 
   const lastSavedContent = useRef<any[]>(null);
-  const {setSlateStatus} = useSlateStatusContext();
+  const { setSlateStatus } = useSlateStatusContext();
 
   // ===== DISPLAY THE RIGHT DOCUMENT =====
   useEffect(() => {
     if (state.isInitialised) return;
     const document = thoughtWithDocument?.document;
 
-    dispatch({type: "INIT_CONTENT"});
+    dispatch({ type: "INIT_CONTENT" });
     setSlateStatus("loading");
 
     if (thoughtId === "new") {
       editor.children = initialValue;
       Editor.normalize(editor);
-      dispatch({type: "CONTENT_LOADED"});
+      dispatch({ type: "CONTENT_LOADED" });
       lastSavedContent.current = initialValue;
-      
+
     } else if (document?.content && thoughtId !== "new") {
-      handleValueChange(document.content);
+      handleValueChange(document.content, checkIsBlockSlashOnly, editor);
       editor.children = document.content;
       Editor.normalize(editor);
-      
-      dispatch({type: "CONTENT_LOADED"});
+
+      dispatch({ type: "CONTENT_LOADED" });
       lastSavedContent.current = document.content;
     }
 
@@ -145,12 +214,12 @@ export default function SlateEditor({ handleClick, handleValueChange, thoughtId 
     return debounce(async (content: any[]) => {
       const document = thoughtWithDocument?.document;
       if (!document || !lastSavedContent.current) return;
-      
+
       if (!hasContentChanged(lastSavedContent.current, content)) return;
 
-      dispatch({type: "SAVE_START"});
+      dispatch({ type: "SAVE_START" });
       setSlateStatus("saving");
-      
+
       try {
         await updateThought({
           newContent: content,
@@ -158,13 +227,13 @@ export default function SlateEditor({ handleClick, handleValueChange, thoughtId 
           thoughtId
         })
 
-        dispatch({type: "SAVE_SUCCESS"});
+        dispatch({ type: "SAVE_SUCCESS" });
         setSlateStatus("saved");
         lastSavedContent.current = content;
       } catch (error) {
         console.error("Error saving content: ", error);
       }
-      
+
     }, 3000)
   }, [thoughtId, thoughtWithDocument?.document?._id, hasContentChanged])
 
@@ -173,11 +242,11 @@ export default function SlateEditor({ handleClick, handleValueChange, thoughtId 
     const contentLength = getContentLength(content);
     if (contentLength < 10) return;
 
-    dispatch({type: "CREATING_THOUGHT"});
+    dispatch({ type: "CREATING_THOUGHT" });
     setSlateStatus("saving");
 
     try {
-      const newThoughtId = await createThought({isPrivate: true});
+      const newThoughtId = await createThought({ isPrivate: true });
       if (!newThoughtId) return;
       // create a document for the thought
       const coreThought = await createDocument({
@@ -187,8 +256,8 @@ export default function SlateEditor({ handleClick, handleValueChange, thoughtId 
       })
 
       // init document as the core thought of the created thought
-      await setCoreThought({coreThought: coreThought, thoughtId: newThoughtId});
-      dispatch({type: "CONTENT_LOADED"});
+      await setCoreThought({ coreThought: coreThought, thoughtId: newThoughtId });
+      dispatch({ type: "CONTENT_LOADED" });
 
       // update last saved ref
       lastSavedContent.current = content;
@@ -204,7 +273,7 @@ export default function SlateEditor({ handleClick, handleValueChange, thoughtId 
   const handleSlateValueChange = useCallback(async (content: any[]) => {
     if (!content) return;
 
-    handleValueChange(content); // call external value change
+    handleValueChange(content, checkIsBlockSlashOnly, editor); // call external value change
 
     if (thoughtId !== "new" && state.isInitialised) {
       await debounceAutosave(content);
@@ -258,7 +327,16 @@ export default function SlateEditor({ handleClick, handleValueChange, thoughtId 
   }
 
   return (
-    <Slate key={thoughtId} editor={editor} initialValue={initialValue} onValueChange={handleSlateValueChange}>
+    <Slate 
+      key={thoughtId} 
+      editor={editor} 
+      initialValue={initialValue} 
+      onValueChange={(e) => {
+        handleSlateValueChange(e); 
+        const blockType = getCurrentBlockType(editor);
+        const headingLevel = blockType === 'heading' ? getCurrentHeadingLevel(editor) : undefined;
+        handleBlockTypeChange(blockType as BlockType, checkIsBlockSlashOnly(editor), headingLevel);
+      }}>
       <SlateNavbar />
       <InlineMenu />
 

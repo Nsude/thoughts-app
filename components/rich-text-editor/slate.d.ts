@@ -1,7 +1,12 @@
 import { BaseEditor } from "slate";
 import { ReactEditor } from "slate-react";
 
-
+export type BlockType = 
+| "heading"
+| "code"
+| "paragraph"
+| "bullet-list"
+| "numbered-list"
 
 export type ParagraphElement = {type: "paragraph", children: CustomText[]};
 export type HeadingElement = {type: "heading", level: 1 | 2 | 3, children: CustomText[]};

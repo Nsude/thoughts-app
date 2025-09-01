@@ -221,7 +221,7 @@ export default function Naviation() {
       {/* profile */}
       <div className="
         rounded-[20px]
-        flex bg-myWhite z-[2] items-center absolute border-t border-myGray bottom-0 left-0 w-full h-[4.5rem] p-[0.9375rem] justify-between">
+        flex bg-myWhite z-[2] items-center absolute border-t border-border-gray/55 bottom-0 left-0 w-full h-[4.5rem] p-[0.9375rem] justify-between">
         {/* not logged in */}
         <ProfileDisplay
           userName={currentUser?.name?.split(" ")[0] || currentUser?.email || "name"}

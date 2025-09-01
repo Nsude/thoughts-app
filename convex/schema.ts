@@ -53,6 +53,7 @@ const schema = defineSchema({
   // ===== VERSIONS =====
   versions: defineTable({
     updatedThought: v.id("thought_documents"),
+    isCore: v.boolean(),
     versionNumber: v.number(),
     thoughtId: v.id("thoughts"),
     changeLabel: v.union(
