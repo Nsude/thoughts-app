@@ -11,9 +11,6 @@ export type AccountTypes = "Freeloader" | "Premium";
 
 export type AuthType = "signUp" | "login";
 
-// thought documents
-export type ThoughtDocument = Doc<"thought_documents">;
-
 // thoughts
 export type Thought = Doc<"thoughts">;
 export type ThoughtId = Id<"thoughts">;

@@ -23,8 +23,7 @@ const schema = defineSchema({
   // ===== THOUGHTS =====
   thoughts: defineTable({
     description: v.optional(v.string()),
-    coreThought: v.optional(v.id("thought_documents")),
-    versions: v.optional(v.array(v.id("versions"))),
+    selectedVersion: v.optional(v.id("versions")), // last displayed version
     isPrivate: v.boolean(),
     collaborators: v.optional(v.array(v.id("users"))),
     lastModified: v.object({
@@ -34,39 +33,26 @@ const schema = defineSchema({
     owner: v.id("users"),
   })
     .index("by_owner", ["owner"])
-    .index("by_owner_lastModified", ["owner", "lastModified.date"])
     .index("by_owner_privacy", ["owner", "isPrivate"]),
-
-  // ===== THOUGHT DOCUMENTS =====
-  thought_documents: defineTable({
-    title: v.string(),
-    thoughtFileId: v.id("thoughts"),
-
-    // raw slate JSON content
-    content: v.any(),
-
-    sourceType: v.optional(v.union(v.literal("audio"), v.literal("text"))),
-  })
-    .index("thoughtFileId", ["thoughtFileId"])
-    .index("title", ["title"]), // for search and auto-complete
 
   // ===== VERSIONS =====
   versions: defineTable({
-    updatedThought: v.id("thought_documents"),
-    isCore: v.boolean(),
-    versionNumber: v.number(),
     thoughtId: v.id("thoughts"),
+    content: v.any(), // raw slate JSON content
+    versionNumber: v.number(),
+    title: v.string(),
     changeLabel: v.union(
       v.literal("Light"),
       v.literal("Mid"),
       v.literal("Heavy")
     ),
-    updatedAt: v.number(),
+    isCore: v.boolean(), // Is this the original/core version?
+    createdAt: v.number(),
     modifiedBy: v.id("users"),
   })
-    .index("updatedThought_date", ["updatedThought", "updatedAt"])
-    .index("updatedThought_version", ["updatedThought", "versionNumber"])
-    .index("modifiedBy", ["modifiedBy"]),
+    // query by thoughtId and versionNumber for returning a specific version
+    .index("by_thought_version", ["thoughtId", "versionNumber"])
+    .index("by_modifiedBy", ["modifiedBy"]),
 });
 
 export default schema;

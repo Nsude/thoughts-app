@@ -167,12 +167,17 @@ export default function SlateEditor({
   const initialValue: Descendant[] = useMemo(() => [{ type: "paragraph", children: [{ text: "" }] }], []);
   const router = useRouter();
 
-  // convex mutations and queries
-  const createThought = useMutation(api.thoughts.createNewThought);
-  const createDocument = useMutation(api.thoughts.createNewDocument);
-  const setCoreThought = useMutation(api.thoughts.setCoreThought);
+  // ===== CONVEX MUTATIONS =====
+  const createThought = useMutation(api.thoughts.createThought);
+  const createVersion = useMutation(api.thoughts.createVersion);
   const updateThought = useMutation(api.thoughts.updateThought);
-  const thoughtWithDocument = useQuery(api.thoughts.getThoughtWithDocument, thoughtId !== "new" ? { thoughtId } : "skip");
+  const setSelectedVersion = useMutation(api.thoughts.setSelectedVersion);
+
+  // ===== CONVEX QUERIES =====
+  const thoughtWithCoreVersion = useQuery(
+    api.thoughts.getThoughtWithCoreVersion, 
+    thoughtId !== "new" ? { thoughtId } : "skip"
+  );
 
   // compare content
   const hasContentChanged = useCallback((oldContent: any[], newContent: any[]) => {
@@ -183,10 +188,10 @@ export default function SlateEditor({
   const lastSavedContent = useRef<any[]>(null);
   const { setSlateStatus } = useSlateStatusContext();
 
-  // ===== DISPLAY THE RIGHT DOCUMENT =====
+  // ===== DISPLAY THE CORE VERSION OF THE SELECTED THOUGHT =====
   useEffect(() => {
     if (state.isInitialised) return;
-    const document = thoughtWithDocument?.document;
+    const coreVersion = thoughtWithCoreVersion?.coreVersion;
 
     dispatch({ type: "INIT_CONTENT" });
     setSlateStatus("loading");
@@ -197,23 +202,22 @@ export default function SlateEditor({
       dispatch({ type: "CONTENT_LOADED" });
       lastSavedContent.current = initialValue;
 
-    } else if (document?.content && thoughtId !== "new") {
-      handleValueChange(document.content, checkIsBlockSlashOnly, editor);
-      editor.children = document.content;
+    } else if (coreVersion?.content && thoughtId !== "new") {
+      handleValueChange(coreVersion.content, checkIsBlockSlashOnly, editor); // external handle change
+      editor.children = coreVersion.content;
       Editor.normalize(editor);
 
       dispatch({ type: "CONTENT_LOADED" });
-      lastSavedContent.current = document.content;
+      lastSavedContent.current = coreVersion.content;
     }
 
     setSlateStatus("idle");
-  }, [thoughtId, thoughtWithDocument?.document?.content])
+  }, [thoughtId, thoughtWithCoreVersion?.coreVersion.content])
 
   // ===== AUTO SAVE =====
   const debounceAutosave = useMemo(() => {
     return debounce(async (content: any[]) => {
-      const document = thoughtWithDocument?.document;
-      if (!document || !lastSavedContent.current) return;
+      if (!lastSavedContent.current) return;
 
       if (!hasContentChanged(lastSavedContent.current, content)) return;
 
@@ -223,7 +227,6 @@ export default function SlateEditor({
       try {
         await updateThought({
           newContent: content,
-          documentId: document._id,
           thoughtId
         })
 
@@ -235,10 +238,10 @@ export default function SlateEditor({
       }
 
     }, 3000)
-  }, [thoughtId, thoughtWithDocument?.document?._id, hasContentChanged])
+  }, [thoughtId, thoughtWithCoreVersion?.coreVersion?._id, hasContentChanged])
 
   // ===== CREATE A NEW THOUGHT =====
-  const handleNewThought = useCallback(async (content: any[]) => {
+  const handleCreateThought = useCallback(async (content: any[]) => {
     const contentLength = getContentLength(content);
     if (contentLength < 10) return;
 
@@ -248,21 +251,29 @@ export default function SlateEditor({
     try {
       const newThoughtId = await createThought({ isPrivate: true });
       if (!newThoughtId) return;
-      // create a document for the thought
-      const coreThought = await createDocument({
-        title: "Untitled Thought",
-        thoughtFileId: newThoughtId,
-        content
+
+      // create the core version for the thought
+      const versionId = await createVersion({
+        thoughtId: newThoughtId,
+        content,
+        versionNumber: 1,
+        isCore: true,
+        createdAt: Date.now()
       })
 
-      // init document as the core thought of the created thought
-      await setCoreThought({ coreThought: coreThought, thoughtId: newThoughtId });
-      dispatch({ type: "CONTENT_LOADED" });
+      if (!versionId) return;
+
+      // set the selected version to the only version as it stands
+      await setSelectedVersion({
+        thoughtId: newThoughtId,
+        selectedVersion: versionId
+      })
 
       // update last saved ref
       lastSavedContent.current = content;
       router.replace(`/thoughts/${newThoughtId}`);
       setSlateStatus("saved");
+
     } catch (error) {
       console.error("Error creating new thought: ", error);
       setSlateStatus("error");
@@ -282,11 +293,11 @@ export default function SlateEditor({
     if (state.isCreatingThought) return;
 
     if (thoughtId === "new") {
-      await handleNewThought(content);
+      await handleCreateThought(content);
     }
 
 
-  }, [handleValueChange, handleNewThought, thoughtId, state.isInitialised, state.isCreatingThought])
+  }, [handleValueChange, handleCreateThought, thoughtId, state.isInitialised, state.isCreatingThought])
 
   // render the selected element type
   const renderElement = useCallback((props: RenderElementProps) => {

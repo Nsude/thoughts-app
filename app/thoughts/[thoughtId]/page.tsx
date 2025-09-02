@@ -54,7 +54,13 @@ export default function ThoughtDocument({params}: {params: Promise<{thoughtId: I
     console.log("triggered")
     // headerPlaceHolder.current = {y: top, level};
     setHeaderPlaceholder({y: top, level});
-  }, [])
+  }, []);
+
+
+  // handle add versions
+  const handleAddVersion = () => {
+    console.log("version added")
+  }
 
   return (
     <div>
@@ -73,8 +79,12 @@ export default function ThoughtDocument({params}: {params: Promise<{thoughtId: I
             <h3 className="text-title text-fade-gray">Core</h3>
             <span className="flex items-center gap-x-1.5">
               <SlateStatusDisplay />
+
+              {/* refine idea button */}
               <ClassicButton icon={<LogoIcon />} text="Refine" />
-              <ClassicButton icon={<PlusIcon />} />
+
+              {/* add version button */}
+              <ClassicButton icon={<PlusIcon />} handleClick={handleAddVersion}/>
             </span>
           </div>
 
@@ -98,10 +108,7 @@ export default function ThoughtDocument({params}: {params: Promise<{thoughtId: I
               style={{
                 opacity: headerPlaceHolder ? 1 : 0,
                 top: headerPlaceHolder?.y + "px",
-                fontSize: getHeaderFontSizeAndLevel()?.fontSize,
-                // transform: `translateX(${
-                //   getHeaderFontSizeAndLevel()?.level === 1 ? 1.6 : 1.3
-                // }rem)`
+                fontSize: getHeaderFontSizeAndLevel()?.fontSize
               }}
               className="fixed mt-1.5 font-extrabold"
             >
