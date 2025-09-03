@@ -56,8 +56,8 @@ export default function SlateEditor({
   const setSelectedVersion = useMutation(api.thoughts.setSelectedVersion);
 
   // ===== CONVEX QUERIES =====
-  const thoughtWithCoreVersion = useQuery(
-    api.thoughts.getThoughtWithCoreVersion, 
+  const selectedVersion = useQuery(
+    api.thoughts.getSelectedVersion, 
     thoughtId !== "new" ? { thoughtId } : "skip"
   );
 
@@ -70,10 +70,10 @@ export default function SlateEditor({
   const lastSavedContent = useRef<any[]>(null);
   const { setSlateStatus } = useSlateStatusContext();
 
-  // ===== DISPLAY THE CORE VERSION OF THE SELECTED THOUGHT =====
+  // ===== DISPLAY THE SELECTED VERSION CONTENT ON FIRST LOAD =====
   useEffect(() => {
     if (state.isInitialised) return;
-    const coreVersion = thoughtWithCoreVersion?.coreVersion;
+    const selectedContent = selectedVersion?.content;
 
     dispatch({ type: "INIT_CONTENT" });
     setSlateStatus("loading");
@@ -84,18 +84,30 @@ export default function SlateEditor({
       dispatch({ type: "CONTENT_LOADED" });
       lastSavedContent.current = initialValue;
 
-    } else if (coreVersion?.content && thoughtId !== "new") {
-      editor.children = coreVersion.content;
+    } else if (selectedContent && thoughtId !== "new") {
+      editor.children = selectedContent;
       Editor.normalize(editor);
       // notify the placeholder state that the editor isn't empty
-      handleSlateValueChange(coreVersion.content); 
+      handleSlateValueChange(selectedContent); 
 
       dispatch({ type: "CONTENT_LOADED" });
-      lastSavedContent.current = coreVersion.content;
+      lastSavedContent.current = selectedContent;
     }
 
     setSlateStatus("idle");
-  }, [thoughtId, thoughtWithCoreVersion?.coreVersion.content])
+  }, [thoughtId, selectedVersion?.content])
+
+  // UPDATE THE DISPLAYED CONTENT ON VERSION SWITCH;
+  useEffect(() => {
+    if (!state.isInitialised || !selectedVersion) return;
+    const selectedContent = selectedVersion.content;
+
+    editor.children = selectedContent;
+    Editor.normalize(editor);
+    handleSlateValueChange(selectedContent);
+    // lastSavedContent.current = selectedContent;
+
+  }, [selectedVersion?._id])
 
   // ===== AUTO SAVE =====
   const debounceAutosave = useMemo(() => {
@@ -120,8 +132,8 @@ export default function SlateEditor({
         console.error("Error saving content: ", error);
       }
 
-    }, 3000)
-  }, [thoughtId, thoughtWithCoreVersion?.coreVersion?._id, hasContentChanged])
+    }, 2000)
+  }, [thoughtId, selectedVersion?._id, hasContentChanged])
 
   // ===== CREATE A NEW THOUGHT =====
   const handleCreateThought = useCallback(async (content: any[]) => {

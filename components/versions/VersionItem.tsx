@@ -22,8 +22,10 @@ const VersionItem = React.memo(function VersionItem({
 
   return (
     <button
+      data-selected={isSelected}
       onClick={(e) => handleClick(e, _id)}
-      style={{ opacity: isSelected ? 1 : .5 }}>
+      style={{ opacity: isSelected ? 1 : .45 }}
+      className="my-versionItem focus:outline-none">
       {
         isCore ?
           <div className="flex items-center gap-0.5">

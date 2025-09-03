@@ -2,6 +2,7 @@ button.my-classicButton path {
   transition: stroke 200ms linear;
 }
 
+button.my-versionItem,
 button.my-authProviderButton,
 button.my-noBgButton,
 button.my-classicButton,
@@ -93,4 +94,10 @@ button.my-optionsModalBtn:hover {
 
 button.my-optionsModalBtn[data-index="3"]:hover {
   background: var(--accent);
+}
+
+
+/* versions */
+button.my-versionItem[data-selected="false"]:hover {
+  opacity: .7 !important;
 }

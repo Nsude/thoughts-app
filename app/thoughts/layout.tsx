@@ -9,29 +9,29 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="relative w-full h-screen flex gap-x-[0.75rem]">
       {/* navigation */}
-      <aside className="
+      <SlateStatusContextProvider>
+        <aside className="
         relative w-[20.5%] min-w-[18.5rem] h-full bg-myWhite rounded-tr-[20px] 
         rounded-br-[20px] border border-border-gray/60 p-[0.9375rem] z-[5]">
-        <Naviation />
-      </aside>
+          <Naviation />
+        </aside>
 
-      {/* content */}
-      <SlateStatusContextProvider>
+        {/* content */}
         <div className="w-full h-full flex justify-center items-center">
           {children}
         </div>
+
+        {/* top-right-buttons */}
+        <div className="absolute top-[0.75rem] right-[1.38rem] w-fit h-fit flex gap-x-[0.38rem]">
+          <ClassicButton icon={<ShareIcon />} text="Share" />
+          <ClassicButton icon={<NotificationIcon />} />
+        </div>
+
+        {/* version indicator */}
+        <div className="absolute right-[1.5rem] top-[10rem]">
+          <Versions />
+        </div>
       </SlateStatusContextProvider>
-
-      {/* top-right-buttons */}
-      <div className="absolute top-[0.75rem] right-[1.38rem] w-fit h-fit flex gap-x-[0.38rem]">
-        <ClassicButton icon={<ShareIcon />} text="Share" />
-        <ClassicButton icon={<NotificationIcon />} />
-      </div>
-
-      {/* version indicator */}
-      <div className="absolute right-[1.5rem] top-[10rem]">
-        <Versions />
-      </div>
     </div>
   )
 }

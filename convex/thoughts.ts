@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getCurrentUserHelper } from "./users";
+import { Id } from "./_generated/dataModel";
 
 // create a new thought
 export const createThought = mutation({
@@ -49,6 +50,19 @@ export const createVersion = mutation({
     } catch (error) {
       console.error(error);
     }
+  }
+})
+
+// get versions
+export const getThoughtVersions = query({
+  args: {thoughtId: v.id("thoughts")},
+  handler: async (ctx, {thoughtId}) => {
+    const versions = await ctx.db
+      .query("versions")
+      .withIndex("by_thought_version", (q) => q.eq("thoughtId", thoughtId))
+      .collect();
+
+    return versions;
   }
 })
 
@@ -133,30 +147,19 @@ export const getUserThoughts = query({
 }) 
 
 // get the selected thought with it's core document
-export const getThoughtWithCoreVersion = query({
+export const getSelectedVersion = query({
   args: {
     thoughtId: v.id("thoughts")
   },
   handler: async (ctx, {thoughtId}) => {
-    try {
-      const thought = await ctx.db.get(thoughtId);
-      if (!thought) throw new Error("Error fetching thought, it does not exist");
-  
-      const coreVersion = await ctx.db
-        .query("versions")
-        .withIndex("by_thought_version", (q) => q.eq("thoughtId", thoughtId).eq("versionNumber", 1))
-        .unique()
-  
-      if (!coreVersion) throw new Error("Core version does not exist");
-      
-      return {
-        ...thought,
-        coreVersion
-      }
-      
-    } catch (error) {
-      console.error(error);
-    }
+    const thought = await ctx.db.get(thoughtId);
+    if (!thought?.selectedVersion) return;
+
+    const versionId = thought.selectedVersion as Id<"versions">
+
+    const selectedVersion = await ctx.db.get(versionId);
+    
+    return selectedVersion;
   }
 })
 

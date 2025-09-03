@@ -2,17 +2,20 @@
 
 import ClassicButton from "@/components/buttons/ClassicButton";
 import TabButton, { easeInOutCubic } from "@/components/buttons/TabButton";
+import { useSlateStatusContext } from "@/components/contexts/SlateStatusContext";
 import { useSlateEditorState } from "@/components/hooks/useSlateEditorState";
 import { PlaceholderDisplay } from "@/components/rich-text-editor/PlaceholderDisplay";
 import { BlockType } from "@/components/rich-text-editor/slate";
 import SlateEditor from "@/components/rich-text-editor/SlateEditor";
 import SlateStatusDisplay from "@/components/rich-text-editor/Status";
+import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import LogoIcon from "@/public/icons/LogoIcon";
 import MicrophoneIcon from "@/public/icons/MicrophoneIcon";
 import PlusIcon from "@/public/icons/PlusIcon";
 import TextIcon from "@/public/icons/TextIcon";
 import { useGSAP } from "@gsap/react";
+import { useMutation, useQuery } from "convex/react";
 import gsap from "gsap";
 import { use, useCallback, useRef, useState } from "react";
 
@@ -21,6 +24,13 @@ export default function ThoughtDocument({params}: {params: Promise<{thoughtId: I
   const {thoughtId} = use(params);
   const placeholderRef = useRef(null);
   const editorState = useSlateEditorState(thoughtId);
+  const {setSlateStatus} = useSlateStatusContext();
+
+  // convex mutations & queries
+  const createVersion = useMutation(api.thoughts.createVersion);
+  const versions = useQuery(api.thoughts.getThoughtVersions, 
+    thoughtId !== "new" ? {thoughtId} : "skip"
+  );
 
   // Single handler for all editor changes
   const handleEditorChange = useCallback((newState: {
@@ -54,8 +64,25 @@ export default function ThoughtDocument({params}: {params: Promise<{thoughtId: I
 
 
   // handle add versions
-  const handleAddVersion = () => {
-    console.log("version added")
+  const handleAddVersion = async () => {
+    setSlateStatus("loading");
+
+    try {
+      if (!versions) throw new Error("versions is undefined");
+
+      await createVersion({
+        thoughtId,
+        content: editorState.content,
+        versionNumber: versions.length + 1,
+        isCore: false,
+        createdAt: Date.now()
+      })
+
+      setSlateStatus("saved");
+    } catch (error) {
+      setSlateStatus("error");
+      console.error(error);
+    }
   }
 
   return (
