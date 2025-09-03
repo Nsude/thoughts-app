@@ -7,7 +7,7 @@ export const useSlateEditorState = (thoughtId: Id<"thoughts">) => {
   const [content, setContent] = useState<any[]>([]);
   const [currentBlock, setCurrentBlock] = useState({
     type: "paragraph" as BlockType,
-    isEmpty: true,
+    isEmpty: true, // checks if the entire editor is empty
     isSlashOnly: false,
     headingLevel: 0,
   });

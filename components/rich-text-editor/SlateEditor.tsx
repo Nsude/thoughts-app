@@ -167,11 +167,13 @@ export default function SlateEditor({
   const handleSlateValueChange = useCallback(async (content: any[]) => {
     if (!content) return;
 
+    // set states for useSlateEditorState hook
     const blockType = getCurrentBlockType(editor);
     const isEmpty = editor.children.length === 0;
     const isSlashOnly = checkIsBlockSlashOnly(editor);
     const headingLevel = blockType === 'heading' ? getCurrentHeadingLevel(editor) : 0;
 
+    // call external on change
     onChange({
       content,
       blockType: blockType as BlockType,

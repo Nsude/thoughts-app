@@ -95,8 +95,3 @@ button {
   height: calc(49.75rem - 4.8rem);
   padding-bottom: 1.5625rem;
 }
-
-/* .my-slateContainer ::selection {
-  background-color: var(--color-border-gray);
-  color: var(--black);
-} */

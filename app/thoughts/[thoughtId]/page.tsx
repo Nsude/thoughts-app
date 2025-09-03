@@ -18,10 +18,6 @@ import { use, useCallback, useRef, useState } from "react";
 
 export default function ThoughtDocument({params}: {params: Promise<{thoughtId: Id<"thoughts">}>}) {
   const [tab, setTab] = useState(0);
-  const [isEmpty, setIsEmpty] = useState(true);
-  const [headerPlaceHolder, setHeaderPlaceholder] = useState<{y: number, level: number} | null>(null);
-  
-  // new implementation
   const {thoughtId} = use(params);
   const placeholderRef = useRef(null);
   const editorState = useSlateEditorState(thoughtId);
