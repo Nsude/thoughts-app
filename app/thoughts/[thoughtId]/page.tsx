@@ -26,15 +26,6 @@ export default function ThoughtDocument({params}: {params: Promise<{thoughtId: I
   const placeholderRef = useRef(null);
   const editorState = useSlateEditorState(thoughtId);
 
-
-  // const getHeaderFontSizeAndLevel = () => {
-  //   const level = headerPlaceHolder?.level;
-  //   if (!level) return null;
-
-  //   const fontSize = level === 1 ? "2.5rem" : level === 2 ? "2.25rem" : level === 3 ? "1.75rem" : "";
-  //   return {fontSize, level}
-  // }
-
   // Single handler for all editor changes
   const handleEditorChange = useCallback((newState: {
     content: any[],
@@ -63,21 +54,7 @@ export default function ThoughtDocument({params}: {params: Promise<{thoughtId: I
       ease: easeInOutCubic
     })
 
-  }, {dependencies: [tab]})
-
-  // display message when header block type is selected on an empty paragraph
-  // const onBlockTypeChange = useCallback((blockType: BlockType, isSlashOnly: boolean, level?: number) => {
-  //   if (blockType !== "heading" || !isSlashOnly || !level) return;
-    
-  //   const domSelection = document.getSelection();
-  //   if (!domSelection || !domSelection.isCollapsed) return;
-
-  //   // get the position of the cursor
-  //   const {top} = domSelection.getRangeAt(0).getBoundingClientRect();
-  //   console.log("triggered")
-  //   // headerPlaceHolder.current = {y: top, level};
-  //   setHeaderPlaceholder({y: top, level});
-  // }, []);
+  }, {dependencies: [tab]});
 
 
   // handle add versions
@@ -89,13 +66,13 @@ export default function ThoughtDocument({params}: {params: Promise<{thoughtId: I
     <div>
       <div className="relative">
         <span 
-        className="absolute z-0 h-[49.75rem] w-[40.125rem] rounded-2xl bg-[#DCDCDC] -top-[0.8125rem] left-[1.125rem]" />
+          className="absolute z-0 h-[83vh] w-[40.125rem] rounded-2xl bg-[#DCDCDC] -top-[0.8125rem] left-[1.125rem]" />
         <span 
-        className="absolute -z-1 h-[49.75rem] w-[37.875rem] rounded-2xl bg-[#C9C9C9] -top-[1.625rem] left-[2.25rem]" />
+          className="absolute -z-1 h-[83vh] w-[37.875rem] rounded-2xl bg-[#C9C9C9] -top-[1.625rem] left-[2.25rem]" />
       </div>
 
-      <div className="flex justify-center items-center">
-        <div className="relative h-[49.75rem] w-[42.375rem] bg-myWhite border border-border-gray/60 rounded-2xl pt-[4.6rem]">
+      <div className="flex justify-center items-center h-[83vh]">
+        <div className="relative h-full w-[42.375rem] bg-myWhite border border-border-gray/60 rounded-2xl pt-[4.6rem]">
 
           {/* Header */}
           <div className="absolute top-0 left-0 w-full px-[1.125rem] h-[4.25rem] flex justify-between items-center">

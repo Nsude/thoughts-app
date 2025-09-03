@@ -7,9 +7,11 @@ import ShareIcon from "@/public/icons/ShareIcon";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative w-full h-screen flex gap-x-[0.75rem] p-[0.75rem]">
+    <div className="relative w-full h-screen flex gap-x-[0.75rem]">
       {/* navigation */}
-      <aside className="relative w-[20.5%] min-w-[18.5rem] h-full bg-myWhite rounded-[20px] border border-border-gray/60 p-[0.9375rem] z-[5]">
+      <aside className="
+        relative w-[20.5%] min-w-[18.5rem] h-full bg-myWhite rounded-tr-[20px] 
+        rounded-br-[20px] border border-border-gray/60 p-[0.9375rem] z-[5]">
         <Naviation />
       </aside>
 

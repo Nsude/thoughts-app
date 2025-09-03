@@ -96,7 +96,7 @@ button {
   padding-bottom: 1.5625rem;
 }
 
-.my-slateContainer ::selection {
+/* .my-slateContainer ::selection {
   background-color: var(--color-border-gray);
   color: var(--black);
-}
+} */
