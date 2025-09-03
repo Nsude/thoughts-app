@@ -2,6 +2,8 @@
 
 import ClassicButton from "@/components/buttons/ClassicButton";
 import TabButton, { easeInOutCubic } from "@/components/buttons/TabButton";
+import { useSlateEditorState } from "@/components/hooks/useSlateEditorState";
+import { PlaceholderDisplay } from "@/components/rich-text-editor/PlaceholderDisplay";
 import { BlockType } from "@/components/rich-text-editor/slate";
 import SlateEditor from "@/components/rich-text-editor/SlateEditor";
 import SlateStatusDisplay from "@/components/rich-text-editor/Status";
@@ -18,16 +20,37 @@ export default function ThoughtDocument({params}: {params: Promise<{thoughtId: I
   const [tab, setTab] = useState(0);
   const [isEmpty, setIsEmpty] = useState(true);
   const [headerPlaceHolder, setHeaderPlaceholder] = useState<{y: number, level: number} | null>(null);
-  const placeholderRef = useRef(null);
+  
+  // new implementation
   const {thoughtId} = use(params);
+  const placeholderRef = useRef(null);
+  const editorState = useSlateEditorState(thoughtId);
 
-  const getHeaderFontSizeAndLevel = () => {
-    const level = headerPlaceHolder?.level;
-    if (!level) return null;
 
-    const fontSize = level === 1 ? "2.5rem" : level === 2 ? "2.25rem" : level === 3 ? "1.75rem" : "";
-    return {fontSize, level}
-  }
+  // const getHeaderFontSizeAndLevel = () => {
+  //   const level = headerPlaceHolder?.level;
+  //   if (!level) return null;
+
+  //   const fontSize = level === 1 ? "2.5rem" : level === 2 ? "2.25rem" : level === 3 ? "1.75rem" : "";
+  //   return {fontSize, level}
+  // }
+
+  // Single handler for all editor changes
+  const handleEditorChange = useCallback((newState: {
+    content: any[],
+    blockType: BlockType,
+    isEmpty: boolean,
+    isSlashOnly: boolean,
+    headingLevel?: number
+  }) => {
+    editorState.setContent(newState.content);
+    editorState.setCurrentBlock({
+      type: newState.blockType,
+      isEmpty: newState.isEmpty,
+      isSlashOnly: newState.isSlashOnly,
+      headingLevel: newState.headingLevel || 0
+    });
+  }, [editorState]);
 
   // switch placeholder depending on selected tab
   useGSAP(() => {
@@ -43,18 +66,18 @@ export default function ThoughtDocument({params}: {params: Promise<{thoughtId: I
   }, {dependencies: [tab]})
 
   // display message when header block type is selected on an empty paragraph
-  const onBlockTypeChange = useCallback((blockType: BlockType, isSlashOnly: boolean, level?: number) => {
-    if (blockType !== "heading" || !isSlashOnly || !level) return;
+  // const onBlockTypeChange = useCallback((blockType: BlockType, isSlashOnly: boolean, level?: number) => {
+  //   if (blockType !== "heading" || !isSlashOnly || !level) return;
     
-    const domSelection = document.getSelection();
-    if (!domSelection || !domSelection.isCollapsed) return;
+  //   const domSelection = document.getSelection();
+  //   if (!domSelection || !domSelection.isCollapsed) return;
 
-    // get the position of the cursor
-    const {top} = domSelection.getRangeAt(0).getBoundingClientRect();
-    console.log("triggered")
-    // headerPlaceHolder.current = {y: top, level};
-    setHeaderPlaceholder({y: top, level});
-  }, []);
+  //   // get the position of the cursor
+  //   const {top} = domSelection.getRangeAt(0).getBoundingClientRect();
+  //   console.log("triggered")
+  //   // headerPlaceHolder.current = {y: top, level};
+  //   setHeaderPlaceholder({y: top, level});
+  // }, []);
 
 
   // handle add versions
@@ -91,44 +114,16 @@ export default function ThoughtDocument({params}: {params: Promise<{thoughtId: I
           {/* ===== BODY ===== */}
           <div className="relative slim-scrollbar my-slateContainer px-[1.125rem] w-full overflow-y-scroll overflow-x-clip">
             {/* Placeholder msg */}
-
-            <div className="absolute w-full overflow-clip" 
-            style={{
-              pointerEvents: isEmpty ? "all" : 'none',
-              opacity: isEmpty ? "1" : '0'
-              }}>
-              <div ref={placeholderRef} className="leading-[1.5] relative flex flex-col">
-                <span className="text-fade-gray"> Let's hear it... </span>
-                <span className="text-fade-gray absolute -bottom-[150%]"> Write or type '/' for commands... </span>
-              </div>
-            </div>
-
-            {/* ===== Header Level Indicator ===== */}
-            <div 
-              style={{
-                opacity: headerPlaceHolder ? 1 : 0,
-                top: headerPlaceHolder?.y + "px",
-                fontSize: getHeaderFontSizeAndLevel()?.fontSize
-              }}
-              className="fixed mt-1.5 font-extrabold"
-            >
-              <span className="opacity-25"> Heading {getHeaderFontSizeAndLevel()?.level} </span>
-            </div>
+            <PlaceholderDisplay 
+              placeholderRef={placeholderRef}
+              placeholderState={editorState.placeholderState}
+            />
 
             {/* ===== SLATE RICH TEXT EDITOR ===== */}
             <SlateEditor 
               handleClick={useCallback(() => setTab(1), [])} 
-              handleValueChange={(content, checkIsBlockSlashOnly, editor) => {
-                // hide or display the placeholder text
-                content[0]?.children[0].text?.trim() === "" && content[0]?.type === "paragraph"
-                  ? setIsEmpty(true) : setIsEmpty(false);
-
-                const isSlashOnly = checkIsBlockSlashOnly(editor);
-                if (isSlashOnly) return;
-                setHeaderPlaceholder(null); 
-              }} 
-              thoughtId={thoughtId} 
-              handleBlockTypeChange={(blockType, isBlockEmpty, level) => onBlockTypeChange(blockType, isBlockEmpty, level)}/>
+              onChange={handleEditorChange} 
+              thoughtId={thoughtId} />
           </div>
 
           {/* Tabs */}

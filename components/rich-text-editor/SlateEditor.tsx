@@ -13,153 +13,35 @@ import { useRouter } from "next/navigation";
 import { debounce } from "lodash";
 import { SlateStatusTypes, useSlateStatusContext } from "../contexts/SlateStatusContext";
 import { BlockType } from "./slate";
+import { 
+  checkIsBlockSlashOnly, 
+  editorReducer, 
+  getContentLength, 
+  getCurrentBlockType, 
+  getCurrentHeadingLevel } from "../utility/slateEditorFunctions";
+import { EditorState } from "../app.models";
 
-interface Props {
-  handleClick?: () => void;
-  handleValueChange: (
-    value: any[], 
-    checkIsBlockSlashOnly: (editor: Editor) => boolean, 
-    editor: Editor
-  ) => void;
-  thoughtId: Id<"thoughts">
-  handleBlockTypeChange: (blockType: BlockType, isBlockEmpty: boolean, headingLevel?: number) => void;
-}
-
-// central state 
-type EditorState = {
-  status: SlateStatusTypes;
-  isInitialised: boolean;
-  isCreatingThought: boolean;
-}
-
-// all editor actions
-type EditorAction =
-  | { type: "INIT_CONTENT" }
-  | { type: "CONTENT_LOADED" }
-  | { type: "CREATING_THOUGHT" }
-  | { type: "SAVE_START" }
-  | { type: "SAVE_SUCCESS" };
-
+// ==== MAIN EDITOR COMPONENT ====
+// central editor state 
 const initialState: EditorState = {
   status: "idle",
   isInitialised: false,
   isCreatingThought: false
 }
-
-// central reducer
-const editorReducer = (state: EditorState, action: EditorAction) => {
-  switch (action.type) {
-    case "INIT_CONTENT":
-      return {
-        ...state,
-        status: "loading",
-        isInitialised: false
-      } as EditorState;
-    case "CREATING_THOUGHT":
-      return {
-        ...state,
-        isCreatingThought: true,
-        isInitialised: false,
-        status: "saving"
-      } as EditorState
-    case "CONTENT_LOADED":
-      return {
-        ...state,
-        status: "idle",
-        isInitialised: true,
-      } as EditorState;
-    case "SAVE_START":
-      return {
-        ...state,
-        status: "saving"
-      } as EditorState;
-    case "SAVE_SUCCESS":
-      return {
-        ...state,
-        status: "idle",
-      } as EditorState;
-  }
+interface Props {
+  handleClick?: () => void;
+  thoughtId: Id<"thoughts">;
+  onChange: (state: {
+    content: any[],
+    blockType: BlockType,
+    isEmpty: boolean,
+    isSlashOnly: boolean,
+    headingLevel?: number
+  }) => void;
 }
 
-// function to get the length of the charactes on the page not counting spaces
-const getContentLength = (content: any[]): number => {
-  if (!content || content.length === 0) return 0;
-
-  return content.reduce((total, node) => {
-    if (node.children) {
-      return total + (node.children as any[]).reduce((nodeTotal, child) => {
-        return nodeTotal + (child.text?.trim().length || 0)
-      }, 0)
-    }
-    return total;
-  }, 0)
-}
-
-// function to get current block type
-const getCurrentBlockType = (editor: Editor) => {
-  const [match] = Editor.nodes(editor, {
-    match: n => Element.isElement(n) && Editor.isBlock(editor, n),
-  });
-
-  if (match) {
-    const [node] = match;
-    return Element.isElement(node) ? node.type : 'paragraph';
-  }
-  return 'paragraph';
-};
-
-// function to get heading level
-const getCurrentHeadingLevel = (editor: Editor) => {
-  const [match] = Editor.nodes(editor, {
-    match: n => Element.isElement(n) && n.type === 'heading',
-  });
-
-  if (match) {
-    const [node] = match;
-    return Element.isElement(node) ? (node as any).level || 1 : 1;
-  }
-  return 0;
-};
-
-// check if the current block is empty
-const checkIsCurrentBlockEmpty = (editor: Editor):boolean => {
-  const [match] = Editor.nodes(editor, {
-    match: n => Element.isElement(n) && Editor.isBlock(editor, n), 
-    mode: "lowest"
-  })
-  
-  if (!match) return false;
-
-  const [node] = match;
-  return Editor.isEmpty(editor, node as Element);
-}
-
-// check if the block only has a "/"
-const checkIsBlockSlashOnly = (editor: Editor): boolean => {
-  if (!editor.selection) return false;
-
-  // Get current block
-  const [match] = Editor.nodes(editor, {
-    match: n => Element.isElement(n) && Editor.isBlock(editor, n),
-    mode: "lowest"
-  });
-
-  if (!match) return false;
-
-  const [, path] = match;
-
-  // Get the text content of the current block
-  const blockText = Editor.string(editor, Editor.range(editor, path));
-
-  // Remove all spaces and check if only "/" remains
-  const textWithoutSpaces = blockText.replace(/\s/g, '');
-
-  return textWithoutSpaces === '/';
-};
-
-// ==== MAIN EDITOR COMPONENT ====
 export default function SlateEditor({ 
-  handleClick, handleValueChange, thoughtId, handleBlockTypeChange }: Props) {
+  handleClick, onChange, thoughtId }: Props) {
   const [state, dispatch] = useReducer(editorReducer, initialState);
 
   // editor instance 
@@ -203,9 +85,10 @@ export default function SlateEditor({
       lastSavedContent.current = initialValue;
 
     } else if (coreVersion?.content && thoughtId !== "new") {
-      handleValueChange(coreVersion.content, checkIsBlockSlashOnly, editor); // external handle change
       editor.children = coreVersion.content;
       Editor.normalize(editor);
+      // notify the placeholder state that the editor isn't empty
+      handleSlateValueChange(coreVersion.content); 
 
       dispatch({ type: "CONTENT_LOADED" });
       lastSavedContent.current = coreVersion.content;
@@ -284,7 +167,18 @@ export default function SlateEditor({
   const handleSlateValueChange = useCallback(async (content: any[]) => {
     if (!content) return;
 
-    handleValueChange(content, checkIsBlockSlashOnly, editor); // call external value change
+    const blockType = getCurrentBlockType(editor);
+    const isEmpty = editor.children.length === 0;
+    const isSlashOnly = checkIsBlockSlashOnly(editor);
+    const headingLevel = blockType === 'heading' ? getCurrentHeadingLevel(editor) : 0;
+
+    onChange({
+      content,
+      blockType: blockType as BlockType,
+      isEmpty,
+      isSlashOnly,
+      headingLevel
+    });
 
     if (thoughtId !== "new" && state.isInitialised) {
       await debounceAutosave(content);
@@ -297,7 +191,7 @@ export default function SlateEditor({
     }
 
 
-  }, [handleValueChange, handleCreateThought, thoughtId, state.isInitialised, state.isCreatingThought])
+  }, [onChange, handleCreateThought, thoughtId, state.isInitialised, state.isCreatingThought])
 
   // render the selected element type
   const renderElement = useCallback((props: RenderElementProps) => {
@@ -342,12 +236,7 @@ export default function SlateEditor({
       key={thoughtId} 
       editor={editor} 
       initialValue={initialValue} 
-      onValueChange={(e) => {
-        handleSlateValueChange(e); 
-        const blockType = getCurrentBlockType(editor);
-        const headingLevel = blockType === 'heading' ? getCurrentHeadingLevel(editor) : undefined;
-        handleBlockTypeChange(blockType as BlockType, checkIsBlockSlashOnly(editor), headingLevel);
-      }}>
+      onValueChange={handleSlateValueChange}>
       <SlateNavbar />
       <InlineMenu />
 
