@@ -15,7 +15,7 @@ interface Props {
 const VersionItem = React.memo(function VersionItem({
   version: { isCore, versionNumber, changeLabel, _id },
   selectedVersion,
-  handleClick
+  handleClick,
 }: Props) {
 
   const isSelected = selectedVersion === _id;
@@ -23,6 +23,7 @@ const VersionItem = React.memo(function VersionItem({
   return (
     <button
       data-selected={isSelected}
+      data-version-id={_id}
       onClick={(e) => handleClick(e, _id)}
       style={{ opacity: isSelected ? 1 : .45 }}
       className="my-versionItem focus:outline-none">

@@ -65,6 +65,7 @@ export default function ThoughtDocument({params}: {params: Promise<{thoughtId: I
 
   // handle add versions
   const handleAddVersion = async () => {
+    if ( versions && versions.length > 9) return;
     setSlateStatus("loading");
 
     try {

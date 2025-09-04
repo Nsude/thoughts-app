@@ -3,7 +3,7 @@
 import { Id } from "@/convex/_generated/dataModel";
 import { ThoughtId, User, Version } from "../app.models";
 import VersionItem from "./VersionItem";
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { easeInOutCubic } from "../buttons/TabButton";
@@ -26,6 +26,7 @@ export default function Versions() {
   const mainRef = useRef(null);
   const {slateStatus, setSlateStatus, currentContent} = useSlateStatusContext();
   
+  
   // convex queries
   const thoughtVersions = useQuery(
     api.thoughts.getThoughtVersions, 
@@ -40,11 +41,47 @@ export default function Versions() {
   const setConvexSelectedVersion = useMutation(api.thoughts.setSelectedVersion);
   const updateThought = useMutation(api.thoughts.updateThought);
 
+  const hasInitialized = useRef(false);
+
+  // sync selectedVersion._id with local state on thought switch
+  useEffect(() => {
+    if (selectedVersion?._id) {
+      setSelected(selectedVersion._id);
+    }
+  }, [selectedVersion?._id]);
+
+  // Initialize selected state and animate indicator
+  useEffect(() => {
+    if (!selectedVersion || !thoughtVersions || hasInitialized.current) return;
+
+    setSelected(selectedVersion._id);
+    hasInitialized.current = false;
+
+    // Animate to the selected version after a brief delay to ensure DOM is ready
+    setTimeout(() => {
+      const selectedElement = document.querySelector(`[data-version-id="${selectedVersion._id}"]`);
+      if (selectedElement && spanRef.current && mainRef.current) {
+        const target = selectedElement as HTMLElement;
+        const main = mainRef.current as HTMLSpanElement;
+
+        const { top: targetTop } = target.getBoundingClientRect();
+        const { top: mainTop } = main.getBoundingClientRect();
+        const top = targetTop - mainTop;
+
+        gsap.set(spanRef.current, {
+          top: `${top - 4}px`,
+          height: selectedVersion.isCore ? "1.3rem" : "2.7rem",
+        });
+      }
+    }, 50);
+
+  }, [selectedVersion, thoughtVersions]);
+
   // enable manual save chanages functionality
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const {key} = e;
-      console.log(key)
+
       if (e.ctrlKey && key.toLowerCase() === "s") {
         e.preventDefault();
         saveChanges();
@@ -122,7 +159,7 @@ export default function Versions() {
             <VersionItem 
               key={version._id}
               version={version}
-              selectedVersion={selected}
+              selectedVersion={selected || (selectedVersion?._id || selected)}
               handleClick={(e) => onVersionClick(e, version._id, version.isCore)}
             />
           ))
