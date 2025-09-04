@@ -18,19 +18,26 @@ import { useGSAP } from "@gsap/react";
 import { useMutation, useQuery } from "convex/react";
 import gsap from "gsap";
 import { use, useCallback, useRef, useState } from "react";
+import DefaultIcon from "@/public/icons/DefaultIcon";
+import DeleteIcon from "@/public/icons/DeleteIcon";
 
-export default function ThoughtDocument({params}: {params: Promise<{thoughtId: Id<"thoughts">}>}) {
+export default function ThoughtDocument({ params }: { params: Promise<{ thoughtId: Id<"thoughts"> }> }) {
   const [tab, setTab] = useState(0);
-  const {thoughtId} = use(params);
+  const { thoughtId } = use(params);
   const placeholderRef = useRef(null);
   const editorState = useSlateEditorState(thoughtId);
-  const {setSlateStatus} = useSlateStatusContext();
+  const { slateStatus, setSlateStatus } = useSlateStatusContext();
 
   // convex mutations & queries
   const createVersion = useMutation(api.thoughts.createVersion);
-  const versions = useQuery(api.thoughts.getThoughtVersions, 
-    thoughtId !== "new" ? {thoughtId} : "skip"
+  const deleteVersion = useMutation(api.thoughts.deleleVersion);
+  const versions = useQuery(api.thoughts.getThoughtVersions,
+    thoughtId !== "new" ? { thoughtId } : "skip"
   );
+  const selectedVersion = useQuery(
+    api.thoughts.getSelectedVersion,
+    thoughtId !== "new" ? { thoughtId } : "skip"
+  )
 
   // Single handler for all editor changes
   const handleEditorChange = useCallback((newState: {
@@ -60,12 +67,12 @@ export default function ThoughtDocument({params}: {params: Promise<{thoughtId: I
       ease: easeInOutCubic
     })
 
-  }, {dependencies: [tab]});
+  }, { dependencies: [tab] });
 
 
   // handle add versions
   const handleAddVersion = async () => {
-    if ( versions && versions.length > 9) return;
+    if (versions && versions.length > 9) return;
     setSlateStatus("loading");
 
     try {
@@ -86,12 +93,22 @@ export default function ThoughtDocument({params}: {params: Promise<{thoughtId: I
     }
   }
 
+  // handle delete version
+  const handleDeleteVersion = async () => {
+    try {
+      setSlateStatus("deleting");
+      await deleteVersion({ thoughtId: thoughtId })
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
   return (
     <div>
       <div className="relative">
-        <span 
+        <span
           className="absolute z-0 h-[83vh] w-[40.125rem] rounded-2xl bg-[#DCDCDC] -top-[0.8125rem] left-[1.125rem]" />
-        <span 
+        <span
           className="absolute -z-1 h-[83vh] w-[37.875rem] rounded-2xl bg-[#C9C9C9] -top-[1.625rem] left-[2.25rem]" />
       </div>
 
@@ -108,22 +125,22 @@ export default function ThoughtDocument({params}: {params: Promise<{thoughtId: I
               <ClassicButton icon={<LogoIcon />} text="Refine" />
 
               {/* add version button */}
-              <ClassicButton icon={<PlusIcon />} handleClick={handleAddVersion}/>
+              <ClassicButton icon={<PlusIcon />} handleClick={handleAddVersion} />
             </span>
           </div>
 
           {/* ===== BODY ===== */}
           <div className="relative slim-scrollbar my-slateContainer px-[1.125rem] w-full overflow-y-scroll overflow-x-clip">
             {/* Placeholder msg */}
-            <PlaceholderDisplay 
+            <PlaceholderDisplay
               placeholderRef={placeholderRef}
               placeholderState={editorState.placeholderState}
             />
 
             {/* ===== SLATE RICH TEXT EDITOR ===== */}
-            <SlateEditor 
-              handleClick={useCallback(() => setTab(1), [])} 
-              onChange={handleEditorChange} 
+            <SlateEditor
+              handleClick={useCallback(() => setTab(1), [])}
+              onChange={handleEditorChange}
               thoughtId={thoughtId} />
           </div>
 
@@ -137,9 +154,25 @@ export default function ThoughtDocument({params}: {params: Promise<{thoughtId: I
             />
           </div>
 
-          {/* Suprise Me */}
-          <div className="absolute bottom-[1.125rem] right-[1.125rem]">
-            <ClassicButton icon={<LogoIcon />} />
+          {/* Suprise Me / delete version */}
+          <div className="absolute bottom-[1.125rem] right-[1.125rem] flex gap-x-1.5">
+            {
+              editorState.currentBlock.isEmpty && slateStatus === "idle" ?
+                <ClassicButton
+                  icon={<LogoIcon />}
+                  handleClick={() => console.info("Suprise-me clicked")} />
+                : null
+            }
+
+            {/* delete button */}
+            <div style={{
+              opacity: selectedVersion?.isCore ? .5 : 1,
+              pointerEvents: selectedVersion?.isCore ? "none" : "all"
+              }}>
+              <ClassicButton
+                icon={<DeleteIcon />}
+                handleClick={handleDeleteVersion} />
+            </div>
           </div>
         </div>
       </div>

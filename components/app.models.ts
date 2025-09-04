@@ -26,6 +26,7 @@ export type SlateStatusTypes =
   | "loading"
   | "saving"
   | "saved"
+  | "deleting"
   | "unsaved_change"
   | "idle"
   | "error";

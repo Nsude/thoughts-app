@@ -42,11 +42,32 @@ export default function Versions() {
   const updateThought = useMutation(api.thoughts.updateThought);
 
   const hasInitialized = useRef(false);
+  const lastSavedVersionLength = useRef(0);
+
+  const getCoreVersion = () => {
+    if (!thoughtVersions) return;
+
+    const coreVersion = thoughtVersions.filter(version => version.isCore)[0];
+    return coreVersion;
+  }
+
+  // it there's a change to the length of the thought versions (say an item has beeen deleted)
+  // set the selected version to core
+  useEffect(() => {
+    if (lastSavedVersionLength.current === thoughtVersions?.length) return;
+    const coreVersion = getCoreVersion();
+    if (!coreVersion) return;
+
+    setSelected(coreVersion._id);
+    lastSavedVersionLength.current = thoughtVersions?.length || 0;
+    handleConvexSelectedVersion(coreVersion._id);
+  }, [thoughtVersions?.length])
 
   // sync selectedVersion._id with local state on thought switch
   useEffect(() => {
     if (selectedVersion?._id) {
       setSelected(selectedVersion._id);
+      lastSavedVersionLength.current = thoughtVersions ? thoughtVersions.length : 0;
     }
   }, [selectedVersion?._id]);
 
@@ -93,7 +114,8 @@ export default function Versions() {
 
   // set clicked the item to convex selected version
   const handleConvexSelectedVersion = async (versionId: Id<"versions">) => {
-    setSlateStatus("loading");
+    if (versionId === selectedVersion?._id) return;
+     setSlateStatus("loading");
     try {
       await setConvexSelectedVersion({
         thoughtId,
@@ -108,6 +130,7 @@ export default function Versions() {
   // save changes before switching to other versions
   const saveChanges = async () => {
     if (!currentContent) return;
+    if (slateStatus !== "unsaved_change") return;
     try {
       setSlateStatus("saving")
       await updateThought({thoughtId, newContent: currentContent});
@@ -119,10 +142,10 @@ export default function Versions() {
 
   const onVersionClick = async (e: React.MouseEvent, id: Id<"versions">, isCore: boolean) => {
     if (slateStatus !== "idle" && slateStatus !== "saved") return;
-    setSelected(id); 
-    animateIndicator(e, isCore);
     // save content
     await saveChanges();
+    setSelected(id); 
+    animateIndicator(e, isCore);
     // update convex selected version
     await handleConvexSelectedVersion(id);
   }
