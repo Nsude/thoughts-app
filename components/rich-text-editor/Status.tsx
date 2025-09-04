@@ -10,9 +10,10 @@ export default function SlateStatusDisplay () {
 
   const debounceResetStatus = useCallback(() => {
     return debounce(() => {
+      if (slateStatus === "unsaved_change") return;
       setSlateStatus("idle");
     }, 2000)
-  }, [slateStatus])();
+  }, [slateStatus]);
 
   useEffect(() => {
     debounceResetStatus();
@@ -23,11 +24,12 @@ export default function SlateStatusDisplay () {
   return (
     <div className="text-dark-gray-label flex items-center gap-x-1 mr-2">
       <span style={{
-        opacity: slateStatus === "saved" ? 0 : 1
+        opacity: slateStatus === "saved" || slateStatus === "unsaved_change" ? 0 : 1
       }}> <LoadingIcon /> </span>
       <span style={{
-        color: slateStatus === "saved" ? "var(--black)" : ""
-      }}>{slateStatus || "Idle"}</span>
+        color: slateStatus === "saved" ? "var(--black)" : 
+        slateStatus === "unsaved_change" ? "var(--accent)" : ""
+      }}>{slateStatus.split("_").join(" ") || "Idle"}</span>
     </div>
   )
 }

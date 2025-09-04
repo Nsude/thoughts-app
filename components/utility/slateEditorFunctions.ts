@@ -85,6 +85,7 @@ export const editorReducer = (state: EditorState, action: EditorAction) => {
         ...state,
         status: "idle",
         isInitialised: true,
+        hasUnsavedContent: false
       } as EditorState;
     case "SAVE_START":
       return {
@@ -95,6 +96,12 @@ export const editorReducer = (state: EditorState, action: EditorAction) => {
       return {
         ...state,
         status: "idle",
+        hasUnsavedContent: false
+      } as EditorState;
+    case "UNSAVED_CONTENT":
+      return {
+        ...state,
+        hasUnsavedContent: true
       } as EditorState;
   }
 }

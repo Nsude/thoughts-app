@@ -11,7 +11,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useRouter } from "next/navigation";
 import { debounce } from "lodash";
-import { SlateStatusTypes, useSlateStatusContext } from "../contexts/SlateStatusContext";
+import { useSlateStatusContext } from "../contexts/SlateStatusContext";
 import { BlockType } from "./slate";
 import { 
   checkIsBlockSlashOnly, 
@@ -26,7 +26,8 @@ import { EditorState } from "../app.models";
 const initialState: EditorState = {
   status: "idle",
   isInitialised: false,
-  isCreatingThought: false
+  isCreatingThought: false,
+  hasUnsavedContent: false
 }
 interface Props {
   handleClick?: () => void;
@@ -67,8 +68,17 @@ export default function SlateEditor({
     return JSON.stringify(newContent) !== JSON.stringify(oldContent);
   }, [])
 
-  const lastSavedContent = useRef<any[]>(null);
-  const { setSlateStatus } = useSlateStatusContext();
+  // checks if the the changes about to be saved belongs to the current version
+  // const isSameVersion = useCallback(():boolean => {
+  //   const hasLastViewed = lastViewedVersion.current.trim() !== "";
+  //   const isDifferent = hasLastViewed && lastViewedVersion.current !== selectedVersion?._id;
+
+  //   return !isDifferent; // true if same OR no last viewed
+  // }, [selectedVersion?._id])
+
+  const lastSavedContent = useRef<any[]>([]);
+  const lastViewedVersion = useRef<Id<"versions">>("" as Id<"versions">);
+  const { slateStatus, setSlateStatus } = useSlateStatusContext();
 
   // ===== DISPLAY THE SELECTED VERSION CONTENT ON FIRST LOAD =====
   useEffect(() => {
@@ -80,13 +90,11 @@ export default function SlateEditor({
 
     if (thoughtId === "new") {
       editor.children = initialValue;
-      Editor.normalize(editor);
       dispatch({ type: "CONTENT_LOADED" });
       lastSavedContent.current = initialValue;
 
     } else if (selectedContent && thoughtId !== "new") {
       editor.children = selectedContent;
-      Editor.normalize(editor);
       // notify the placeholder state that the editor isn't empty
       handleSlateValueChange(selectedContent); 
 
@@ -103,20 +111,22 @@ export default function SlateEditor({
     const selectedContent = selectedVersion.content;
 
     editor.children = selectedContent;
-    Editor.normalize(editor);
     handleSlateValueChange(selectedContent);
-    // lastSavedContent.current = selectedContent;
 
   }, [selectedVersion?._id])
 
   // ===== AUTO SAVE =====
   const debounceAutosave = useMemo(() => {
     return debounce(async (content: any[]) => {
-      if (!lastSavedContent.current) return;
+      if (lastSavedContent.current.length === 0) return;
 
-      if (!hasContentChanged(lastSavedContent.current, content)) return;
+      if (
+        !hasContentChanged(lastSavedContent.current, content) || 
+        slateStatus !== "idle"
+      ) return;
 
       dispatch({ type: "SAVE_START" });
+      console.log("saving")
       setSlateStatus("saving");
 
       try {
@@ -193,6 +203,12 @@ export default function SlateEditor({
       isSlashOnly,
       headingLevel
     });
+
+    // notify unsaved changes
+    if (state.isInitialised) {
+      dispatch({type: "UNSAVED_CONTENT"});
+      setSlateStatus("unsaved_change");
+    };
 
     if (thoughtId !== "new" && state.isInitialised) {
       await debounceAutosave(content);

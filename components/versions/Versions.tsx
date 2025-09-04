@@ -24,7 +24,7 @@ export default function Versions() {
   const [selected, setSelected] = useState<Id<"versions">>("" as Id<"versions">);
   const spanRef = useRef(null);
   const mainRef = useRef(null);
-  const {setSlateStatus} = useSlateStatusContext();
+  const {slateStatus, setSlateStatus} = useSlateStatusContext();
   
   // convex queries
   const thoughtVersions = useQuery(
@@ -54,6 +54,7 @@ export default function Versions() {
   }
 
   const onVersionClick = async (e: React.MouseEvent, id: Id<"versions">, isCore: boolean) => {
+    if (slateStatus !== "idle" && slateStatus !== "saved") return;
     setSelected(id); 
     animateIndicator(e, isCore);
     // update convex selected version

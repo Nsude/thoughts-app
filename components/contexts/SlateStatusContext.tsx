@@ -1,8 +1,7 @@
 "use client";
 
 import { createContext, PropsWithChildren, SetStateAction, useContext, useState } from "react";
-
-export type SlateStatusTypes = "loading" | "saving" | "saved" | "idle" | "error";
+import { SlateStatusTypes } from "../app.models";
 
 interface SlateStatus {
   slateStatus: SlateStatusTypes;
