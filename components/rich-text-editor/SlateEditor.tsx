@@ -68,17 +68,8 @@ export default function SlateEditor({
     return JSON.stringify(newContent) !== JSON.stringify(oldContent);
   }, [])
 
-  // checks if the the changes about to be saved belongs to the current version
-  // const isSameVersion = useCallback(():boolean => {
-  //   const hasLastViewed = lastViewedVersion.current.trim() !== "";
-  //   const isDifferent = hasLastViewed && lastViewedVersion.current !== selectedVersion?._id;
-
-  //   return !isDifferent; // true if same OR no last viewed
-  // }, [selectedVersion?._id])
-
   const lastSavedContent = useRef<any[]>([]);
-  const lastViewedVersion = useRef<Id<"versions">>("" as Id<"versions">);
-  const { slateStatus, setSlateStatus } = useSlateStatusContext();
+  const { slateStatus, setSlateStatus, setCurrentContent } = useSlateStatusContext();
 
   // ===== DISPLAY THE SELECTED VERSION CONTENT ON FIRST LOAD =====
   useEffect(() => {
@@ -126,7 +117,6 @@ export default function SlateEditor({
       ) return;
 
       dispatch({ type: "SAVE_START" });
-      console.log("saving")
       setSlateStatus("saving");
 
       try {
@@ -188,6 +178,7 @@ export default function SlateEditor({
   // ===== HANDLE VALUE CHANGE =====
   const handleSlateValueChange = useCallback(async (content: any[]) => {
     if (!content) return;
+    setCurrentContent(content)
 
     // set states for useSlateEditorState hook
     const blockType = getCurrentBlockType(editor);

@@ -7,7 +7,7 @@ import { useSlateEditorState } from "@/components/hooks/useSlateEditorState";
 import { PlaceholderDisplay } from "@/components/rich-text-editor/PlaceholderDisplay";
 import { BlockType } from "@/components/rich-text-editor/slate";
 import SlateEditor from "@/components/rich-text-editor/SlateEditor";
-import SlateStatusDisplay from "@/components/rich-text-editor/Status";
+import SlateStatusDisplay from "@/components/rich-text-editor/EditorStatus";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import LogoIcon from "@/public/icons/LogoIcon";

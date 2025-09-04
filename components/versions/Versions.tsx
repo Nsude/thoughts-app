@@ -24,7 +24,7 @@ export default function Versions() {
   const [selected, setSelected] = useState<Id<"versions">>("" as Id<"versions">);
   const spanRef = useRef(null);
   const mainRef = useRef(null);
-  const {slateStatus, setSlateStatus} = useSlateStatusContext();
+  const {slateStatus, setSlateStatus, currentContent} = useSlateStatusContext();
   
   // convex queries
   const thoughtVersions = useQuery(
@@ -38,6 +38,21 @@ export default function Versions() {
 
   // convex mutations
   const setConvexSelectedVersion = useMutation(api.thoughts.setSelectedVersion);
+  const updateThought = useMutation(api.thoughts.updateThought);
+
+  // enable manual save chanages functionality
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const {key} = e;
+      console.log(key)
+      if (e.ctrlKey && key.toLowerCase() === "s") {
+        e.preventDefault();
+        saveChanges();
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+  }, [])
 
   // set clicked the item to convex selected version
   const handleConvexSelectedVersion = async (versionId: Id<"versions">) => {
@@ -53,10 +68,24 @@ export default function Versions() {
     }
   }
 
+  // save changes before switching to other versions
+  const saveChanges = async () => {
+    if (!currentContent) return;
+    try {
+      setSlateStatus("saving")
+      await updateThought({thoughtId, newContent: currentContent});
+      setSlateStatus("saved");
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   const onVersionClick = async (e: React.MouseEvent, id: Id<"versions">, isCore: boolean) => {
     if (slateStatus !== "idle" && slateStatus !== "saved") return;
     setSelected(id); 
     animateIndicator(e, isCore);
+    // save content
+    await saveChanges();
     // update convex selected version
     await handleConvexSelectedVersion(id);
   }

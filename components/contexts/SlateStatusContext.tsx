@@ -6,6 +6,8 @@ import { SlateStatusTypes } from "../app.models";
 interface SlateStatus {
   slateStatus: SlateStatusTypes;
   setSlateStatus: React.Dispatch<SetStateAction<SlateStatusTypes>>
+  currentContent: any[];
+  setCurrentContent: React.Dispatch<SetStateAction<any[]>>
 }
 
 const SlateContext = createContext<SlateStatus | null>(null);
@@ -21,9 +23,15 @@ export const useSlateStatusContext = () => {
 
 export default function SlateStatusContextProvider({children}: PropsWithChildren) {
   const [slateStatus, setSlateStatus] = useState<SlateStatusTypes>("idle");
+  const [currentContent, setCurrentContent] = useState<any[]>([]);
 
   return (
-    <SlateContext.Provider value={{slateStatus, setSlateStatus}}>
+    <SlateContext.Provider value={{
+      slateStatus, 
+      setSlateStatus, 
+      currentContent, 
+      setCurrentContent
+      }}>
       {children}
     </SlateContext.Provider>
   )

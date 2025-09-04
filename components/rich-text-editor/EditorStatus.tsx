@@ -1,22 +1,21 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useSlateStatusContext } from "../contexts/SlateStatusContext";
 import LoadingIcon from "@/public/icons/LoadingIcon";
-import { debounce } from "lodash";
 
 export default function SlateStatusDisplay () {
   const {slateStatus, setSlateStatus} = useSlateStatusContext();
 
-  const debounceResetStatus = useCallback(() => {
-    return debounce(() => {
-      if (slateStatus === "unsaved_change") return;
-      setSlateStatus("idle");
-    }, 2000)
-  }, [slateStatus]);
+  const timeout = useRef<NodeJS.Timeout>(null)
 
   useEffect(() => {
-    debounceResetStatus();
+    if (timeout.current) clearTimeout(timeout.current);
+
+    timeout.current = setTimeout(() => {
+      setSlateStatus("idle")
+    }, 2000)
+
   }, [slateStatus])
 
   if (slateStatus === "idle") return null;
