@@ -2,6 +2,8 @@ button.my-classicButton path {
   transition: stroke 200ms linear;
 }
 
+/* Transition */
+button.my-audioControlBtn,
 button.my-versionItem,
 button.my-authProviderButton,
 button.my-noBgButton,
@@ -16,6 +18,8 @@ button.my-classicButton:hover {
   border-color: var(--accent);
 }
 
+/* on active */
+button.my-audioControlBtn,
 button.my-noBgButton:active,
 button.my-classicButton:active {
   transform: scale(0.93);
@@ -96,8 +100,13 @@ button.my-optionsModalBtn[data-index="3"]:hover {
   background: var(--accent);
 }
 
-
 /* versions */
 button.my-versionItem[data-selected="false"]:hover {
   opacity: .7 !important;
+}
+
+/* audio control button (play & pause) */
+button.my-audioControlBtn:disabled {
+  opacity: .5;
+  pointer-events: none;
 }

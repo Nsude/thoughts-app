@@ -25,7 +25,8 @@ import { AudioModalAction, AudioModalState } from "@/components/app.models";
 
 const initialAudioModalState: AudioModalState = {
   display: false,
-  startRecording: false
+  startRecording: false,
+  audioUrl: null
 }
 
 const audioModalReducer = (state: AudioModalState, action: AudioModalAction) => {
@@ -40,6 +41,11 @@ const audioModalReducer = (state: AudioModalState, action: AudioModalAction) => 
         ...state,
         startRecording: action.start
       } as AudioModalState;
+    case "AUDIO_URL":
+      return {
+        ...state,
+        audioUrl: action.url
+      } as AudioModalState
   }
 }
 
@@ -144,8 +150,6 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
         }
       })
 
-      console.log("✅ mic access granted");
-
       // check if the browser media recorder supports the webm format
       if (MediaRecorder.isTypeSupported("audio/webm")) {
         mediaRecorder.current = new MediaRecorder(stream, {mimeType: "audio/webm"});
@@ -162,13 +166,15 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
         }
       }
 
+      // create blob then create audio url from the blob
       mediaRecorder.current.onstop = (e) => {
         console.log("recording stopped ✅")
         if (audioChunks.current.length > 0) {
           const audioBlob = new Blob(audioChunks.current, {type: "audio/webm"});
   
           const audioUrl = URL.createObjectURL(audioBlob);
-          console.log("audio URL: ", audioUrl);
+          audioDispatch({type: "AUDIO_URL", url: audioUrl});
+          
         } else {
           console.error("no audio chunks to create blob from ❌")
         }
@@ -183,7 +189,9 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
   }, [audioState.display])
 
   const startRecording = () => {
-    if (!mediaRecorder.current) return console.log("cant start recording ❌")
+    if (!mediaRecorder.current) return console.log("media recorder not initialised ❌");
+    audioDispatch({type: "AUDIO_URL", url: null});
+
     isRecording.current = true;
     audioDispatch({ type: "START_RECORDING", start: true });
 
@@ -267,6 +275,7 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
             <AudioInputModal 
               display={audioState.display}
               startRecording={audioState.startRecording}
+              audioUrl={audioState.audioUrl}
               UploadAudio={() => {}}
               />
           </div>

@@ -34,4 +34,6 @@ About [NextJS](https://nextjs.org/docs):
 
 - When rendering lists in _NextJS/React_, you probably shouldn't use the index as the key prop, it is quite unreliable. If the list is updated in any way that affects it's length, that becomes problematic in very weird ways (and ofcourse I didn't make this rookie mistake... just sharing it 🥲).
 
-- React state's are not very reliable when used for optional rendering or synchronous operations, use refs in addition to the states so you can trigger a rerender and still have your application working.
+- React state's are not very reliable when used for synchronous operations, use refs in addition to the states so you can trigger a rerender and still have your application working.
+
+For Instance:
