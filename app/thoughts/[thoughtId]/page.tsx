@@ -17,9 +17,31 @@ import TextIcon from "@/public/icons/TextIcon";
 import { useGSAP } from "@gsap/react";
 import { useMutation, useQuery } from "convex/react";
 import gsap from "gsap";
-import { use, useCallback, useRef, useState } from "react";
-import DefaultIcon from "@/public/icons/DefaultIcon";
+import { use, useCallback, useEffect, useReducer, useRef, useState } from "react";
 import DeleteIcon from "@/public/icons/DeleteIcon";
+import AudioInputModal from "@/components/audio-input/AudioInputModal";
+import StopIcon from "@/public/icons/StopIcon";
+import { AudioModalAction, AudioModalState } from "@/components/app.models";
+
+const initialAudioModalState: AudioModalState = {
+  display: false,
+  startRecording: false
+}
+
+const audioModalReducer = (state: AudioModalState, action: AudioModalAction) => {
+  switch(action.type) {
+    case "DISPLAY":
+      return {
+        ...state,
+        display: action.display
+      } as AudioModalState;
+    case "START_RECORDING":
+      return {
+        ...state,
+        startRecording: action.start
+      } as AudioModalState;
+  }
+}
 
 export default function ThoughtDocument({ params }: { params: Promise<{ thoughtId: Id<"thoughts"> }> }) {
   const [tab, setTab] = useState(0);
@@ -27,6 +49,9 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
   const placeholderRef = useRef(null);
   const editorState = useSlateEditorState(thoughtId);
   const { slateStatus, setSlateStatus } = useSlateStatusContext();
+
+  // audio modal state
+  const [audioState, audioDispatch] = useReducer(audioModalReducer, initialAudioModalState);
 
   // convex mutations & queries
   const createVersion = useMutation(api.thoughts.createVersion);
@@ -103,6 +128,87 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
     }
   }
 
+  // handle record tab clicked 
+  const isRecording = useRef(false);
+  const audioChunks = useRef<any[]>([]);
+  const mediaRecorder = useRef<MediaRecorder>(null);
+  const handleRecordTabClicked = useCallback( async () => {
+    if (!audioState.display) audioDispatch({type: "DISPLAY", display: true}); 
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          sampleRate: 44100
+        }
+      })
+
+      console.log("✅ mic access granted");
+
+      // check if the browser media recorder supports the webm format
+      if (MediaRecorder.isTypeSupported("audio/webm")) {
+        mediaRecorder.current = new MediaRecorder(stream, {mimeType: "audio/webm"});
+      } else {
+        mediaRecorder.current = new MediaRecorder(stream, {mimeType: "audio/mp4"});
+      }
+
+      // clear previous chunks
+      audioChunks.current = [];
+
+      mediaRecorder.current.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          audioChunks.current.push(e.data);
+        }
+      }
+
+      mediaRecorder.current.onstop = (e) => {
+        console.log("recording stopped ✅")
+        if (audioChunks.current.length > 0) {
+          const audioBlob = new Blob(audioChunks.current, {type: "audio/webm"});
+  
+          const audioUrl = URL.createObjectURL(audioBlob);
+          console.log("audio URL: ", audioUrl);
+        } else {
+          console.error("no audio chunks to create blob from ❌")
+        }
+      }
+
+      startRecording();
+    } catch(error) {
+      console.error(error);
+    }
+
+
+  }, [audioState.display])
+
+  const startRecording = () => {
+    if (!mediaRecorder.current) return console.log("cant start recording ❌")
+    isRecording.current = true;
+    audioDispatch({ type: "START_RECORDING", start: true });
+
+    mediaRecorder.current.start();
+  }
+
+  const stopRecording = () => {
+    if (!mediaRecorder.current) return;
+
+    isRecording.current = false;
+    audioDispatch({ type: "START_RECORDING", start: false });
+
+    mediaRecorder.current.stop();
+  }
+
+  // close audio modal
+  useEffect(() => {
+    const handleMouseDown = () => {
+      if (isRecording.current) return;
+      audioDispatch({type: "DISPLAY", display: false})
+    }
+
+    window.addEventListener("mousedown", handleMouseDown);
+  }, [isRecording.current])
+
   return (
     <div>
       <div className="relative">
@@ -144,14 +250,25 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
               thoughtId={thoughtId} />
           </div>
 
-          {/* Tabs */}
+          {/* ==== AUDIO AND TEXT INPUT TABS ==== */}
           <div className="absolute bottom-[0.9375rem] left-1/2 -translate-x-1/2">
             <TabButton
-              tabIcon1={<MicrophoneIcon />}
+              tabIcon1={
+                !isRecording.current ? 
+                <MicrophoneIcon /> : <StopIcon />
+              }
               tabIcon2={<TextIcon />}
+              handleTab1Click={!isRecording.current ? handleRecordTabClicked : stopRecording}
               handleClick={useCallback((tab) => setTab(tab), [])}
               preselectTab={tab}
             />
+
+            {/* Audio Input Component */}
+            <AudioInputModal 
+              display={audioState.display}
+              startRecording={audioState.startRecording}
+              UploadAudio={() => {}}
+              />
           </div>
 
           {/* Suprise Me / delete version */}
@@ -168,7 +285,7 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
             <div style={{
               opacity: selectedVersion?.isCore ? .5 : 1,
               pointerEvents: selectedVersion?.isCore ? "none" : "all"
-              }}>
+            }}>
               <ClassicButton
                 icon={<DeleteIcon />}
                 handleClick={handleDeleteVersion} />

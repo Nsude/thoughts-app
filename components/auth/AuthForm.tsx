@@ -256,11 +256,6 @@ export default function AuthForm({ authType }: Props) {
         }
 
       </div>
-
-      {/* Right side */}
-      <div className="w-full h-full bg-tab-gray rounded-2xl hidden xl:flex justify-center items-center">
-        <span className="opacity-25 text-3xl">video</span>
-      </div>
     </div>
   )
 }
