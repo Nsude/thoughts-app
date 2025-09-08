@@ -15,7 +15,7 @@ import MicrophoneIcon from "@/public/icons/MicrophoneIcon";
 import PlusIcon from "@/public/icons/PlusIcon";
 import TextIcon from "@/public/icons/TextIcon";
 import { useGSAP } from "@gsap/react";
-import { useMutation, useQuery } from "convex/react";
+import { useAction, useMutation, useQuery } from "convex/react";
 import gsap from "gsap";
 import { use, useCallback, useEffect, useReducer, useRef, useState } from "react";
 import DeleteIcon from "@/public/icons/DeleteIcon";
@@ -26,7 +26,7 @@ import { AudioModalAction, AudioModalState } from "@/components/app.models";
 const initialAudioModalState: AudioModalState = {
   display: false,
   startRecording: false,
-  audioUrl: null
+  blob: null
 }
 
 const audioModalReducer = (state: AudioModalState, action: AudioModalAction) => {
@@ -41,10 +41,10 @@ const audioModalReducer = (state: AudioModalState, action: AudioModalAction) => 
         ...state,
         startRecording: action.start
       } as AudioModalState;
-    case "AUDIO_URL":
+    case "BLOB":
       return {
         ...state,
-        audioUrl: action.url
+        blob: action.blob
       } as AudioModalState
   }
 }
@@ -167,13 +167,12 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
       }
 
       // create blob then create audio url from the blob
-      mediaRecorder.current.onstop = (e) => {
-        console.log("recording stopped ✅")
+      mediaRecorder.current.onstop = () => {
         if (audioChunks.current.length > 0) {
           const audioBlob = new Blob(audioChunks.current, {type: "audio/webm"});
   
           const audioUrl = URL.createObjectURL(audioBlob);
-          audioDispatch({type: "AUDIO_URL", url: audioUrl});
+          audioDispatch({type: "BLOB", blob: audioBlob});
 
         } else {
           console.error("no audio chunks to create blob from ❌")
@@ -190,7 +189,7 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
 
   const startRecording = () => {
     if (!mediaRecorder.current) return console.log("media recorder not initialised ❌");
-    audioDispatch({type: "AUDIO_URL", url: null});
+    audioDispatch({type: "BLOB", blob: null});
 
     isRecording.current = true;
     audioDispatch({ type: "START_RECORDING", start: true });
@@ -205,6 +204,32 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
     audioDispatch({ type: "START_RECORDING", start: false });
 
     mediaRecorder.current.stop();
+  }
+
+  // HANDLE UPLOAD AUDIO
+  const generateUploadUrl = useMutation(api.audio.generateUploadUrl);
+  const transcribeAudio = useAction(api.audio.transcribeAudio);
+  const handleUploadAudio = async () => {
+    try {
+      if (!audioState.blob) throw new Error("Client Error: Blob does not exit");
+      // get upload url from convex
+      const uploadUrl = await generateUploadUrl();
+
+      // upload
+      const response = await fetch(uploadUrl, {
+        method: "POST",
+        headers: {"Content-Type": audioState.blob.type},
+        body: audioState.blob
+      })
+
+      const {storageId} = await response.json();
+
+      const transcribedText = await transcribeAudio({storageId})
+      console.log(transcribedText);
+      
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   // close audio modal
@@ -275,9 +300,9 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
             <AudioInputModal 
               display={audioState.display}
               startRecording={audioState.startRecording}
-              audioUrl={audioState.audioUrl}
+              audioBlob={audioState.blob}
               handleExceedRecordLimit={() => stopRecording()}
-              UploadAudio={() => {}}
+              UploadAudio={handleUploadAudio}
               />
           </div>
 

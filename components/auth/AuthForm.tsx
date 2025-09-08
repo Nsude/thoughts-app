@@ -125,8 +125,6 @@ export default function AuthForm({ authType }: Props) {
 
   // verify email
   const verifyEmail = useCallback(async () => {
-    if (emailOtp.length < OTPLength) return;
-
     try {
       await signIn("password", { email: form.email, code: emailOtp, flow});
       await new Promise<void>((resolve) => setTimeout(resolve, 200)); // little delay to allow email verification

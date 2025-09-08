@@ -52,13 +52,13 @@ export type EditorAction =
 export type AudioModalState = {
   display: boolean;
   startRecording: boolean;
-  audioUrl: string | null
+  blob: Blob | null
 };
 
 export type AudioModalAction =
   | { type: "DISPLAY"; display: boolean }
   | { type: "START_RECORDING"; start: boolean }
-  | {type: "AUDIO_URL", url: string | null}
+  | {type: "BLOB", blob: Blob | null}
 
 
 // The actual audio component state

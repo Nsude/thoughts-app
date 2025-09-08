@@ -11,64 +11,50 @@ import PlayIcon from "@/public/icons/PlayIcon";
 interface Props {
   display: boolean;
   startRecording: boolean;
-  audioUrl?: string | null; 
+  audioBlob: Blob | null; 
   handleExceedRecordLimit: () => void;
   UploadAudio: () => void;
 }
 
-export default function AudioInputModal({display, startRecording, audioUrl, UploadAudio, handleExceedRecordLimit}: Props) {
+export default function AudioInputModal({display, startRecording, audioBlob, UploadAudio, handleExceedRecordLimit}: Props) {
   const mainRef = useRef(null);
   const [audioTime, setAudioTime] = useState(0); 
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
-  const playbackDuration = useRef(0);
   const limitReached = useRef(false);
   
   const timerRef = useRef<NodeJS.Timeout>(null);
 
-  const disableControl = !(!!audioUrl); // disable control btns if audio url isn't available
-
-  const decodeAudio = async (url: string) => {
-    if (!url) return
-    const blob = await fetch(url).then(res => res.blob());
-    const arrayBuffer = await blob.arrayBuffer();
-    const audioCtx = new AudioContext();
-    const decodedAudio = audioCtx.decodeAudioData(arrayBuffer);
-
-    return decodedAudio;
-  }
-
-  // create audio element when audio url is available
-  const createAudioElem = async () => {
-    if (!audioUrl) return;
-
-    const currentAudioElem = new Audio(audioUrl);
-    audioRef.current = currentAudioElem;
-
-    const decodedAudioObject = await decodeAudio(audioUrl);
-    if (!decodedAudioObject) return;
-    playbackDuration.current = decodedAudioObject.duration;
-
-    currentAudioElem.onplay = () => {
-      setIsPlaying(true);
-    }
-
-    currentAudioElem.onpause = () => {
-      setIsPlaying(false);
-    }
-
-    currentAudioElem.ontimeupdate = () => {
-      let currentTime = currentAudioElem.currentTime.toFixed(0);
-      setAudioTime(+currentTime);
-    }
-  }
+  const disableControl = !(!!audioBlob); // disable control btns if audio url isn't available
+  const audioUrl = audioBlob !== null ? URL.createObjectURL(audioBlob) : null;
 
   useEffect(() => {
-    if (!audioUrl) return;
+    if (!audioBlob) return;
+
+    // create audio element when audio url is available
+    const createAudioElem = async () => {
+      if (!audioUrl) return;
+
+      const currentAudioElem = new Audio(audioUrl);
+      audioRef.current = currentAudioElem;
+
+      currentAudioElem.onplay = () => {
+        setIsPlaying(true);
+      }
+
+      currentAudioElem.onpause = () => {
+        setIsPlaying(false);
+      }
+
+      currentAudioElem.ontimeupdate = () => {
+        let currentTime = currentAudioElem.currentTime.toFixed(0);
+        setAudioTime(+currentTime);
+      }
+    }
 
     createAudioElem();
 
-  }, [audioUrl])
+  }, [audioBlob])
 
   // handle playback
   const handlePlayback = () => {
@@ -105,7 +91,6 @@ export default function AudioInputModal({display, startRecording, audioUrl, Uplo
   // stop the recording input when limit duration is reached
   useEffect(() => {
     if (!limitReached.current) return;
-    console.log("limit reached")
     handleExceedRecordLimit()
 
   }, [limitReached.current])

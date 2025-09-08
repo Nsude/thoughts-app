@@ -128,7 +128,7 @@ export default function Naviation() {
   const handleSignout = async () => {
     try {
       await signOut();
-      router.replace("/");
+      router.replace("/login");
     } catch (error) {
       console.log("Error signing out: ", error);
     }
