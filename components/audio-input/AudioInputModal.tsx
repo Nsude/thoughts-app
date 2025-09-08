@@ -12,15 +12,17 @@ interface Props {
   display: boolean;
   startRecording: boolean;
   audioUrl?: string | null; 
+  handleExceedRecordLimit: () => void;
   UploadAudio: () => void;
 }
 
-export default function AudioInputModal({display, startRecording, audioUrl, UploadAudio}: Props) {
+export default function AudioInputModal({display, startRecording, audioUrl, UploadAudio, handleExceedRecordLimit}: Props) {
   const mainRef = useRef(null);
   const [audioTime, setAudioTime] = useState(0); 
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const playbackDuration = useRef(0);
+  const limitReached = useRef(false);
   
   const timerRef = useRef<NodeJS.Timeout>(null);
 
@@ -85,8 +87,10 @@ export default function AudioInputModal({display, startRecording, audioUrl, Uplo
   useEffect(() => {
     if (display && startRecording) {
       startTimer();
+      setAudioTime(0);
     } else if (!startRecording || !display) {
       stopTimer();
+      limitReached.current = false; // reset limit reached
     }
 
   }, [display, startRecording])
@@ -98,9 +102,25 @@ export default function AudioInputModal({display, startRecording, audioUrl, Uplo
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // stop the recording input when limit duration is reached
+  useEffect(() => {
+    if (!limitReached.current) return;
+    console.log("limit reached")
+    handleExceedRecordLimit()
+
+  }, [limitReached.current])
+
   const startTimer = () => {
+    limitReached.current = false;
     timerRef.current = setInterval(() => {
-      setAudioTime(prev => prev + 1);
+      setAudioTime(prev => {
+        if (prev > 59) {
+          limitReached.current = true;
+          stopTimer();
+          return 0;
+        }
+        return prev + 1}
+      );
     }, 1000)
   }
 

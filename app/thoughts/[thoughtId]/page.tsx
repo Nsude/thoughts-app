@@ -174,7 +174,7 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
   
           const audioUrl = URL.createObjectURL(audioBlob);
           audioDispatch({type: "AUDIO_URL", url: audioUrl});
-          
+
         } else {
           console.error("no audio chunks to create blob from ❌")
         }
@@ -276,6 +276,7 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
               display={audioState.display}
               startRecording={audioState.startRecording}
               audioUrl={audioState.audioUrl}
+              handleExceedRecordLimit={() => stopRecording()}
               UploadAudio={() => {}}
               />
           </div>
@@ -284,16 +285,18 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
           <div className="absolute bottom-[1.125rem] right-[1.125rem] flex gap-x-1.5">
             {
               editorState.currentBlock.isEmpty && slateStatus === "idle" ?
-                <ClassicButton
-                  icon={<LogoIcon />}
-                  handleClick={() => console.info("Suprise-me clicked")} />
+                <div title="Surprise me">
+                  <ClassicButton
+                    icon={<LogoIcon />}
+                    handleClick={() => console.info("Suprise-me clicked")} />
+                </div>
                 : null
             }
 
             {/* delete button */}
             <div style={{
-              opacity: selectedVersion?.isCore ? .5 : 1,
-              pointerEvents: selectedVersion?.isCore ? "none" : "all"
+              opacity: selectedVersion?.isCore || thoughtId === "new" ? .5 : 1,
+              pointerEvents: selectedVersion?.isCore || thoughtId === "new" ? "none" : "all"
             }}>
               <ClassicButton
                 icon={<DeleteIcon />}
