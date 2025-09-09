@@ -11,8 +11,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* navigation */}
       <SlateStatusContextProvider>
         <aside className="
-        relative w-[20.5%] min-w-[18.5rem] h-full bg-myWhite rounded-tr-[20px] 
-        rounded-br-[20px] border border-border-gray/60 p-[0.9375rem] z-[5]">
+        relative w-[19%] min-w-[18rem] h-full bg-myWhite p-[0.9375rem] z-[5]">
           <Naviation />
         </aside>
 
