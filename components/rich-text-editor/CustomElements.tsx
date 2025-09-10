@@ -38,6 +38,6 @@ export function ListItemElement(props: RenderElementProps) {
 
 export function DefaultElement(props: RenderElementProps) {
   return (
-    <p {...props.attributes} className="leading-[1.5]">{props.children}</p>
+    <p {...props.attributes} className="leading-[1.5] text-[1rem] tracking-[0.03ch]">{props.children}</p>
   )
 }

@@ -33,7 +33,6 @@ interface Props {
   handleClick?: () => void;
   thoughtId: Id<"thoughts">;
   onChange: (state: {
-    content: any[],
     blockType: BlockType,
     isEmpty: boolean,
     isSlashOnly: boolean,
@@ -69,7 +68,7 @@ export default function SlateEditor({
   }, [])
 
   const lastSavedContent = useRef<any[]>([]);
-  const { slateStatus, setSlateStatus, setCurrentContent } = useSlateStatusContext();
+  const { slateStatus, setSlateStatus, setCurrentContent, currentContent } = useSlateStatusContext();
 
   // ===== DISPLAY THE SELECTED VERSION CONTENT ON FIRST LOAD =====
   useEffect(() => {
@@ -188,7 +187,6 @@ export default function SlateEditor({
 
     // call external on change
     onChange({
-      content,
       blockType: blockType as BlockType,
       isEmpty,
       isSlashOnly,
@@ -213,6 +211,22 @@ export default function SlateEditor({
 
 
   }, [onChange, handleCreateThought, thoughtId, state.isInitialised, state.isCreatingThought])
+
+  useEffect(() => {
+
+  }, [currentContent])
+
+  // display content on editor after recording in transcribed 
+  useEffect(() => {
+    if (
+      currentContent.length === 0 || 
+      !hasContentChanged(editor.children, currentContent)
+    ) return;
+
+    // update the editor 
+    Transforms.insertNodes(editor, currentContent, {at: [editor.children.length]})
+    console.info("updated editor ✅")
+  }, [currentContent])
 
   // render the selected element type
   const renderElement = useCallback((props: RenderElementProps) => {

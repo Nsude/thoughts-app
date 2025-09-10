@@ -18,6 +18,7 @@ import Thought from "./Thought";
 import { Id } from "@/convex/_generated/dataModel";
 import OptionsModal from "./OptionsModal";
 import { ThoughtId } from "../app.models";
+import { useSlateStatusContext } from "../contexts/SlateStatusContext";
 
 
 
@@ -65,6 +66,7 @@ export default function Naviation() {
   const thoughts = useQuery(api.thoughts.getUserThoughts, { isPrivate });
   const signOut = useAction(api.auth.signOut);
   const router = useRouter();
+  const {setCurrentContent} = useSlateStatusContext();
 
   // modal central state 
   const [modalState, modalDispath] = useReducer(modalReducer, initialState);
@@ -122,6 +124,7 @@ export default function Naviation() {
   }, [modalState])
 
   const handleNewThought = () => {
+    setCurrentContent([]); // reset current content
     router.replace("/thoughts/new");
   }
 
@@ -192,6 +195,7 @@ export default function Naviation() {
                 editing={modalState.isEditing === item._id}
                 modalDispath={modalDispath}
                 handleClick={() => {
+                  setCurrentContent([]) // reset current content
                   router.replace(`/thoughts/${item._id}`);
                   currentThoughtId.current = item._id;
                 }} 

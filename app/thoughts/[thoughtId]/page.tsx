@@ -54,7 +54,7 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
   const { thoughtId } = use(params);
   const placeholderRef = useRef(null);
   const editorState = useSlateEditorState(thoughtId);
-  const { slateStatus, setSlateStatus } = useSlateStatusContext();
+  const { slateStatus, setSlateStatus, currentContent, setCurrentContent } = useSlateStatusContext();
 
   // audio modal state
   const [audioState, audioDispatch] = useReducer(audioModalReducer, initialAudioModalState);
@@ -72,13 +72,11 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
 
   // Single handler for all editor changes
   const handleEditorChange = useCallback((newState: {
-    content: any[],
     blockType: BlockType,
     isEmpty: boolean,
     isSlashOnly: boolean,
     headingLevel?: number
   }) => {
-    editorState.setContent(newState.content);
     editorState.setCurrentBlock({
       type: newState.blockType,
       isEmpty: newState.isEmpty,
@@ -111,7 +109,7 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
 
       await createVersion({
         thoughtId,
-        content: editorState.content,
+        content: currentContent,
         versionNumber: versions.length + 1,
         isCore: false,
         createdAt: Date.now()
@@ -171,7 +169,6 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
         if (audioChunks.current.length > 0) {
           const audioBlob = new Blob(audioChunks.current, {type: "audio/webm"});
   
-          const audioUrl = URL.createObjectURL(audioBlob);
           audioDispatch({type: "BLOB", blob: audioBlob});
 
         } else {
@@ -197,6 +194,7 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
     mediaRecorder.current.start();
   }
 
+  // stop recording input
   const stopRecording = () => {
     if (!mediaRecorder.current) return;
 
@@ -222,10 +220,10 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
         body: audioState.blob
       })
 
+      // set transcribed audio to current slate content
       const {storageId} = await response.json();
-
-      const transcribedText = await transcribeAudio({storageId})
-      console.log(transcribedText);
+      const audioTranscribedToslateContent = await transcribeAudio({storageId});
+      setCurrentContent(audioTranscribedToslateContent);
       
     } catch (error) {
       console.error(error);

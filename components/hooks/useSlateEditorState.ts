@@ -4,7 +4,6 @@ import { Id } from "@/convex/_generated/dataModel";
 
 // ✅ Centralized editor state management
 export const useSlateEditorState = (thoughtId: Id<"thoughts">) => {
-  const [content, setContent] = useState<any[]>([]);
   const [currentBlock, setCurrentBlock] = useState({
     type: "paragraph" as BlockType,
     isEmpty: true, // checks if the entire editor is empty
@@ -33,8 +32,6 @@ export const useSlateEditorState = (thoughtId: Id<"thoughts">) => {
   }, [currentBlock]);
 
   return {
-    content,
-    setContent,
     currentBlock,
     setCurrentBlock,
     placeholderState,
