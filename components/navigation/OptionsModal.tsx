@@ -12,6 +12,7 @@ import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { ModalActions } from "./Navigation";
 import { useRouter } from "next/navigation";
+import { useSlateStatusContext } from "../contexts/SlateStatusContext";
 
 type OptionItem = {
   label: string;
@@ -30,6 +31,7 @@ interface OptionsModalProps {
 export default function OptionsModal({ 
   thoughtId, y, display, modalDispath }: OptionsModalProps
 ) {
+  const {setCurrentContent} = useSlateStatusContext();
   const deleteThought = useMutation(api.thoughts.deleleThought);
 
   const mainRef = useRef(null);
@@ -77,6 +79,7 @@ export default function OptionsModal({
       modalDispath({ type: "TOGGLE_DISPLAY", value: false })
 
       // navigate to new thought
+      setCurrentContent([]) // reset current content
       if (isDisplayed) router.replace("/thoughts/new");
 
     } catch (error) {

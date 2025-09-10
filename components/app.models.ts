@@ -47,3 +47,22 @@ export type EditorAction =
   | { type: "SAVE_START" }
   | { type: "SAVE_SUCCESS" }
   | { type: "UNSAVED_CONTENT" };
+
+// Audio modal (used in the parent component)
+export type AudioModalState = {
+  display: boolean;
+  startRecording: boolean;
+};
+
+export type AudioModalAction =
+  | { type: "DISPLAY"; display: boolean }
+  | { type: "START_RECORDING"; start: boolean }
+
+
+// The actual audio component state
+export type AudioComponentState = {
+  recordingTime: number
+}
+
+export type AudioComponentAction = 
+| {type: "RECORDING_TIME", time: number}

@@ -15,18 +15,43 @@ import MicrophoneIcon from "@/public/icons/MicrophoneIcon";
 import PlusIcon from "@/public/icons/PlusIcon";
 import TextIcon from "@/public/icons/TextIcon";
 import { useGSAP } from "@gsap/react";
-import { useMutation, useQuery } from "convex/react";
+import { useAction, useMutation, useQuery } from "convex/react";
 import gsap from "gsap";
-import { use, useCallback, useRef, useState } from "react";
-import DefaultIcon from "@/public/icons/DefaultIcon";
+import { use, useCallback, useEffect, useReducer, useRef, useState } from "react";
 import DeleteIcon from "@/public/icons/DeleteIcon";
+import AudioInputModal from "@/components/audio-input/AudioInputModal";
+import StopIcon from "@/public/icons/StopIcon";
+import { AudioModalAction, AudioModalState } from "@/components/app.models";
+
+const initialAudioModalState: AudioModalState = {
+  display: false,
+  startRecording: false,
+}
+
+const audioModalReducer = (state: AudioModalState, action: AudioModalAction) => {
+  switch(action.type) {
+    case "DISPLAY":
+      return {
+        ...state,
+        display: action.display
+      } as AudioModalState;
+    case "START_RECORDING":
+      return {
+        ...state,
+        startRecording: action.start
+      } as AudioModalState;
+  }
+}
 
 export default function ThoughtDocument({ params }: { params: Promise<{ thoughtId: Id<"thoughts"> }> }) {
   const [tab, setTab] = useState(0);
   const { thoughtId } = use(params);
   const placeholderRef = useRef(null);
   const editorState = useSlateEditorState(thoughtId);
-  const { slateStatus, setSlateStatus } = useSlateStatusContext();
+  const { slateStatus, setSlateStatus, currentContent, setCurrentContent } = useSlateStatusContext();
+
+  // audio modal state
+  const [audioState, audioDispatch] = useReducer(audioModalReducer, initialAudioModalState);
 
   // convex mutations & queries
   const createVersion = useMutation(api.thoughts.createVersion);
@@ -41,13 +66,11 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
 
   // Single handler for all editor changes
   const handleEditorChange = useCallback((newState: {
-    content: any[],
     blockType: BlockType,
     isEmpty: boolean,
     isSlashOnly: boolean,
     headingLevel?: number
   }) => {
-    editorState.setContent(newState.content);
     editorState.setCurrentBlock({
       type: newState.blockType,
       isEmpty: newState.isEmpty,
@@ -80,7 +103,7 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
 
       await createVersion({
         thoughtId,
-        content: editorState.content,
+        content: currentContent,
         versionNumber: versions.length + 1,
         isCore: false,
         createdAt: Date.now()
@@ -102,6 +125,61 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
       console.error(error)
     }
   }
+
+  // handle record tab clicked 
+  const isRecording = useRef(false);
+  const handleRecordTabClicked = useCallback( async () => {
+    if (!audioState.display) audioDispatch({type: "DISPLAY", display: true}); 
+    startRecording();
+
+  }, [audioState.display])
+
+  const startRecording = () => {
+    isRecording.current = true;
+    audioDispatch({ type: "START_RECORDING", start: true });
+  }
+
+  // stop recording input
+  const stopRecording = () => {
+    isRecording.current = false;
+    audioDispatch({ type: "START_RECORDING", start: false });
+  }
+
+  // HANDLE UPLOAD AUDIO
+  const generateUploadUrl = useMutation(api.audio.generateUploadUrl);
+  const transcribeAudio = useAction(api.audio.transcribeAudio);
+  const handleUploadAudio = async (recordedBlob: Blob | null) => {
+    try {
+      if (!recordedBlob) throw new Error("Client Error: Blob does not exit");
+      // get upload url from convex
+      const uploadUrl = await generateUploadUrl();
+
+      // upload
+      const response = await fetch(uploadUrl, {
+        method: "POST",
+        headers: {"Content-Type": recordedBlob.type},
+        body: recordedBlob
+      })
+
+      // set transcribed audio to current slate content
+      const {storageId} = await response.json();
+      const audioTranscribedToslateContent = await transcribeAudio({storageId});
+      setCurrentContent(audioTranscribedToslateContent);
+      
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  // close audio modal
+  useEffect(() => {
+    const handleMouseDown = () => {
+      if (isRecording.current) return;
+      audioDispatch({type: "DISPLAY", display: false})
+    }
+
+    window.addEventListener("mousedown", handleMouseDown);
+  }, [isRecording.current])
 
   return (
     <div>
@@ -144,31 +222,45 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
               thoughtId={thoughtId} />
           </div>
 
-          {/* Tabs */}
+          {/* ==== AUDIO AND TEXT INPUT TABS ==== */}
           <div className="absolute bottom-[0.9375rem] left-1/2 -translate-x-1/2">
             <TabButton
-              tabIcon1={<MicrophoneIcon />}
+              tabIcon1={
+                !isRecording.current ? 
+                <MicrophoneIcon /> : <StopIcon />
+              }
               tabIcon2={<TextIcon />}
+              handleTab1Click={!isRecording.current ? handleRecordTabClicked : stopRecording}
               handleClick={useCallback((tab) => setTab(tab), [])}
               preselectTab={tab}
             />
+
+            {/* Audio Input Component */}
+            <AudioInputModal 
+              display={audioState.display}
+              startRecording={audioState.startRecording}
+              handleExceedRecordLimit={() => stopRecording()}
+              uploadAudio={(audioBlob) => handleUploadAudio(audioBlob)}
+              />
           </div>
 
           {/* Suprise Me / delete version */}
           <div className="absolute bottom-[1.125rem] right-[1.125rem] flex gap-x-1.5">
             {
               editorState.currentBlock.isEmpty && slateStatus === "idle" ?
-                <ClassicButton
-                  icon={<LogoIcon />}
-                  handleClick={() => console.info("Suprise-me clicked")} />
+                <div title="Surprise me">
+                  <ClassicButton
+                    icon={<LogoIcon />}
+                    handleClick={() => console.info("Suprise-me clicked")} />
+                </div>
                 : null
             }
 
             {/* delete button */}
             <div style={{
-              opacity: selectedVersion?.isCore ? .5 : 1,
-              pointerEvents: selectedVersion?.isCore ? "none" : "all"
-              }}>
+              opacity: selectedVersion?.isCore || thoughtId === "new" ? .5 : 1,
+              pointerEvents: selectedVersion?.isCore || thoughtId === "new" ? "none" : "all"
+            }}>
               <ClassicButton
                 icon={<DeleteIcon />}
                 handleClick={handleDeleteVersion} />

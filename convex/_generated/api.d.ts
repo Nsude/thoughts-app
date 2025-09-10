@@ -14,6 +14,7 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as ResendOtp from "../ResendOtp.js";
+import type * as audio from "../audio.js";
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
 import type * as thoughts from "../thoughts.js";
@@ -29,6 +30,7 @@ import type * as users from "../users.js";
  */
 declare const fullApi: ApiFromModules<{
   ResendOtp: typeof ResendOtp;
+  audio: typeof audio;
   auth: typeof auth;
   http: typeof http;
   thoughts: typeof thoughts;

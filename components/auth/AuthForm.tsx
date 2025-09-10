@@ -125,8 +125,6 @@ export default function AuthForm({ authType }: Props) {
 
   // verify email
   const verifyEmail = useCallback(async () => {
-    if (emailOtp.length < OTPLength) return;
-
     try {
       await signIn("password", { email: form.email, code: emailOtp, flow});
       await new Promise<void>((resolve) => setTimeout(resolve, 200)); // little delay to allow email verification
@@ -255,11 +253,6 @@ export default function AuthForm({ authType }: Props) {
             </div>
         }
 
-      </div>
-
-      {/* Right side */}
-      <div className="w-full h-full bg-tab-gray rounded-2xl hidden xl:flex justify-center items-center">
-        <span className="opacity-25 text-3xl">video</span>
       </div>
     </div>
   )
