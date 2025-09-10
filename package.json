@@ -21,6 +21,7 @@
     "next": "15.4.6",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "react-voice-visualizer-react19": "^1.0.0",
     "resend": "^6.0.1",
     "slate": "^0.118.0",
     "slate-history": "^0.113.1",

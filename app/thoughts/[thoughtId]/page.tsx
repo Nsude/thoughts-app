@@ -26,7 +26,6 @@ import { AudioModalAction, AudioModalState } from "@/components/app.models";
 const initialAudioModalState: AudioModalState = {
   display: false,
   startRecording: false,
-  blob: null
 }
 
 const audioModalReducer = (state: AudioModalState, action: AudioModalAction) => {
@@ -41,11 +40,6 @@ const audioModalReducer = (state: AudioModalState, action: AudioModalAction) => 
         ...state,
         startRecording: action.start
       } as AudioModalState;
-    case "BLOB":
-      return {
-        ...state,
-        blob: action.blob
-      } as AudioModalState
   }
 }
 
@@ -134,90 +128,37 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
 
   // handle record tab clicked 
   const isRecording = useRef(false);
-  const audioChunks = useRef<any[]>([]);
-  const mediaRecorder = useRef<MediaRecorder>(null);
   const handleRecordTabClicked = useCallback( async () => {
     if (!audioState.display) audioDispatch({type: "DISPLAY", display: true}); 
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          sampleRate: 44100
-        }
-      })
-
-      // check if the browser media recorder supports the webm format
-      if (MediaRecorder.isTypeSupported("audio/webm")) {
-        mediaRecorder.current = new MediaRecorder(stream, {mimeType: "audio/webm"});
-      } else {
-        mediaRecorder.current = new MediaRecorder(stream, {mimeType: "audio/mp4"});
-      }
-
-      // clear previous chunks
-      audioChunks.current = [];
-
-      mediaRecorder.current.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          audioChunks.current.push(e.data);
-        }
-      }
-
-      // create blob then create audio url from the blob
-      mediaRecorder.current.onstop = () => {
-        if (audioChunks.current.length > 0) {
-          const audioBlob = new Blob(audioChunks.current, {type: "audio/webm"});
-  
-          audioDispatch({type: "BLOB", blob: audioBlob});
-
-        } else {
-          console.error("no audio chunks to create blob from ❌")
-        }
-      }
-
-      startRecording();
-    } catch(error) {
-      console.error(error);
-    }
-
+    startRecording();
 
   }, [audioState.display])
 
   const startRecording = () => {
-    if (!mediaRecorder.current) return console.log("media recorder not initialised ❌");
-    audioDispatch({type: "BLOB", blob: null});
-
     isRecording.current = true;
     audioDispatch({ type: "START_RECORDING", start: true });
-
-    mediaRecorder.current.start();
   }
 
   // stop recording input
   const stopRecording = () => {
-    if (!mediaRecorder.current) return;
-
     isRecording.current = false;
     audioDispatch({ type: "START_RECORDING", start: false });
-
-    mediaRecorder.current.stop();
   }
 
   // HANDLE UPLOAD AUDIO
   const generateUploadUrl = useMutation(api.audio.generateUploadUrl);
   const transcribeAudio = useAction(api.audio.transcribeAudio);
-  const handleUploadAudio = async () => {
+  const handleUploadAudio = async (recordedBlob: Blob | null) => {
     try {
-      if (!audioState.blob) throw new Error("Client Error: Blob does not exit");
+      if (!recordedBlob) throw new Error("Client Error: Blob does not exit");
       // get upload url from convex
       const uploadUrl = await generateUploadUrl();
 
       // upload
       const response = await fetch(uploadUrl, {
         method: "POST",
-        headers: {"Content-Type": audioState.blob.type},
-        body: audioState.blob
+        headers: {"Content-Type": recordedBlob.type},
+        body: recordedBlob
       })
 
       // set transcribed audio to current slate content
@@ -298,9 +239,8 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
             <AudioInputModal 
               display={audioState.display}
               startRecording={audioState.startRecording}
-              audioBlob={audioState.blob}
               handleExceedRecordLimit={() => stopRecording()}
-              UploadAudio={handleUploadAudio}
+              uploadAudio={(audioBlob) => handleUploadAudio(audioBlob)}
               />
           </div>
 

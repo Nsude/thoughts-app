@@ -7,86 +7,61 @@ import gsap from "gsap";
 import { easeInOutCubic } from "../buttons/TabButton";
 import PauseIcon from "@/public/icons/PauseIcon";
 import PlayIcon from "@/public/icons/PlayIcon";
+import { useVoiceVisualizer, VoiceVisualizer } from "react-voice-visualizer-react19";
 
 interface Props {
   display: boolean;
   startRecording: boolean;
-  audioBlob: Blob | null; 
   handleExceedRecordLimit: () => void;
-  UploadAudio: () => void;
+  uploadAudio: (audioBlob: Blob | null) => void;
 }
 
-export default function AudioInputModal({display, startRecording, audioBlob, UploadAudio, handleExceedRecordLimit}: Props) {
+export default function AudioInputModal({display, startRecording, uploadAudio, handleExceedRecordLimit}: Props) {
   const mainRef = useRef(null);
-  const [audioTime, setAudioTime] = useState(0); 
   const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
   const limitReached = useRef(false);
   
-  const timerRef = useRef<NodeJS.Timeout>(null);
+  // voice visualizer
+  const recorderControls = useVoiceVisualizer({
+    onEndAudioPlayback() {
+      setIsPlaying(false);
+    },
 
-  const disableControl = !(!!audioBlob); // disable control btns if audio url isn't available
-  const audioUrl = audioBlob !== null ? URL.createObjectURL(audioBlob) : null;
+  });
+  const {
+    startAudioPlayback,
+    stopAudioPlayback,
+    startRecording: _startRecording,
+    stopRecording,
+    recordedBlob,
+    isRecordingInProgress,
+    formattedRecordedAudioCurrentTime,
+    formattedRecordingTime
+  } = recorderControls;
 
-  useEffect(() => {
-    if (!audioBlob) return;
-
-    // create audio element when audio url is available
-    const createAudioElem = async () => {
-      if (!audioUrl) return;
-
-      const currentAudioElem = new Audio(audioUrl);
-      audioRef.current = currentAudioElem;
-
-      currentAudioElem.onplay = () => {
-        setIsPlaying(true);
-      }
-
-      currentAudioElem.onpause = () => {
-        setIsPlaying(false);
-      }
-
-      currentAudioElem.ontimeupdate = () => {
-        let currentTime = currentAudioElem.currentTime.toFixed(0);
-        setAudioTime(+currentTime);
-      }
-    }
-
-    createAudioElem();
-
-  }, [audioBlob])
 
   // handle playback
   const handlePlayback = () => {
-    if (!audioRef.current) return;
 
     // already playing
     if (isPlaying) {
-      audioRef.current.pause()
+      stopAudioPlayback();
+      setIsPlaying(false)
     } else {
-      audioRef.current.play();
+      startAudioPlayback();
+      setIsPlaying(true)
     }
   }
-
 
   // call start and stop recording functions
   useEffect(() => {
     if (display && startRecording) {
-      startTimer();
-      setAudioTime(0);
+      _startRecording();
     } else if (!startRecording || !display) {
-      stopTimer();
-      limitReached.current = false; // reset limit reached
+      stopRecording();
     }
 
   }, [display, startRecording])
-
-  // Format time display
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
 
   // stop the recording input when limit duration is reached
   useEffect(() => {
@@ -94,29 +69,6 @@ export default function AudioInputModal({display, startRecording, audioBlob, Upl
     handleExceedRecordLimit()
 
   }, [limitReached.current])
-
-  const startTimer = () => {
-    limitReached.current = false;
-    timerRef.current = setInterval(() => {
-      setAudioTime(prev => {
-        if (prev > 59) {
-          limitReached.current = true;
-          stopTimer();
-          return 0;
-        }
-        return prev + 1}
-      );
-    }, 1000)
-  }
-
-  const stopTimer = () => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-      setAudioTime(0);
-    }
-  }
-
 
   // display and hide modal
   useGSAP(() => {
@@ -136,7 +88,7 @@ export default function AudioInputModal({display, startRecording, audioBlob, Upl
         scale: 0,
         duration: .4,
         ease: easeInOutCubic
-      }).then(() => setAudioTime(0))
+      })
     }
 
   }, {dependencies: [display], scope: mainRef})
@@ -153,24 +105,42 @@ export default function AudioInputModal({display, startRecording, audioBlob, Upl
         
         {/* Recording time & control button */}
         <div 
-          className="absolute flex items-center gap-x-0.5">
+          className="
+            absolute flex items-center gap-x-0.5 z-1 bg-myWhite/10 pl-1 pr-3 rounded-[6px]
+            backdrop-blur-[25px]
+            ">
           <button 
-            disabled={disableControl}
+            disabled={!(!!recordedBlob)}
             onClick={handlePlayback}
             className="my-audioControlBtn flex items-center justify-center w-[1.5rem] aspect-square">
             { isPlaying ? <PauseIcon /> : <PlayIcon />}
           </button>
-          <span>{formatTime(audioTime)}</span>
+          <span>{
+            isRecordingInProgress ? formattedRecordingTime : 
+            formattedRecordedAudioCurrentTime
+          }</span>
         </div>
 
         {/* Audio Visualizer */}
-        <div></div>
+        <div className="absolute left-0 right-0 z-0">
+          <VoiceVisualizer 
+            controls={recorderControls} 
+            isControlPanelShown={false}
+            height={"20px"}
+            width={"100%"}
+            mainBarColor="#DDD"
+            secondaryBarColor="#9D57F9"
+            animateCurrentPick={true}
+            isProgressIndicatorTimeShown={false}
+            isProgressIndicatorTimeOnHoverShown={false}
+            />
+        </div>
 
       </div>
 
       {/* Send Button */}
       <button 
-        onClick={UploadAudio}
+        onClick={() => uploadAudio(recordedBlob)}
         className="h-[2.25rem] pl-0.5 aspect-square bg-myWhite border-tab-gray border-3 
         flex items-center justify-between rounded-full">
         <UploadIcon />

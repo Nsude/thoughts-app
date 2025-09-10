@@ -145,7 +145,7 @@ export const convertTranscriptionToSlate = action({
           ]
         },
         {
-          "type": "bulleted-list",
+          "type": "bullet-list",
           "children": [
             {
               "type": "list-item",
