@@ -6,7 +6,7 @@ import InputComponent from "./InputComponent";
 import GoogleIcon from "@/public/icons/GoogleIcon";
 import GithubIcon from "@/public/icons/GithubIcon";
 import Logo from "../Logo";
-import { AuthType, AuthFormState, authFormAction, FormProps, FormValidation } from "../app.models";
+import { AuthType, AuthFormState, authFormAction, FormValidation } from "../app.models";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useCallback, useReducer } from "react";
 import { useMutation } from "convex/react";
@@ -56,6 +56,8 @@ const initialState = (authType: AuthType): AuthFormState => ({
   emailOtp: "",
   resendTimer: 30,
   error: "",
+  pressedAuthButtonId: "",
+  status: "idle"
 });
 
 function reducer(state: AuthFormState, action: authFormAction): AuthFormState {
@@ -74,6 +76,10 @@ function reducer(state: AuthFormState, action: authFormAction): AuthFormState {
       return { ...state, resendTimer: action.time };
     case "ERROR":
       return { ...state, error: action.msg };
+    case "PRESSED_AUTH_BUTTON":
+      return {...state, pressedAuthButtonId: action.targetId};
+    case "STATUS":
+      return {...state, status: action.status};
     default:
       return state;
   }
@@ -113,8 +119,10 @@ export default function AuthForm({ authType }: Props) {
   };
 
   // initial email auth
-  const emailAuth = async () => {
+  const emailAuth = async (targetId: string) => {
     if (!isFormValid()) return;
+    dispatch({type: "PRESSED_AUTH_BUTTON", targetId})
+    dispatch({type: "STATUS", status: "loading"});
     dispatch({ type: "ERROR", msg: "" });
 
     try {
@@ -124,6 +132,7 @@ export default function AuthForm({ authType }: Props) {
         dispatch({ type: "FLOW", flow: "email-verification" });
       }
     } catch {
+      dispatch({ type: "STATUS", status: "error"});
       return dispatch({ type: "ERROR", msg: "invalid email or password, please try again." });
     }
 
@@ -131,21 +140,43 @@ export default function AuthForm({ authType }: Props) {
   };
 
   // verify email
-  const verifyEmail = useCallback(async () => {
+  const verifyEmail = useCallback(async (targetId: string) => {
+    dispatch({type: "STATUS", status: "loading"});
+    dispatch({type: "PRESSED_AUTH_BUTTON", targetId});
+
     try {
       await signIn("password", { email: state.form.email, code: state.emailOtp, flow: state.flow });
+
+      // wait to avoid updating a profile that doesn't yet exit
       await new Promise<void>((resolve) => setTimeout(resolve, 200));
       await updateProfile({ name: state.form.name });
       dispatch({ type: "RESET_FORM", reset: true });
+
       router.replace("/thoughts/new");
     } catch {
+      dispatch({type: "STATUS", status: "error"});
       dispatch({ type: "ERROR", msg: "Couldn't verify email at this time, try again." });
     }
+
   }, [state.form, state.emailOtp, state.flow, updateProfile, signIn, router]);
 
   const updateFormValidation = (field: keyof FormValidation, isValid: boolean) => {
     dispatch({ type: "FORM_VALIDATION", isFormValid: { ...state.isValidProp, [field]: isValid } });
   };
+
+  // google sign in
+  const authProviderSignIn = async (provider: "github" | "google", id: string) => {
+    dispatch({type: "PRESSED_AUTH_BUTTON", targetId: id});
+
+    try {
+      dispatch({type: "STATUS", status: "loading"});
+      await signIn(provider);
+    } catch (error) {
+      dispatch({ type: "STATUS", status: "error" });
+      dispatch({type: "ERROR", msg: "Something went wrong, please try again"});
+      console.error(error);
+    }
+  }
 
   return (
     <div className="flex w-full h-screen items-center p-[0.75rem]">
@@ -171,14 +202,20 @@ export default function AuthForm({ authType }: Props) {
         <div className="flex flex-col gap-y-[1.5625rem]">
           <div className="flex gap-x-1 items-center">
             <AuthProviderButton
+              id="google-button"
+              targetId={state.pressedAuthButtonId}
+              status={state.status}
               label="Google"
               icon={<GoogleIcon />}
-              handleClick={useCallback(() => signIn("google"), [])}
+              handleClick={() => authProviderSignIn("google", "google-button")}
             />
             <AuthProviderButton
+              id="github-button"
+              targetId={state.pressedAuthButtonId}
+              status={state.status}
               label="Github"
               icon={<GithubIcon />}
-              handleClick={useCallback(() => signIn("github"), [])}
+              handleClick={() => authProviderSignIn("github", "github-button")}
             />
           </div>
 
@@ -218,7 +255,14 @@ export default function AuthForm({ authType }: Props) {
               onValidationChange={(isValid) => updateFormValidation("password", isValid)}
             />
 
-            <AuthProviderButton label={auth.submitLabel} handleClick={emailAuth} disabled={!isFormValid()} />
+            <AuthProviderButton 
+              id="email-auth-button"
+              targetId={state.pressedAuthButtonId}
+              status={state.status}
+              label={auth.submitLabel} 
+              handleClick={() => emailAuth("email-auth-button")} 
+              disabled={!isFormValid()} />
+              
           </form>
         ) : (
           <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-y-[1.5625rem] mb-[1.5625rem]">
@@ -229,7 +273,13 @@ export default function AuthForm({ authType }: Props) {
               reset={true}
               onChange={(value) => dispatch({ type: "EMAIL_OTP", otp: value })}
             />
-            <AuthProviderButton label={auth.submitLabel} handleClick={verifyEmail} />
+            <AuthProviderButton 
+              id="verify-email-button"
+              targetId={state.pressedAuthButtonId}
+              status={state.status}
+              label={auth.submitLabel} 
+              handleClick={() => verifyEmail("verify-email-button")} 
+              />
           </form>
         )}
 
@@ -243,7 +293,7 @@ export default function AuthForm({ authType }: Props) {
         ) : (
           <div className="flex gap-x-1">
             <button
-              onClick={emailAuth}
+              onClick={() => emailAuth("")}
               disabled={state.resendTimer > 1}
               className="underline opacity-40 hover:opacity-100 transition-[opacity] duration-[200ms]"
               style={{ pointerEvents: state.resendTimer > 1 ? "none" : "all" }}

@@ -32,7 +32,9 @@ export type AuthFormState = {
   flow: AuthFlow,
   emailOtp: string,
   resendTimer: number,
-  error: string
+  error: string,
+  pressedAuthButtonId: string,
+  status: ButtonStatus
 }
 
 export type authFormAction = 
@@ -43,6 +45,8 @@ export type authFormAction =
 | {type: "EMAIL_OTP", otp: string}
 | {type: "RESEND_TIMER", time: number}
 | {type: "ERROR", msg: string}
+| {type: "PRESSED_AUTH_BUTTON", targetId: string}
+| {type: "STATUS", status: ButtonStatus}
 
 // thoughts
 export type Thought = Doc<"thoughts">;
