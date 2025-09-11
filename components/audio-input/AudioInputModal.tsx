@@ -8,19 +8,27 @@ import { easeInOutCubic } from "../buttons/TabButton";
 import PauseIcon from "@/public/icons/PauseIcon";
 import PlayIcon from "@/public/icons/PlayIcon";
 import { useVoiceVisualizer, VoiceVisualizer } from "react-voice-visualizer-react19";
+import { ButtonStatus } from "../app.models";
+import LoadingIcon from "@/public/icons/LoadingIcon";
 
 interface Props {
   display: boolean;
   startRecording: boolean;
   handleExceedRecordLimit: () => void;
   uploadAudio: (audioBlob: Blob | null) => void;
+  status: ButtonStatus;
+  targetId: string;
 }
 
-export default function AudioInputModal({display, startRecording, uploadAudio, handleExceedRecordLimit}: Props) {
+export default function AudioInputModal({ 
+  display, startRecording, uploadAudio, 
+  handleExceedRecordLimit, status, targetId }: Props) {
   const mainRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const limitReached = useRef(false);
-  
+  const uploadIconCon = useRef(null);
+  const isLoading = targetId === "upload-button" && status === "loading"
+
   // voice visualizer
   const recorderControls = useVoiceVisualizer({
     onEndAudioPlayback() {
@@ -91,10 +99,24 @@ export default function AudioInputModal({display, startRecording, uploadAudio, h
       })
     }
 
-  }, {dependencies: [display], scope: mainRef})
+  }, { dependencies: [display], scope: mainRef })
+
+  // animate upload icon
+  const animateUploadIcon = (mouseIn: boolean) => {
+    if (!uploadIconCon.current) return;
+    const iconCon = uploadIconCon.current as HTMLSpanElement;
+    const ease = "power3.inOut";
+    const duration = .3;
+
+    gsap.to(iconCon, {
+      yPercent: mouseIn ? -50 : 0,
+      duration,
+      ease
+    })
+  }
 
   return (
-    <div 
+    <div
       onMouseDown={(e) => e.stopPropagation()}
       ref={mainRef} className="absolute scale-0 top-[0%] -translate-x-[20%] h-[3rem] w-fit flex 
     items-center py-0.5 gap-x-[0.25rem]">
@@ -102,29 +124,29 @@ export default function AudioInputModal({display, startRecording, uploadAudio, h
       <div className="
         relative w-[11.125rem] h-full bg-myWhite rounded-full border-tab-gray border-3
         flex items-center px-[0.75rem] text-label-small">
-        
+
         {/* Recording time & control button */}
-        <div 
+        <div
           className="
             absolute flex items-center gap-x-0.5 z-1 bg-myWhite/10 pl-1 pr-3 rounded-[6px]
             backdrop-blur-[25px]
             ">
-          <button 
+          <button
             disabled={!(!!recordedBlob)}
             onClick={handlePlayback}
             className="my-audioControlBtn flex items-center justify-center w-[1.5rem] aspect-square">
-            { isPlaying ? <PauseIcon /> : <PlayIcon />}
+            {isPlaying ? <PauseIcon /> : <PlayIcon />}
           </button>
           <span>{
-            isRecordingInProgress ? formattedRecordingTime : 
-            formattedRecordedAudioCurrentTime
+            isRecordingInProgress ? formattedRecordingTime :
+              formattedRecordedAudioCurrentTime
           }</span>
         </div>
 
         {/* Audio Visualizer */}
         <div className="absolute left-0 right-0 z-0">
-          <VoiceVisualizer 
-            controls={recorderControls} 
+          <VoiceVisualizer
+            controls={recorderControls}
             isControlPanelShown={false}
             height={"20px"}
             width={"100%"}
@@ -133,17 +155,30 @@ export default function AudioInputModal({display, startRecording, uploadAudio, h
             animateCurrentPick={true}
             isProgressIndicatorTimeShown={false}
             isProgressIndicatorTimeOnHoverShown={false}
-            />
+          />
         </div>
 
       </div>
 
       {/* Send Button */}
-      <button 
+      <button
+        onMouseEnter={() => animateUploadIcon(true)}
+        onMouseLeave={() => animateUploadIcon(false)}
         onClick={() => uploadAudio(recordedBlob)}
-        className="h-[2.25rem] pl-0.5 aspect-square bg-myWhite border-tab-gray border-3 
-        flex items-center justify-between rounded-full">
-        <UploadIcon />
+        className="relative h-[2.25rem] pl-0.5 aspect-square bg-myWhite border-tab-gray border-3 flex items-center justify-between rounded-full overflow-clip">
+        
+        <span 
+          style={{opacity: isLoading ? 0 : 1}}
+          ref={uploadIconCon} className="flex flex-col justify-center translate-y-1/4">
+          <span><UploadIcon /></span>
+          <span><UploadIcon /></span>
+        </span>
+
+        <span 
+          style={{opacity: isLoading ? 1 : 0}} 
+          className="absolute pointer-events-none z-10 left-1/2 -translate-x-1/2">
+          <LoadingIcon />
+        </span>
       </button>
     </div>
   )

@@ -89,11 +89,15 @@ export type EditorAction =
 export type AudioModalState = {
   display: boolean;
   startRecording: boolean;
+  targetId: string,
+  status: ButtonStatus
 };
 
 export type AudioModalAction =
   | { type: "DISPLAY"; display: boolean }
   | { type: "START_RECORDING"; start: boolean }
+  | { type: "PRESSED_BUTTON"; targetId: string }
+  | { type: "STATUS"; status: ButtonStatus }
 
 
 // The actual audio component state

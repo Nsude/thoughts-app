@@ -26,20 +26,20 @@ import { AudioModalAction, AudioModalState } from "@/components/app.models";
 const initialAudioModalState: AudioModalState = {
   display: false,
   startRecording: false,
+  targetId: "",
+  status: "idle"
 }
 
-const audioModalReducer = (state: AudioModalState, action: AudioModalAction) => {
+const audioModalReducer = (state: AudioModalState, action: AudioModalAction):AudioModalState => {
   switch(action.type) {
     case "DISPLAY":
-      return {
-        ...state,
-        display: action.display
-      } as AudioModalState;
+      return { ...state, display: action.display }
     case "START_RECORDING":
-      return {
-        ...state,
-        startRecording: action.start
-      } as AudioModalState;
+      return { ...state, startRecording: action.start };
+    case "PRESSED_BUTTON":
+      return {...state, targetId: action.targetId};
+    case "STATUS":
+      return {...state, status: action.status}
   }
 }
 
@@ -149,6 +149,9 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
   const generateUploadUrl = useMutation(api.audio.generateUploadUrl);
   const transcribeAudio = useAction(api.audio.transcribeAudio);
   const handleUploadAudio = async (recordedBlob: Blob | null) => {
+    audioDispatch({type: "PRESSED_BUTTON", targetId: "upload-button"});
+    audioDispatch({type: "STATUS", status: "loading"});
+
     try {
       if (!recordedBlob) throw new Error("Client Error: Blob does not exit");
       // get upload url from convex
@@ -165,6 +168,9 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
       const {storageId} = await response.json();
       const audioTranscribedToslateContent = await transcribeAudio({storageId});
       setCurrentContent(audioTranscribedToslateContent);
+
+      audioDispatch({type: "STATUS", status: "idle"});
+      audioDispatch({type: "DISPLAY", display: false});
       
     } catch (error) {
       console.error(error);
@@ -191,7 +197,7 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
       </div>
 
       <div className="flex justify-center items-center h-[83vh]">
-        <div className="relative h-full w-[42.375rem] bg-myWhite border border-border-gray/60 rounded-2xl pt-[4.6rem]">
+        <div className="relative h-full w-[42.375rem] bg-myWhite border border-border-gray/50 rounded-2xl pt-[4.6rem]">
 
           {/* Header */}
           <div className="absolute top-0 left-0 w-full px-[1.125rem] h-[4.25rem] flex justify-between items-center">
@@ -241,6 +247,8 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
               startRecording={audioState.startRecording}
               handleExceedRecordLimit={() => stopRecording()}
               uploadAudio={(audioBlob) => handleUploadAudio(audioBlob)}
+              targetId={audioState.targetId}
+              status={audioState.status}
               />
           </div>
 
