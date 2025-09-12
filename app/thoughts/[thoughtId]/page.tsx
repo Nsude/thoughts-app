@@ -22,6 +22,7 @@ import DeleteIcon from "@/public/icons/DeleteIcon";
 import AudioInputModal from "@/components/audio-input/AudioInputModal";
 import StopIcon from "@/public/icons/StopIcon";
 import { AudioModalAction, AudioModalState } from "@/components/app.models";
+import { useConfirmation } from "@/components/utility/ConfirmationContext";
 
 const initialAudioModalState: AudioModalState = {
   display: false,
@@ -55,6 +56,7 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
     setCurrentContent,
     setIsSourceAudio
   } = useSlateStatusContext();
+  const {confirmAction} = useConfirmation();
 
   // audio modal state
   const [audioState, audioDispatch] = useReducer(audioModalReducer, initialAudioModalState);
@@ -124,6 +126,9 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
 
   // handle delete version
   const handleDeleteVersion = async () => {
+    const confirmDelete = await confirmAction();
+    if (!confirmDelete) return; 
+    
     try {
       setSlateStatus("deleting");
       await deleteVersion({ thoughtId: thoughtId })

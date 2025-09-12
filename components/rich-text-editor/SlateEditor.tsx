@@ -18,7 +18,7 @@ import {
   editorReducer, 
   getContentLength, 
   getCurrentBlockType, 
-  getCurrentHeadingLevel } from "../utility/slateEditorFunctions";
+  getCurrentHeadingLevel } from "./slateEditorFunctions";
 import { EditorState } from "../app.models";
 
 // ==== MAIN EDITOR COMPONENT ====

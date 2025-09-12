@@ -12,7 +12,7 @@ import { useCallback, useReducer } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
-import Toast from "../utils/Toast";
+import Toast from "../utility/Toast";
 import DefaultIcon from "@/public/icons/DefaultIcon";
 
 // ==== Auth Map ====

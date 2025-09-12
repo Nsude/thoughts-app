@@ -13,13 +13,13 @@ import { api } from "@/convex/_generated/api";
 import { ModalActions } from "./Navigation";
 import { useRouter } from "next/navigation";
 import { useSlateStatusContext } from "../contexts/SlateStatusContext";
+import { useConfirmation } from "../utility/ConfirmationContext";
 
 type OptionItem = {
   label: string;
   icon: any;
   handleClick: (thoughtId: Id<"thoughts">) => void;
 }
-
 
 interface OptionsModalProps {
   thoughtId: Id<"thoughts">;
@@ -31,6 +31,7 @@ interface OptionsModalProps {
 export default function OptionsModal({ 
   thoughtId, y, display, modalDispath }: OptionsModalProps
 ) {
+  const { confirmAction } = useConfirmation();
   const {setCurrentContent} = useSlateStatusContext();
   const deleteThought = useMutation(api.thoughts.deleleThought);
 
@@ -72,6 +73,9 @@ export default function OptionsModal({
   }, [])
 
   const handleDelete = useCallback(async (thoughtId: Id<"thoughts">) => {
+    const confirmDelete = await confirmAction();
+    if (!confirmDelete) return
+      
     try {
       const displayedThoughtId = location.href.split("/thoughts/")[1];
       const isDisplayed = displayedThoughtId === thoughtId;
