@@ -47,7 +47,6 @@ export default function AudioInputModal({
     formattedRecordingTime
   } = recorderControls;
 
-
   // handle playback
   const handlePlayback = () => {
 

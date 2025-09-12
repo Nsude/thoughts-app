@@ -48,7 +48,13 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
   const { thoughtId } = use(params);
   const placeholderRef = useRef(null);
   const editorState = useSlateEditorState(thoughtId);
-  const { slateStatus, setSlateStatus, currentContent, setCurrentContent } = useSlateStatusContext();
+  const { 
+    slateStatus, 
+    setSlateStatus, 
+    currentContent, 
+    setCurrentContent,
+    setIsSourceAudio
+  } = useSlateStatusContext();
 
   // audio modal state
   const [audioState, audioDispatch] = useReducer(audioModalReducer, initialAudioModalState);
@@ -167,6 +173,7 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
       // set transcribed audio to current slate content
       const {storageId} = await response.json();
       const audioTranscribedToslateContent = await transcribeAudio({storageId});
+      setIsSourceAudio(true);
       setCurrentContent(audioTranscribedToslateContent);
 
       audioDispatch({type: "STATUS", status: "idle"});
@@ -183,7 +190,7 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
       if (isRecording.current) return;
       audioDispatch({type: "DISPLAY", display: false})
     }
-
+    
     window.addEventListener("mousedown", handleMouseDown);
   }, [isRecording.current])
 

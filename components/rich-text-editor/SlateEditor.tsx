@@ -68,7 +68,14 @@ export default function SlateEditor({
   }, [])
 
   const lastSavedContent = useRef<any[]>([]);
-  const { slateStatus, setSlateStatus, setCurrentContent, currentContent } = useSlateStatusContext();
+  const { 
+    slateStatus, 
+    setSlateStatus, 
+    setCurrentContent, 
+    setIsSourceAudio, 
+    isSourceAudio,
+    currentContent 
+  } = useSlateStatusContext();
 
   // ===== DISPLAY THE SELECTED VERSION CONTENT ON FIRST LOAD =====
   useEffect(() => {
@@ -177,6 +184,7 @@ export default function SlateEditor({
   // ===== HANDLE VALUE CHANGE =====
   const handleSlateValueChange = useCallback(async (content: any[]) => {
     if (!content) return;
+    setIsSourceAudio(false);
     setCurrentContent(content)
 
     // set states for useSlateEditorState hook
@@ -220,11 +228,13 @@ export default function SlateEditor({
   useEffect(() => {
     if (
       currentContent.length === 0 || 
-      !hasContentChanged(editor.children, currentContent)
+      !hasContentChanged(editor.children, currentContent) ||
+      !isSourceAudio
     ) return;
 
     // update the editor 
-    Transforms.insertNodes(editor, currentContent, {at: [editor.children.length]})
+    Transforms.insertNodes(editor, currentContent, {at: [editor.children.length]});
+    setIsSourceAudio(false);
     console.info("updated editor ✅")
   }, [currentContent])
 
