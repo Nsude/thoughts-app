@@ -39,9 +39,21 @@ export default function Thought({
 
   // preselect title to rename 
   useEffect(() => {
-    if (!editing) return;
-    inputRef.current?.focus();
-    inputRef.current?.select();
+    if (!inputRef.current) return;
+    const button = inputRef.current.closest("button");
+    if (!button) return;
+
+    if (!editing) {
+      button.classList.contains("is-renaming") ? 
+      button.classList.remove("is-renaming") : null;
+      inputRef.current.blur();
+    } else {
+      inputRef.current.focus();
+      inputRef.current.select();
+      button.classList.add("is-renaming")
+    }
+
+
   }, [editing])
 
   // update title 
@@ -87,6 +99,7 @@ export default function Thought({
 
         <span
           role="button"
+          style={{opacity: editing ? 0 : 1}}
           onMouseDown={(e) => e.stopPropagation()}
           onClick={(e) => { e.stopPropagation(); handleEditClick(e) }} >
           <ThreeDotIcon />
