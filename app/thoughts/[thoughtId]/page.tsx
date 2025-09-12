@@ -22,24 +22,25 @@ import DeleteIcon from "@/public/icons/DeleteIcon";
 import AudioInputModal from "@/components/audio-input/AudioInputModal";
 import StopIcon from "@/public/icons/StopIcon";
 import { AudioModalAction, AudioModalState } from "@/components/app.models";
+import { useConfirmation } from "@/components/utility/ConfirmationContext";
 
 const initialAudioModalState: AudioModalState = {
   display: false,
   startRecording: false,
+  targetId: "",
+  status: "idle"
 }
 
-const audioModalReducer = (state: AudioModalState, action: AudioModalAction) => {
+const audioModalReducer = (state: AudioModalState, action: AudioModalAction):AudioModalState => {
   switch(action.type) {
     case "DISPLAY":
-      return {
-        ...state,
-        display: action.display
-      } as AudioModalState;
+      return { ...state, display: action.display }
     case "START_RECORDING":
-      return {
-        ...state,
-        startRecording: action.start
-      } as AudioModalState;
+      return { ...state, startRecording: action.start };
+    case "PRESSED_BUTTON":
+      return {...state, targetId: action.targetId};
+    case "STATUS":
+      return {...state, status: action.status}
   }
 }
 
@@ -48,7 +49,14 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
   const { thoughtId } = use(params);
   const placeholderRef = useRef(null);
   const editorState = useSlateEditorState(thoughtId);
-  const { slateStatus, setSlateStatus, currentContent, setCurrentContent } = useSlateStatusContext();
+  const { 
+    slateStatus, 
+    setSlateStatus, 
+    currentContent, 
+    setCurrentContent,
+    setIsSourceAudio
+  } = useSlateStatusContext();
+  const {confirmAction} = useConfirmation();
 
   // audio modal state
   const [audioState, audioDispatch] = useReducer(audioModalReducer, initialAudioModalState);
@@ -118,6 +126,9 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
 
   // handle delete version
   const handleDeleteVersion = async () => {
+    const confirmDelete = await confirmAction();
+    if (!confirmDelete) return; 
+    
     try {
       setSlateStatus("deleting");
       await deleteVersion({ thoughtId: thoughtId })
@@ -149,6 +160,9 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
   const generateUploadUrl = useMutation(api.audio.generateUploadUrl);
   const transcribeAudio = useAction(api.audio.transcribeAudio);
   const handleUploadAudio = async (recordedBlob: Blob | null) => {
+    audioDispatch({type: "PRESSED_BUTTON", targetId: "upload-button"});
+    audioDispatch({type: "STATUS", status: "loading"});
+
     try {
       if (!recordedBlob) throw new Error("Client Error: Blob does not exit");
       // get upload url from convex
@@ -164,7 +178,11 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
       // set transcribed audio to current slate content
       const {storageId} = await response.json();
       const audioTranscribedToslateContent = await transcribeAudio({storageId});
+      setIsSourceAudio(true);
       setCurrentContent(audioTranscribedToslateContent);
+
+      audioDispatch({type: "STATUS", status: "idle"});
+      audioDispatch({type: "DISPLAY", display: false});
       
     } catch (error) {
       console.error(error);
@@ -177,7 +195,7 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
       if (isRecording.current) return;
       audioDispatch({type: "DISPLAY", display: false})
     }
-
+    
     window.addEventListener("mousedown", handleMouseDown);
   }, [isRecording.current])
 
@@ -191,7 +209,7 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
       </div>
 
       <div className="flex justify-center items-center h-[83vh]">
-        <div className="relative h-full w-[42.375rem] bg-myWhite border border-border-gray/60 rounded-2xl pt-[4.6rem]">
+        <div className="relative h-full w-[42.375rem] bg-myWhite border border-border-gray/50 rounded-2xl pt-[4.6rem]">
 
           {/* Header */}
           <div className="absolute top-0 left-0 w-full px-[1.125rem] h-[4.25rem] flex justify-between items-center">
@@ -241,6 +259,8 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
               startRecording={audioState.startRecording}
               handleExceedRecordLimit={() => stopRecording()}
               uploadAudio={(audioBlob) => handleUploadAudio(audioBlob)}
+              targetId={audioState.targetId}
+              status={audioState.status}
               />
           </div>
 

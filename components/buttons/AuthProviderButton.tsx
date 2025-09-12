@@ -1,25 +1,54 @@
 "use client";
 
 import "@/components/buttons/buttons.css";
+import { ButtonStatus } from "../app.models";
+import LoadingIcon from "@/public/icons/LoadingIcon";
+import ErrorIcon from "@/public/icons/ErrorIcon";
+import { useEffect } from "react";
 
 interface Props {
   label?: string;
   icon?: React.ReactNode;
+  id: string;
+  targetId: string;
+  status: ButtonStatus;
   disabled?: boolean;
   handleClick: () => void;
 }
 
-export default function AuthProviderButton({label, icon, disabled,handleClick}: Props) {
+export default function AuthProviderButton({
+  label, icon, id, status, targetId, 
+  disabled, handleClick}: Props) {
+    const isLoading = id === targetId && status === "loading";
+    const isError = id === targetId && status === "error"
+
   return (
     <button
       disabled={disabled}
       onClick={handleClick}
-      className={`my-authProviderButton
+      className={`my-authProviderButton relative
         flex items-center justify-center gap-x-[0.25rem] border border-myGray 
         ${label ? 'pl-[0.75rem] pr-[0.94rem]' : 'pl-1 aspect-square'}
         ${!icon ? 'w-full h-[2.5635rem]' : ''}
         h-[2.5rem] rounded-[0.375rem] bg-myWhite cursor-pointer`}>
-      <span>{icon}</span>
+      {/* status === "loading" */}
+      <span
+        style={{ opacity: isLoading ? 1 : 0 }}
+        className="absolute left-[0.75rem] top-1/2 -translate-y-1/2 pointer-events-none">
+        <LoadingIcon />
+      </span>
+
+      {/* status === "error" */}
+      <span
+        style={{ opacity: isError ? 1 : 0 }}
+        className="absolute left-[0.75rem] top-1/2 -translate-y-1/2 pointer-events-none">
+        <ErrorIcon color="#FE7A33" />
+      </span>
+      <span
+        style={{opacity: isLoading || isError ? 0 : 1}}
+        >
+        {icon}
+      </span>
       <span>{label}</span>
     </button>
   )

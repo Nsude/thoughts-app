@@ -57,6 +57,7 @@ button.my-navMenuItem {
 }
 
 /* button.my-thoughtItem:hover, */
+button.my-thoughtItem.is-renaming,
 button.my-thoughtItem:hover,
 button.my-navMenuItem:hover {
   background: var(--gray);

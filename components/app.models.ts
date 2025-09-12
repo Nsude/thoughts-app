@@ -9,7 +9,44 @@ export interface Icon {
 
 export type AccountTypes = "Freeloader" | "Premium";
 
-export type AuthType = "signUp" | "login";
+// Auth form types
+export interface FormProps {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export interface FormValidation {
+  name: boolean;
+  email: boolean;
+  password: boolean;
+}
+
+export type AuthType = "signUp" | "signIn";
+export type AuthFlow = "signUp" | "signIn" | "email-verification";
+
+export type AuthFormState = {
+  resetForm: boolean,
+  form: FormProps,
+  isValidProp: FormValidation,
+  flow: AuthFlow,
+  emailOtp: string,
+  resendTimer: number,
+  error: string,
+  pressedAuthButtonId: string,
+  status: ButtonStatus
+}
+
+export type authFormAction = 
+| {type: "RESET_FORM", reset: boolean}
+| {type: "FORM", props: FormProps}
+| {type: "FORM_VALIDATION", isFormValid: FormValidation}
+| {type: "FLOW", flow: AuthFlow}
+| {type: "EMAIL_OTP", otp: string}
+| {type: "RESEND_TIMER", time: number}
+| {type: "ERROR", msg: string}
+| {type: "PRESSED_AUTH_BUTTON", targetId: string}
+| {type: "STATUS", status: ButtonStatus}
 
 // thoughts
 export type Thought = Doc<"thoughts">;
@@ -52,11 +89,15 @@ export type EditorAction =
 export type AudioModalState = {
   display: boolean;
   startRecording: boolean;
+  targetId: string,
+  status: ButtonStatus
 };
 
 export type AudioModalAction =
   | { type: "DISPLAY"; display: boolean }
   | { type: "START_RECORDING"; start: boolean }
+  | { type: "PRESSED_BUTTON"; targetId: string }
+  | { type: "STATUS"; status: ButtonStatus }
 
 
 // The actual audio component state
@@ -66,3 +107,7 @@ export type AudioComponentState = {
 
 export type AudioComponentAction = 
 | {type: "RECORDING_TIME", time: number}
+
+
+// button status
+export type ButtonStatus = "idle" | "loading" | "error";

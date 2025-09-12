@@ -1,4 +1,3 @@
-// Updated AuthForm component
 "use client";
 
 import Link from "next/link";
@@ -7,16 +6,16 @@ import InputComponent from "./InputComponent";
 import GoogleIcon from "@/public/icons/GoogleIcon";
 import GithubIcon from "@/public/icons/GithubIcon";
 import Logo from "../Logo";
-import { AuthType } from "../app.models";
+import { AuthType, AuthFormState, authFormAction, FormValidation } from "../app.models";
 import { useAuthActions } from "@convex-dev/auth/react";
-import { useCallback, useState } from "react";
+import { useCallback, useReducer } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
-import { OTPLength } from "@/convex/ResendOtp";
-import Toast from "../utils/Toast";
+import Toast from "../utility/Toast";
 import DefaultIcon from "@/public/icons/DefaultIcon";
 
+// ==== Auth Map ====
 type AuthDetails = {
   label: string,
   submitLabel: string;
@@ -37,7 +36,7 @@ const authTypeMap: Record<AuthType, AuthDetails> = {
       msg: "Got an account?"
     }
   },
-  login: {
+  signIn: {
     label: "Log in",
     submitLabel: "Log in with email",
     redirect: {
@@ -48,137 +47,176 @@ const authTypeMap: Record<AuthType, AuthDetails> = {
   },
 }
 
+// ==== Reducer ====
+const initialState = (authType: AuthType): AuthFormState => ({
+  resetForm: false,
+  form: { name: "", email: "", password: "" },
+  isValidProp: { name: false, email: false, password: false },
+  flow: authType === "signUp" ? "signUp" : "signIn",
+  emailOtp: "",
+  resendTimer: 30,
+  error: "",
+  pressedAuthButtonId: "",
+  status: "idle"
+});
+
+function reducer(state: AuthFormState, action: authFormAction): AuthFormState {
+  switch (action.type) {
+    case "RESET_FORM":
+      return { ...state, resetForm: action.reset };
+    case "FORM":
+      return { ...state, form: action.props };
+    case "FORM_VALIDATION":
+      return { ...state, isValidProp: action.isFormValid };
+    case "FLOW":
+      return { ...state, flow: action.flow as "signUp" | "signIn" | "email-verification" };
+    case "EMAIL_OTP":
+      return { ...state, emailOtp: action.otp };
+    case "RESEND_TIMER":
+      return { ...state, resendTimer: action.time };
+    case "ERROR":
+      return { ...state, error: action.msg };
+    case "PRESSED_AUTH_BUTTON":
+      return {...state, pressedAuthButtonId: action.targetId};
+    case "STATUS":
+      return {...state, status: action.status};
+    default:
+      return state;
+  }
+}
+
 interface Props {
   authType: AuthType;
-}
-
-interface myForm {
-  name: string;
-  email: string;
-  password: string;
-}
-
-interface FormValidation {
-  name: boolean;
-  email: boolean;
-  password: boolean;
 }
 
 export default function AuthForm({ authType }: Props) {
   const { signIn } = useAuthActions();
   const auth = authTypeMap[authType];
-  const [resetForm, setResetForm] = useState(false);
-  const [form, setForm] = useState<myForm>({ name: "", email: "", password: "" });
-  const [formValidation, setFormValidation] = useState<FormValidation>({
-    name: false,
-    email: false,
-    password: false
-  });
-
+  const [state, dispatch] = useReducer(reducer, initialState(authType));
   const updateProfile = useMutation(api.users.updateProfile);
-  const [flow, setFlow] = useState(authType === "signUp" ? "signUp" : "signIn");
   const router = useRouter();
 
-  const [emailOtp, setEmailOtp] = useState("");
   const wait = 30;
-  const [resendTimer, setResendTimer] = useState(wait);
-  const [error, setError] = useState("");
 
   const resendCountDown = () => {
-    setResendTimer(wait);
+    dispatch({ type: "RESEND_TIMER", time: wait });
     let count = wait;
-
-    let interval = setInterval(() => {
+    const interval = setInterval(() => {
       if (count <= 0) {
         clearInterval(interval);
         return;
-      };
+      }
       count = count - 1;
-      setResendTimer(count);
-    }, 1000)
-  }
+      dispatch({ type: "RESEND_TIMER", time: count });
+    }, 1000);
+  };
 
-  // Check if form is valid based on auth type
   const isFormValid = () => {
     if (authType === "signUp") {
-      return formValidation.name && formValidation.email && formValidation.password;
+      return state.isValidProp.name && state.isValidProp.email && state.isValidProp.password;
     }
-    return formValidation.email && formValidation.password;
+    return state.isValidProp.email && state.isValidProp.password;
   };
 
   // initial email auth
-  const emailAuth = async () => {
-    // Prevent execution if form is invalid
+  const emailAuth = async (targetId: string) => {
     if (!isFormValid()) return;
-    setError("");
+    dispatch({type: "PRESSED_AUTH_BUTTON", targetId})
+    dispatch({type: "STATUS", status: "loading"});
+    dispatch({ type: "ERROR", msg: "" });
 
     try {
-      await signIn("password", { email: form.email, password: form.password, flow })
+      await signIn("password", { email: state.form.email, password: state.form.password, flow: state.flow });
       resendCountDown();
-      if (flow === "signUp") setFlow("email-verification");
-    } catch (error) {
-      return setError("invalid email or password, please try again.");
+      if (state.flow === "signUp") {
+        dispatch({ type: "FLOW", flow: "email-verification" });
+      }
+    } catch {
+      dispatch({ type: "STATUS", status: "error"});
+      return dispatch({ type: "ERROR", msg: "invalid email or password, please try again." });
     }
 
-    if (flow === "signIn") return router.replace("/thoughts/new");
-  }
-
-  // verify email
-  const verifyEmail = useCallback(async () => {
-    try {
-      await signIn("password", { email: form.email, code: emailOtp, flow});
-      await new Promise<void>((resolve) => setTimeout(resolve, 200)); // little delay to allow email verification
-      await updateProfile({ name: form.name });
-      setResetForm(true);
-      router.replace("/thoughts/new");
-    } catch (error) {
-      console.log(error);
-      setError("Couldn't verify email at this time, try again.");
-    }
-  }, [])
-
-  // update the isValid status of each form field
-  const updateFormValidation = (field: keyof FormValidation, isValid: boolean) => {
-    setFormValidation(prev => ({
-      ...prev,
-      [field]: isValid
-    }));
+    if (state.flow === "signIn") return router.replace("/thoughts/new");
   };
 
+  // verify email
+  const verifyEmail = useCallback(async (targetId: string) => {
+    dispatch({type: "STATUS", status: "loading"});
+    dispatch({type: "PRESSED_AUTH_BUTTON", targetId});
 
+    try {
+      await signIn("password", { email: state.form.email, code: state.emailOtp, flow: state.flow });
+
+      // wait to avoid updating a profile that doesn't yet exit
+      await new Promise<void>((resolve) => setTimeout(resolve, 200));
+      await updateProfile({ name: state.form.name });
+      dispatch({ type: "RESET_FORM", reset: true });
+
+      router.replace("/thoughts/new");
+    } catch {
+      dispatch({type: "STATUS", status: "error"});
+      dispatch({ type: "ERROR", msg: "Couldn't verify email at this time, try again." });
+    }
+
+  }, [state.form, state.emailOtp, state.flow, updateProfile, signIn, router]);
+
+  const updateFormValidation = (field: keyof FormValidation, isValid: boolean) => {
+    dispatch({ type: "FORM_VALIDATION", isFormValid: { ...state.isValidProp, [field]: isValid } });
+  };
+
+  // google sign in
+  const authProviderSignIn = async (provider: "github" | "google", id: string) => {
+    dispatch({type: "PRESSED_AUTH_BUTTON", targetId: id});
+
+    try {
+      dispatch({type: "STATUS", status: "loading"});
+      await signIn(provider);
+    } catch (error) {
+      dispatch({ type: "STATUS", status: "error" });
+      dispatch({type: "ERROR", msg: "Something went wrong, please try again"});
+      console.error(error);
+    }
+  }
 
   return (
     <div className="flex w-full h-screen items-center p-[0.75rem]">
-      <Toast 
-        icon={<DefaultIcon color="white"/>} 
-        msg={error} 
-        showToast={error.trim() !== "" ? true : false} />
+      <Toast
+        icon={<DefaultIcon color="white" />}
+        msg={state.error}
+        showToast={state.error.trim() !== ""}
+      />
+
       {/* Left side */}
       <div className="relative w-full text-center flex flex-col items-center">
         <span className="mb-[4.0625rem]">
           <Logo />
         </span>
 
-        <div className="absolute">
-
-        </div>
-
         <div className="mb-[3.125rem]">
           <span className="text-fade-gray">Think out loud.</span>
-          <h1 className="text-h1 tracking-h1 text-center mt-5">Great ideas don't <br /> come fully formed</h1>
+          <h1 className="text-h1 tracking-h1 text-center mt-5">
+            Great ideas don't <br /> come fully formed
+          </h1>
         </div>
 
         <div className="flex flex-col gap-y-[1.5625rem]">
           <div className="flex gap-x-1 items-center">
             <AuthProviderButton
+              id="google-button"
+              targetId={state.pressedAuthButtonId}
+              status={state.status}
               label="Google"
               icon={<GoogleIcon />}
-              handleClick={useCallback(() => signIn("google"), [])} />
-
+              handleClick={() => authProviderSignIn("google", "google-button")}
+            />
             <AuthProviderButton
+              id="github-button"
+              targetId={state.pressedAuthButtonId}
+              status={state.status}
               label="Github"
               icon={<GithubIcon />}
-              handleClick={useCallback(() => signIn("github"), [])} />
+              handleClick={() => authProviderSignIn("github", "github-button")}
+            />
           </div>
 
           <div className="relative h-full w-full mb-[1.5625rem]">
@@ -189,71 +227,83 @@ export default function AuthForm({ authType }: Props) {
           </div>
         </div>
 
-        {
-          flow === "signIn" || flow === "signUp" ?
-            <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-y-[1.25rem] mb-[1.5625rem]">
-              {/* only display firtname input on signup auth */}
-              {
-                authType === "signUp" &&
-                <InputComponent
-                  type={"firstName"}
-                  authType={authType}
-                  reset={resetForm}
-                  onChange={(value) => setForm({ ...form, name: value })}
-                  onValidationChange={(isValid) => updateFormValidation('name', isValid)} />
-              }
-
+        {state.flow === "signIn" || state.flow === "signUp" ? (
+          <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-y-[1.25rem] mb-[1.5625rem]">
+            {authType === "signUp" && (
               <InputComponent
-                type={"email"}
+                type={"firstName"}
                 authType={authType}
-                reset={resetForm}
-                onChange={(value) => setForm({ ...form, email: value })}
-                onValidationChange={(isValid) => updateFormValidation('email', isValid)} />
-
-              <InputComponent
-                type={"password"}
-                authType={authType}
-                reset={resetForm}
-                onChange={(value) => setForm({ ...form, password: value })}
-                onValidationChange={(isValid) => updateFormValidation('password', isValid)} />
-
-              <AuthProviderButton
-                label={auth.submitLabel}
-                handleClick={emailAuth}
-                disabled={!isFormValid()} />
-            </form>
-            : // ===== VERIFY EMAIL =====
-            <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-y-[1.5625rem] mb-[1.5625rem]">
-              <InputComponent
-                type={"text"}
-                placeholder="code"
-                authType={authType}
-                reset={true}
-                onChange={(value) => setEmailOtp(value)}
+                reset={state.resetForm}
+                onChange={(value) => dispatch({ type: "FORM", props: { ...state.form, name: value } })}
+                onValidationChange={(isValid) => updateFormValidation("name", isValid)}
               />
+            )}
 
-              <AuthProviderButton
-                label={auth.submitLabel}
-                handleClick={verifyEmail} />
-            </form>
-        }
+            <InputComponent
+              type={"email"}
+              authType={authType}
+              reset={state.resetForm}
+              onChange={(value) => dispatch({ type: "FORM", props: { ...state.form, email: value } })}
+              onValidationChange={(isValid) => updateFormValidation("email", isValid)}
+            />
 
-        {
-          flow === "signIn" || flow === "signUp" ?
-            <div className="flex items-center gap-x-1">
-              <span className="text-fade-gray">{auth.redirect.msg}</span>
-              <Link href={auth.redirect.link} className="underline text-accent">{auth.redirect.label}</Link>
-            </div>
-            : // ===== RESEND EMAIL =====
-            <div className="flex gap-x-1">
-              <button 
-                onClick={emailAuth}
-                disabled={resendTimer > 1} className="underline opacity-40 hover:opacity-100 transition-[opacity] duration-[200ms]" style={{pointerEvents: resendTimer > 1 ? "none" : "all"}}>Resend</button>
-              <span>in {resendTimer < 10 ? '0' : ''}{resendTimer}</span>
-            </div>
-        }
+            <InputComponent
+              type={"password"}
+              authType={authType}
+              reset={state.resetForm}
+              onChange={(value) => dispatch({ type: "FORM", props: { ...state.form, password: value } })}
+              onValidationChange={(isValid) => updateFormValidation("password", isValid)}
+            />
 
+            <AuthProviderButton 
+              id="email-auth-button"
+              targetId={state.pressedAuthButtonId}
+              status={state.status}
+              label={auth.submitLabel} 
+              handleClick={() => emailAuth("email-auth-button")} 
+              disabled={!isFormValid()} />
+              
+          </form>
+        ) : (
+          <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-y-[1.5625rem] mb-[1.5625rem]">
+            <InputComponent
+              type={"text"}
+              placeholder="code"
+              authType={authType}
+              reset={true}
+              onChange={(value) => dispatch({ type: "EMAIL_OTP", otp: value })}
+            />
+            <AuthProviderButton 
+              id="verify-email-button"
+              targetId={state.pressedAuthButtonId}
+              status={state.status}
+              label={auth.submitLabel} 
+              handleClick={() => verifyEmail("verify-email-button")} 
+              />
+          </form>
+        )}
+
+        {state.flow === "signIn" || state.flow === "signUp" ? (
+          <div className="flex items-center gap-x-1">
+            <span className="text-fade-gray">{auth.redirect.msg}</span>
+            <Link href={auth.redirect.link} className="underline text-accent">
+              {auth.redirect.label}
+            </Link>
+          </div>
+        ) : (
+          <div className="flex gap-x-1">
+            <button
+              onClick={() => emailAuth("")}
+              disabled={state.resendTimer > 1}
+              className="underline opacity-40 hover:opacity-100 transition-[opacity] duration-[200ms]"
+              style={{ pointerEvents: state.resendTimer > 1 ? "none" : "all" }}
+            >
+              Resend
+            </button>
+            <span>in {state.resendTimer < 10 ? "0" : ""}{state.resendTimer}</span>
+          </div>
+        )}
       </div>
     </div>
-  )
+  );
 }

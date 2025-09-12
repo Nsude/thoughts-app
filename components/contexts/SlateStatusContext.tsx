@@ -8,6 +8,8 @@ interface SlateStatus {
   setSlateStatus: React.Dispatch<SetStateAction<SlateStatusTypes>>
   currentContent: any[];
   setCurrentContent: React.Dispatch<SetStateAction<any[]>>
+  isSourceAudio: boolean,
+  setIsSourceAudio: React.Dispatch<SetStateAction<boolean>>
 }
 
 const SlateContext = createContext<SlateStatus | null>(null);
@@ -23,6 +25,8 @@ export const useSlateStatusContext = () => {
 
 export default function SlateStatusContextProvider({children}: PropsWithChildren) {
   const [slateStatus, setSlateStatus] = useState<SlateStatusTypes>("idle");
+  const [isSourceAudio, setIsSourceAudio] = useState(false);
+  // used mainly to display transcribed audio on slate
   const [currentContent, setCurrentContent] = useState<any[]>([]);
 
   return (
@@ -30,7 +34,9 @@ export default function SlateStatusContextProvider({children}: PropsWithChildren
       slateStatus, 
       setSlateStatus, 
       currentContent, 
-      setCurrentContent
+      setCurrentContent,
+      isSourceAudio,
+      setIsSourceAudio
       }}>
       {children}
     </SlateContext.Provider>

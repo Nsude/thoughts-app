@@ -13,12 +13,14 @@ import { useAction, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import LogoutIcon from "@/public/icons/LogoutIcon";
 import { redirect, useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState } from "react";
 import Thought from "./Thought";
 import { Id } from "@/convex/_generated/dataModel";
 import OptionsModal from "./OptionsModal";
 import { ThoughtId } from "../app.models";
 import { useSlateStatusContext } from "../contexts/SlateStatusContext";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
 
 
 
@@ -85,6 +87,42 @@ export default function Naviation() {
   const reversedThoughts = useMemo(() => 
       thoughts ? thoughts.slice().reverse() : []
     , [thoughts]);
+  
+  const reversedSharedThoughts = false;
+
+  // animate thoughts list 
+  const mainRef = useRef(null);
+  const thoughtsRef = useRef<HTMLDivElement>(null);
+  const isAnimated = useRef(false);
+
+  useLayoutEffect(() => {
+    isAnimated.current = false;
+  }, [isPrivate])
+
+  useGSAP(() => {
+    if (!mainRef.current || !thoughtsRef.current || isAnimated.current) return;
+
+    const thoughts = thoughtsRef.current.children;
+    if (thoughts.length === 0) return
+
+    gsap.set(thoughts, {y: 40, opacity: 0});
+
+    gsap.set(thoughtsRef.current, {overflowY: "hidden"});
+
+    gsap.to(thoughts, {
+      y: 0, 
+      opacity: 1,
+      ease: "power2.inOut",
+      stagger: .08
+    })
+
+    isAnimated.current = true;
+
+    setTimeout(() => {
+      gsap.set(thoughtsRef.current, {overflowY: "scroll"});
+    }, 2000)
+
+  }, {scope: mainRef, dependencies: [thoughts, isPrivate]})
 
   // close options modal when the user clicks outside
   useEffect(() => {
@@ -138,7 +176,7 @@ export default function Naviation() {
   }
 
   return (
-    <div className="w-full h-full">
+    <div ref={mainRef} className="w-full h-full">
       {/* search & logo */}
       <div className="flex w-full h-fit justify-between items-center mb-[1.75rem]">
         <Logo />
@@ -185,7 +223,7 @@ export default function Naviation() {
           Your Thoughts
         </span>
 
-        <div className="relative flex flex-col h-[90%] overflow-y-scroll snap-y slim-scrollbar">
+        <div ref={thoughtsRef} className="relative flex flex-col h-[90%] overflow-y-scroll snap-y overflow-x-hidden slim-scrollbar">
           {/* Thoughts go here */}
           {
             reversedThoughts.map((item) => (
@@ -216,7 +254,9 @@ export default function Naviation() {
 
       {/* Shared Thoughts */}
       <div className="w-full max-h-[14%] mt-[2.5rem]">
-        <span className="block mb-[0.75rem] text-fade-gray">Shared</span>
+        <span 
+          style={{opacity: reversedSharedThoughts ? 1 : 0}}
+          className="block mb-[0.75rem] text-fade-gray">Shared</span>
         <div className="flex flex-col h-[95%] overflow-y-scroll snap-y slim-scrollbar reduce-sb-height">
           {/* Thoughts go here */}
         </div>
