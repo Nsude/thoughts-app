@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react"
-import { createEditor, Descendant, Editor, Element, Transforms } from "slate"
+import { createEditor, Descendant, Transforms } from "slate"
 import { withHistory } from "slate-history"
 import { Editable, RenderElementProps, Slate, withReact } from "slate-react"
 import { BulletListElement, CodeElement, DefaultElement, HeadingElement, ListItemElement, NumberedListElement } from "./CustomElements";
@@ -19,7 +19,7 @@ import {
   getContentLength, 
   getCurrentBlockType, 
   getCurrentHeadingLevel } from "./slateEditorFunctions";
-import { EditorState, Thought } from "../app.models";
+import { EditorState } from "../app.models";
 
 // ==== MAIN EDITOR COMPONENT ====
 // central editor state 
@@ -54,7 +54,6 @@ export default function SlateEditor({
   const createVersion = useMutation(api.thoughts.createVersion);
   const updateThought = useMutation(api.thoughts.updateThought);
   const setSelectedVersion = useMutation(api.thoughts.setSelectedVersion);
-  const getCurrentThought = useMutation(api.thoughts.getCurrentThought);
 
   // ===== CONVEX QUERIES =====
   const selectedVersion = useQuery(
