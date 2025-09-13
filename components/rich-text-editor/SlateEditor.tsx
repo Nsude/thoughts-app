@@ -10,7 +10,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useRouter } from "next/navigation";
-import { debounce } from "lodash";
+import { debounce, flatMap } from "lodash";
 import { useSlateStatusContext } from "../contexts/SlateStatusContext";
 import { BlockType } from "./slate";
 import { 
@@ -19,7 +19,7 @@ import {
   getContentLength, 
   getCurrentBlockType, 
   getCurrentHeadingLevel } from "./slateEditorFunctions";
-import { EditorState } from "../app.models";
+import { EditorState, Thought } from "../app.models";
 
 // ==== MAIN EDITOR COMPONENT ====
 // central editor state 
@@ -54,6 +54,7 @@ export default function SlateEditor({
   const createVersion = useMutation(api.thoughts.createVersion);
   const updateThought = useMutation(api.thoughts.updateThought);
   const setSelectedVersion = useMutation(api.thoughts.setSelectedVersion);
+  const getCurrentThought = useMutation(api.thoughts.getCurrentThought);
 
   // ===== CONVEX QUERIES =====
   const selectedVersion = useQuery(
@@ -74,7 +75,9 @@ export default function SlateEditor({
     setCurrentContent, 
     setIsSourceAudio, 
     isSourceAudio,
-    currentContent 
+    currentContent,
+    versionSwitched, 
+    setVersionSwitched
   } = useSlateStatusContext();
 
   // ===== DISPLAY THE SELECTED VERSION CONTENT ON FIRST LOAD =====
@@ -184,15 +187,17 @@ export default function SlateEditor({
   // ===== HANDLE VALUE CHANGE =====
   const handleSlateValueChange = useCallback(async (content: any[]) => {
     if (!content) return;
+    
     setIsSourceAudio(false);
     setCurrentContent(content)
-
+    
+    
     // set states for useSlateEditorState hook
     const blockType = getCurrentBlockType(editor);
     const isEmpty = editor.children.length === 0;
     const isSlashOnly = checkIsBlockSlashOnly(editor);
     const headingLevel = blockType === 'heading' ? getCurrentHeadingLevel(editor) : 0;
-
+    
     // call external on change
     onChange({
       blockType: blockType as BlockType,
@@ -200,6 +205,9 @@ export default function SlateEditor({
       isSlashOnly,
       headingLevel
     });
+    
+    // prevent handle change from running when a user switches versions
+    if (versionSwitched) return setVersionSwitched(false);
 
     // notify unsaved changes
     if (state.isInitialised) {

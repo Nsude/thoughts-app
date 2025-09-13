@@ -2,6 +2,7 @@
 
 import { createContext, PropsWithChildren, SetStateAction, useContext, useState } from "react";
 import { SlateStatusTypes } from "../app.models";
+import { Id } from "@/convex/_generated/dataModel";
 
 interface SlateStatus {
   slateStatus: SlateStatusTypes;
@@ -10,6 +11,8 @@ interface SlateStatus {
   setCurrentContent: React.Dispatch<SetStateAction<any[]>>
   isSourceAudio: boolean,
   setIsSourceAudio: React.Dispatch<SetStateAction<boolean>>
+  versionSwitched: boolean,
+  setVersionSwitched: React.Dispatch<SetStateAction<boolean>>
 }
 
 const SlateContext = createContext<SlateStatus | null>(null);
@@ -26,6 +29,7 @@ export const useSlateStatusContext = () => {
 export default function SlateStatusContextProvider({children}: PropsWithChildren) {
   const [slateStatus, setSlateStatus] = useState<SlateStatusTypes>("idle");
   const [isSourceAudio, setIsSourceAudio] = useState(false);
+  const [versionSwitched, setVersionSwitched] = useState(false);
   // used mainly to display transcribed audio on slate
   const [currentContent, setCurrentContent] = useState<any[]>([]);
 
@@ -36,7 +40,9 @@ export default function SlateStatusContextProvider({children}: PropsWithChildren
       currentContent, 
       setCurrentContent,
       isSourceAudio,
-      setIsSourceAudio
+      setIsSourceAudio,
+      versionSwitched,
+      setVersionSwitched
       }}>
       {children}
     </SlateContext.Provider>

@@ -24,7 +24,7 @@ export default function Versions() {
   const [selected, setSelected] = useState<Id<"versions">>("" as Id<"versions">);
   const spanRef = useRef(null);
   const mainRef = useRef(null);
-  const {slateStatus, setSlateStatus, currentContent} = useSlateStatusContext();
+  const {slateStatus, setSlateStatus, currentContent, setVersionSwitched} = useSlateStatusContext();
   
   
   // convex queries
@@ -121,7 +121,7 @@ export default function Versions() {
         thoughtId,
         selectedVersion: versionId
       })
-      setSlateStatus("idle")
+      setSlateStatus("idle");
     } catch (error) {
       console.error(error)
     }
@@ -144,6 +144,7 @@ export default function Versions() {
     if (slateStatus !== "idle" && slateStatus !== "saved") return;
     // save content
     await saveChanges();
+    setVersionSwitched(true);
     setSelected(id); 
     animateIndicator(e, isCore);
     // update convex selected version
