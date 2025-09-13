@@ -52,6 +52,17 @@ export const createVersion = mutation({
   },
 });
 
+// get thought
+export const getCurrentThought = mutation({
+  args: {thoughtId: v.id("thoughts")},
+  handler: async (ctx, {thoughtId}) => {
+    const thought = await ctx.db.get(thoughtId);
+    if (!thought) throw new Error("error getting current thought, thoughId is invalid");
+
+    return thought;
+  }
+})
+
 // get versions
 export const getThoughtVersions = query({
   args: { thoughtId: v.id("thoughts") },
@@ -147,7 +158,7 @@ export const getUserThoughts = query({
   },
 });
 
-// get the selected thought with it's core document
+// get the selected version of the current thought
 export const getSelectedVersion = query({
   args: {
     thoughtId: v.id("thoughts"),

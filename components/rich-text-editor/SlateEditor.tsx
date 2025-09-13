@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react"
-import { createEditor, Descendant, Editor, Element, Transforms } from "slate"
+import { useCallback, useEffect, useMemo, useReducer, useRef } from "react"
+import { createEditor, Descendant, Transforms } from "slate"
 import { withHistory } from "slate-history"
 import { Editable, RenderElementProps, Slate, withReact } from "slate-react"
 import { BulletListElement, CodeElement, DefaultElement, HeadingElement, ListItemElement, NumberedListElement } from "./CustomElements";
@@ -10,7 +10,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useRouter } from "next/navigation";
-import { debounce } from "lodash";
+import { debounce, flatMap } from "lodash";
 import { useSlateStatusContext } from "../contexts/SlateStatusContext";
 import { BlockType } from "./slate";
 import { 
@@ -74,7 +74,9 @@ export default function SlateEditor({
     setCurrentContent, 
     setIsSourceAudio, 
     isSourceAudio,
-    currentContent 
+    currentContent,
+    versionSwitched, 
+    setVersionSwitched
   } = useSlateStatusContext();
 
   // ===== DISPLAY THE SELECTED VERSION CONTENT ON FIRST LOAD =====
@@ -184,15 +186,17 @@ export default function SlateEditor({
   // ===== HANDLE VALUE CHANGE =====
   const handleSlateValueChange = useCallback(async (content: any[]) => {
     if (!content) return;
+    
     setIsSourceAudio(false);
     setCurrentContent(content)
-
+    
+    
     // set states for useSlateEditorState hook
     const blockType = getCurrentBlockType(editor);
     const isEmpty = editor.children.length === 0;
     const isSlashOnly = checkIsBlockSlashOnly(editor);
     const headingLevel = blockType === 'heading' ? getCurrentHeadingLevel(editor) : 0;
-
+    
     // call external on change
     onChange({
       blockType: blockType as BlockType,
@@ -200,6 +204,9 @@ export default function SlateEditor({
       isSlashOnly,
       headingLevel
     });
+    
+    // prevent handle change from running when a user switches versions
+    if (versionSwitched) return setVersionSwitched(false);
 
     // notify unsaved changes
     if (state.isInitialised) {

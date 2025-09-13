@@ -24,7 +24,7 @@ export default function Versions() {
   const [selected, setSelected] = useState<Id<"versions">>("" as Id<"versions">);
   const spanRef = useRef(null);
   const mainRef = useRef(null);
-  const {slateStatus, setSlateStatus, currentContent} = useSlateStatusContext();
+  const {slateStatus, setSlateStatus, currentContent, setVersionSwitched} = useSlateStatusContext();
   
   
   // convex queries
@@ -54,13 +54,31 @@ export default function Versions() {
   // it there's a change to the length of the thought versions (say an item has beeen deleted)
   // set the selected version to core
   useEffect(() => {
-    if (lastSavedVersionLength.current === thoughtVersions?.length) return;
-    const coreVersion = getCoreVersion();
-    if (!coreVersion) return;
+    if (!thoughtVersions) return;
 
-    setSelected(coreVersion._id);
-    lastSavedVersionLength.current = thoughtVersions?.length || 0;
-    handleConvexSelectedVersion(coreVersion._id);
+    if (lastSavedVersionLength.current === thoughtVersions.length) return;
+    
+    // set to last selected version on initial load
+    if (lastSavedVersionLength.current === 0 && selectedVersion?._id) {
+      setSelected(selectedVersion._id);
+      lastSavedVersionLength.current = thoughtVersions.length; 
+      return;
+    }
+    
+    if (lastSavedVersionLength.current < thoughtVersions.length) {
+      // version added 
+      const lastItem = thoughtVersions[thoughtVersions.length - 1];
+      setSelected(lastItem._id);
+      handleConvexSelectedVersion(lastItem._id);
+    } else {
+      // version deleted
+      const coreVersion = getCoreVersion();
+      if (!coreVersion) return;
+      setSelected(coreVersion._id);
+      handleConvexSelectedVersion(coreVersion._id);
+    }
+    
+    lastSavedVersionLength.current = thoughtVersions.length;
   }, [thoughtVersions?.length])
 
   // sync selectedVersion._id with local state on thought switch
@@ -89,9 +107,11 @@ export default function Versions() {
         const { top: mainTop } = main.getBoundingClientRect();
         const top = targetTop - mainTop;
 
-        gsap.set(spanRef.current, {
+        gsap.to(spanRef.current, {
           top: `${top - 4}px`,
           height: selectedVersion.isCore ? "1.3rem" : "2.7rem",
+          duration: .4,
+          ease: easeInOutCubic
         });
       }
     }, 50);
@@ -121,7 +141,7 @@ export default function Versions() {
         thoughtId,
         selectedVersion: versionId
       })
-      setSlateStatus("idle")
+      setSlateStatus("idle");
     } catch (error) {
       console.error(error)
     }
@@ -144,6 +164,7 @@ export default function Versions() {
     if (slateStatus !== "idle" && slateStatus !== "saved") return;
     // save content
     await saveChanges();
+    setVersionSwitched(true);
     setSelected(id); 
     animateIndicator(e, isCore);
     // update convex selected version

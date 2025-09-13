@@ -53,7 +53,6 @@ export default function OptionsModal({
       gsap.to(main, {
         top: y + "px",
         duration: .25,
-        ease: easeInOutCubic 
       })
 
       firstCall.current = false;

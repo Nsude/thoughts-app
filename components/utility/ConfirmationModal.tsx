@@ -30,7 +30,7 @@ export default function ConfirmationModal({display, onConfirm}: Props) {
       style={{ pointerEvents: display ? "all" : "none" }}
       ref={mainRef} 
       className=" opacity-0
-      fixed z-30 left-0 top-0 bg-myWhite/10 backdrop-blur-[5px]
+      fixed z-30 left-0 top-0 bg-myBlack/10 backdrop-blur-[5px]
       w-screen h-screen flex justify-center items-center
     ">
 
@@ -64,6 +64,7 @@ export default function ConfirmationModal({display, onConfirm}: Props) {
 
           <ClassicButton 
             text="No" 
+            preselect={true}
             icon={<CloseIcon size={24} color="black" />} 
             handleClick={() => onConfirm(false)} />
         </div>
