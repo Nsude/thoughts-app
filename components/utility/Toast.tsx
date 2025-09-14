@@ -2,38 +2,78 @@
 
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { easeInOutCubic } from "../buttons/TabButton";
+import SadFaceIcon from "@/public/icons/SadFaceIcon";
+import HappyFaceIcon from "@/public/icons/HappyFaceIcon";
+import { useToastContext } from "../contexts/ToastContext";
 
-interface Props {
-  icon: React.ReactNode;
-  msg: string;
-  showToast: boolean;
-}
-
-export default function Toast({ icon, msg, showToast }: Props) {
+export default function Toast() {
+  const {toast, toggleToast} = useToastContext();
   const mainRef = useRef(null);
 
   useGSAP(() => {
-    if (!showToast) return;
+    const tl = gsap.timeline({ defaults: { ease: easeInOutCubic, duration: .4, delay: 0 } });
 
-    const tl = gsap.timeline({defaults: {ease: easeInOutCubic, duration: .6, delay: 0}});
+    tl.to(mainRef.current, { 
+      transform: toast.showToast ? "translateY(0)" : "translateY(-150%)"
+    })
 
-    tl.set(mainRef.current, {opacity: 1});
-    tl.to(mainRef.current, {transform: "translateY(0)"})
+  }, { scope: mainRef, dependencies: [toast.showToast] })
 
-    setTimeout(() => {
-      tl.to(mainRef.current, { transform: "translateY(-150%)" });
-    }, 4000)
+  const getToastMessage = () => {
+    if (toast.isError) {
+      return !toast.msg ?  
+        "Something went wrong, please try again"
+        : toast.msg;
+    } else {
+      return !toast.msg ?
+        "Deleted items are farther than they appear"
+        : toast.msg;
+    }
+  }
 
-  }, {scope: mainRef, dependencies: [showToast]})
+  const getToastTitle = () => {
+    if (toast.isError) {
+      return toast.title.trim() === "" ?  
+        "Platform Error"
+        : toast.title;
+    } else {
+      return toast.title.trim() === "" ?
+        "Action Successful"
+        : toast.title;
+    }
+  }
 
   return (
-    <div ref={mainRef} className="fixed opacity-0 -translate-y-[150%] pointer-events-none top-[0.75rem] left-[0.75rem] z-1 flex gap-x-2 items-center p-[0.5rem] w-[14.5rem] bg-accent rounded-[0.375rem]">
-      <span className="rounded-[0.25rem] bg-myBlack h-[2.5rem] aspect-square flex justify-center items-center">
-        {icon}
-      </span>
-      <span className="w-full text-[0.875rem]">{msg}</span>
+    <div
+      ref={mainRef}
+      className={`fixed right-[0.75rem] top-[0.75rem] rounded-[10px] 
+        text-label-14 border-x-4 bg-myWhite border border-tab-gray 
+        z-30 w-[17.5rem] py-[0.9375rem] px-[0.625rem] translate-y-[-150%]
+        ${toast.isError ? "border-x-accent" : "border-x-sec-accent"} `}>
+      <div className="flex gap-x-[0.625rem]">
+        <div
+          className={`min-w-[2.25rem] h-[2.25rem] rounded-[6px]
+              ${toast.isError ? "bg-accent/20" : "bg-sec-accent/20"}
+              flex justify-center items-center
+            `} >
+          {toast.isError ? <SadFaceIcon /> : <HappyFaceIcon />}
+        </div>
+        <div className="flex flex-col gap-y-1.5">
+          <span className="text-dark-gray-label">{ getToastTitle() }</span>
+
+          {/* toast message */}
+          <span className="w-[80%]">{ getToastMessage() }</span>
+
+          <button 
+            onClick={() => toggleToast(false)}
+            className="w-fit mt-[0.5625rem] border border-tab-gray rounded-[20px] 
+              px-[0.8rem] py-0.5">
+            Close
+          </button>
+        </div>
+      </div>
     </div>
   )
 }

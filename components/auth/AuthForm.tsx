@@ -12,8 +12,7 @@ import { useCallback, useReducer } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
-import Toast from "../utility/Toast";
-import DefaultIcon from "@/public/icons/DefaultIcon";
+import { useToastContext } from "../contexts/ToastContext";
 
 // ==== Auth Map ====
 type AuthDetails = {
@@ -90,6 +89,7 @@ interface Props {
 }
 
 export default function AuthForm({ authType }: Props) {
+  const {setToast} = useToastContext();
   const { signIn } = useAuthActions();
   const auth = authTypeMap[authType];
   const [state, dispatch] = useReducer(reducer, initialState(authType));
@@ -133,7 +133,13 @@ export default function AuthForm({ authType }: Props) {
       }
     } catch {
       dispatch({ type: "STATUS", status: "error"});
-      return dispatch({ type: "ERROR", msg: "invalid email or password, please try again." });
+      setToast({
+        title: "SignIn Error",
+        msg: "invalid email or password, please try again.",
+        isError: true,
+        showToast: true
+      })
+      return;
     }
 
     if (state.flow === "signIn") return router.replace("/thoughts/new");
@@ -155,7 +161,12 @@ export default function AuthForm({ authType }: Props) {
       router.replace("/thoughts/new");
     } catch {
       dispatch({type: "STATUS", status: "error"});
-      dispatch({ type: "ERROR", msg: "Couldn't verify email at this time, try again." });
+      setToast({
+        title: "SignIn Error",
+        msg: "Couldn't verify email at this time, try again.",
+        isError: true,
+        showToast: true
+      })
     }
 
   }, [state.form, state.emailOtp, state.flow, updateProfile, signIn, router]);
@@ -173,19 +184,18 @@ export default function AuthForm({ authType }: Props) {
       await signIn(provider);
     } catch (error) {
       dispatch({ type: "STATUS", status: "error" });
-      dispatch({type: "ERROR", msg: "Something went wrong, please try again"});
+      setToast({
+        title: "SignIn Error",
+        msg: "Something went wrong, please try again",
+        isError: true,
+        showToast: true
+      })
       console.error(error);
     }
   }
 
   return (
     <div className="flex w-full h-screen items-center p-[0.75rem]">
-      <Toast
-        icon={<DefaultIcon color="white" />}
-        msg={state.error}
-        showToast={state.error.trim() !== ""}
-      />
-
       {/* Left side */}
       <div className="relative w-full text-center flex flex-col items-center">
         <span className="mb-[4.0625rem]">

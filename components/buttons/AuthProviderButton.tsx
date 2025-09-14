@@ -20,7 +20,6 @@ export default function AuthProviderButton({
   label, icon, id, status, targetId, 
   disabled, handleClick}: Props) {
     const isLoading = id === targetId && status === "loading";
-    const isError = id === targetId && status === "error"
 
   return (
     <button
@@ -38,14 +37,8 @@ export default function AuthProviderButton({
         <LoadingIcon />
       </span>
 
-      {/* status === "error" */}
       <span
-        style={{ opacity: isError ? 1 : 0 }}
-        className="absolute left-[0.75rem] top-1/2 -translate-y-1/2 pointer-events-none">
-        <ErrorIcon color="#FE7A33" />
-      </span>
-      <span
-        style={{opacity: isLoading || isError ? 0 : 1}}
+        style={{opacity: isLoading ? 0 : 1}}
         >
         {icon}
       </span>

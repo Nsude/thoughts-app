@@ -3,6 +3,8 @@ import localFont from "next/font/local";
 import "./globals.css";
 import ConvexClientProvider from "./ConvexClientProvider";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
+import { ToastProvider } from "@/components/contexts/ToastContext";
+import Toast from "@/components/utility/Toast";
 
 export const metadata: Metadata = {
   title: "thoughts-app",
@@ -39,7 +41,10 @@ export default function RootLayout({
       <html lang="en">
         <body className={`${hostGrotesk.className} antialiased`}>
           <ConvexClientProvider>
-            {children}
+            <ToastProvider>
+              <Toast />
+              {children}
+            </ToastProvider>
           </ConvexClientProvider>
         </body>
       </html>

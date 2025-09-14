@@ -23,6 +23,7 @@ import AudioInputModal from "@/components/audio-input/AudioInputModal";
 import StopIcon from "@/public/icons/StopIcon";
 import { AudioModalAction, AudioModalState } from "@/components/app.models";
 import { useConfirmation } from "@/components/utility/ConfirmationContext";
+import { useToastContext } from "@/components/contexts/ToastContext";
 
 const initialAudioModalState: AudioModalState = {
   display: false,
@@ -72,6 +73,9 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
     thoughtId !== "new" ? { thoughtId } : "skip"
   )
 
+  // toast notification
+  const { setToast } = useToastContext();
+
   // Single handler for all editor changes
   const handleEditorChange = useCallback((newState: {
     blockType: BlockType,
@@ -118,13 +122,23 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
       })
 
       setSlateStatus("saved");
+      setToast({
+        title: "New Version Created",
+        msg: "A new version has been Successfully created",
+        isError: false,
+        showToast: true
+      })
     } catch (error) {
-      setSlateStatus("error");
       console.error(error);
+      setToast({
+        title: "Add-version Failed",
+        isError: true,
+        showToast: true
+      })
     }
   }
 
-  // handle delete version
+  // handle delete version from thought document delete button
   const handleDeleteVersion = async () => {
     const confirmDelete = await confirmAction();
     if (!confirmDelete) return; 
@@ -132,8 +146,18 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
     try {
       setSlateStatus("deleting");
       await deleteVersion({ thoughtId: thoughtId })
+      setToast({
+        title: "Delete Successful",
+        isError: false,
+        showToast: true
+      })
     } catch (error) {
       console.error(error)
+      setToast({
+        title: "Delete Error",
+        isError: true,
+        showToast: true
+      })
     }
   }
 
@@ -159,7 +183,7 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
   // HANDLE UPLOAD AUDIO
   const generateUploadUrl = useMutation(api.audio.generateUploadUrl);
   const transcribeAudio = useAction(api.audio.transcribeAudio);
-  const handleUploadAudio = async (recordedBlob: Blob | null) => {
+  const handleTranscribeAudio = async (recordedBlob: Blob | null) => {
     audioDispatch({type: "PRESSED_BUTTON", targetId: "upload-button"});
     audioDispatch({type: "STATUS", status: "loading"});
 
@@ -186,6 +210,11 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
       
     } catch (error) {
       console.error(error);
+      setToast({
+        title: "Audio Error",
+        isError: true,
+        showToast: true
+      })
     }
   }
 
@@ -258,13 +287,13 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
               display={audioState.display}
               startRecording={audioState.startRecording}
               handleExceedRecordLimit={() => stopRecording()}
-              uploadAudio={(audioBlob) => handleUploadAudio(audioBlob)}
+              uploadAudio={(audioBlob) => handleTranscribeAudio(audioBlob)}
               targetId={audioState.targetId}
               status={audioState.status}
               />
           </div>
 
-          {/* Suprise Me / delete version */}
+          {/* Suprise Me & delete version */}
           <div className="absolute bottom-[1.125rem] right-[1.125rem] flex gap-x-1.5">
             {
               editorState.currentBlock.isEmpty && slateStatus === "idle" ?
