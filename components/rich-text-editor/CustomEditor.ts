@@ -1,5 +1,6 @@
-import { Editor, Element, Path, Text, Transforms } from "slate";
+import { Editor, Element, Node, Path, Text, Transforms } from "slate";
 import { CustomText } from "./slate";
+import { checkIsBlockSlashOnly } from "./slateEditorFunctions";
 
 export const handleKeyDown = (e: React.KeyboardEvent, editor: Editor) => {
   const { key } = e;
@@ -136,7 +137,6 @@ export const CustomEditor = {
       { type: match ? "paragraph" : "code" },
       { match: (n) => Element.isElement(n) && Editor.isBlock(editor, n) }
     );
-
   },
 
   // toggle bold leaf
@@ -147,7 +147,7 @@ export const CustomEditor = {
     const isHeading = [1, 2, 3].some((level) =>
       this.isHeadingElement(editor, level)
     );
-    
+
     if (isHeading) return;
 
     const match = this.isBoldMarkActive(editor);
@@ -182,13 +182,41 @@ export const CustomEditor = {
   toggleHeadings(editor: Editor, level: number) {
     let match = this.isHeadingElement(editor, level);
 
-    const type = match ? { type: "paragraph" } : { type: "heading", level };
-    !match
-      ? Editor.addMark(editor, "bold", true)
-      : Editor.removeMark(editor, "bold");
+    const type = match ? null : { type: "heading", level };
+    !match ? Editor.addMark(editor, "bold", true) : null;
 
     Transforms.setNodes(editor, type as Partial<Element>, {
       match: (n) => Element.isElement(n) && Editor.isBlock(editor, n),
+    });
+
+    // remove slash from editor
+    this._removeSlash(editor, level);
+  },
+
+  _removeSlash(editor: Editor, level: number) {
+    const isSlashOnly = checkIsBlockSlashOnly(editor);
+    if (!isSlashOnly) return;
+
+    const [nmatch] = Editor.nodes(editor, {
+      match: (n) => Element.isElement(n) && Editor.isBlock(editor, n),
+    });
+    const [, path] = nmatch;
+
+    Transforms.removeNodes(editor, { at: path });
+    Transforms.insertNodes(
+      editor,
+      {
+        type: "heading",
+        level,
+        children: [{ text: "" }],
+      } as Node,
+      { at: path }
+    );
+
+    // Set cursor to the start of the new heading
+    Transforms.select(editor, {
+      anchor: { path: [...path, 0], offset: 0 },
+      focus: { path: [...path, 0], offset: 0 },
     });
   },
 
@@ -207,7 +235,7 @@ export const CustomEditor = {
     const match = this.isBulletlistActive(editor);
 
     if (match) {
-      this.breaklist(editor, true)
+      this.breaklist(editor, true);
     } else {
       Transforms.setNodes(editor, { type: "list-item" });
 
@@ -266,12 +294,12 @@ export const CustomEditor = {
   // turn the element to a paragraph
   resetToParagraph(editor: Editor) {
     const [match] = Editor.nodes(editor, {
-      match: n => Element.isElement(n) && n.type === "heading"
-    })
+      match: (n) => Element.isElement(n) && n.type === "heading",
+    });
 
-    Transforms.setNodes(editor, {type: "paragraph"});
+    Transforms.setNodes(editor, { type: "paragraph" });
 
     if (!match) return;
     Editor.removeMark(editor, "bold");
-  }
+  },
 };

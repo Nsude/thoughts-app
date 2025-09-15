@@ -288,7 +288,7 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
           {/* Suprise Me & delete version */}
           <div className="absolute bottom-[1.125rem] right-[1.125rem] flex gap-x-1.5">
             {
-              editorState.currentBlock.isEmpty && slateStatus === "idle" ?
+              editorState.currentBlock.isEditorEmpty && slateStatus === "idle" ?
                 <div title="Surprise me">
                   <ClassicButton
                     icon={<LogoIcon />}
