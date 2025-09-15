@@ -59,7 +59,7 @@ export const checkIsBlockSlashOnly = (editor: Editor): boolean => {
   const blockText = Editor.string(editor, Editor.range(editor, path));
 
   // Remove all spaces and check if only "/" remains
-  const textWithoutSpaces = blockText.replace(/\s/g, '');
+  const textWithoutSpaces = blockText.trim();
 
   return textWithoutSpaces === '/';
 };
