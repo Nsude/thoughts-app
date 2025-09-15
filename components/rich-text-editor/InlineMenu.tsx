@@ -6,6 +6,7 @@ import { useSlate } from "slate-react";
 import ElementsMenu from "./ElementsMenu";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { getCurrentHeadingLevel } from "./slateEditorFunctions";
 
 export default function InlineMenu() {
   const editor = useSlate();
@@ -22,8 +23,15 @@ export default function InlineMenu() {
 
     // get selection rect
     const {left, top} = domSelection.getRangeAt(0).getBoundingClientRect();
+    const headingLevel = getCurrentHeadingLevel(editor);
 
-    setPosition({x: left - 10, y: top + 25});
+    setPosition({
+      x: left - 10, 
+      y: headingLevel === 0 ? top + 25 : 
+        headingLevel === 1 ? top + 50 :
+        headingLevel === 2 ? top + 45 :  
+        top + 38
+      });
 
   }, [editor.selection])
 

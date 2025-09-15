@@ -59,10 +59,31 @@ export const checkIsBlockSlashOnly = (editor: Editor): boolean => {
   const blockText = Editor.string(editor, Editor.range(editor, path));
 
   // Remove all spaces and check if only "/" remains
-  const textWithoutSpaces = blockText.replace(/\s/g, '');
+  const textWithoutSpaces = blockText.trim();
 
   return textWithoutSpaces === '/';
 };
+
+// check if current block is empty 
+export const checkIsBlockEmpty = (editor: Editor): boolean => {
+  if (!editor.selection) return true;
+
+  // Get current block
+  const [match] = Editor.nodes(editor, {
+    match: (n) => Element.isElement(n) && Editor.isBlock(editor, n),
+    mode: "lowest",
+  });
+
+  if (!match) return true;
+
+  const [, path] = match;
+
+  // Get the text content of the current block
+  const blockText = Editor.string(editor, Editor.range(editor, path));
+
+  return blockText.toLowerCase().trim() === "";
+};
+
 
 // central reducer
 export const editorReducer = (state: EditorState, action: EditorAction) => {

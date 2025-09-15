@@ -224,9 +224,11 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
     <div>
       <div className="relative">
         <span
-          className="absolute z-0 h-[83vh] w-[40.125rem] rounded-2xl bg-[#DCDCDC] -top-[0.8125rem] left-[1.125rem]" />
+          className="absolute z-0 h-[83vh] w-[40.125rem] rounded-2xl bg-[#DCDCDC] 
+          -top-[0.8125rem] left-[1.125rem]" />
         <span
-          className="absolute -z-1 h-[83vh] w-[37.875rem] rounded-2xl bg-[#C9C9C9] -top-[1.625rem] left-[2.25rem]" />
+          className="absolute -z-1 h-[83vh] w-[37.875rem] rounded-2xl bg-[#C9C9C9] 
+          -top-[1.625rem] left-[2.25rem]" />
       </div>
 
       <div className="flex justify-center items-center h-[83vh]">
@@ -288,7 +290,7 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
           {/* Suprise Me & delete version */}
           <div className="absolute bottom-[1.125rem] right-[1.125rem] flex gap-x-1.5">
             {
-              editorState.currentBlock.isEmpty && slateStatus === "idle" ?
+              editorState.currentBlock.isEditorEmpty && slateStatus === "idle" ?
                 <div title="Surprise me">
                   <ClassicButton
                     icon={<LogoIcon />}

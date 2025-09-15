@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { BlockType } from "../rich-text-editor/slate";
-import { Editor, Range } from "slate";
+import { Editor, Element, Range, Transforms } from "slate";
 import {
+  checkIsBlockEmpty,
   checkIsBlockSlashOnly,
   getCurrentBlockType,
   getCurrentHeadingLevel,
@@ -14,7 +15,7 @@ export const useSlateEditorState = () => {
   const [editor, setEditor] = useState<Editor | null>(null);
   const [currentBlock, setCurrentBlock] = useState({
     type: "paragraph" as BlockType,
-    isEmpty: true, // checks if the entire editor is empty
+    isEditorEmpty: true, // checks if the entire editor is empty
     isSlashOnly: false,
     headingLevel: 0,
   });
@@ -27,10 +28,9 @@ export const useSlateEditorState = () => {
 
   useEffect(() => {
     if (!editor) return;
-    console.log("slate hook editor updated ✅✅")
 
     const blockType = getCurrentBlockType(editor) as BlockType;
-    const isEmpty = editor.children.length === 0;
+    const isEditorEmpty = editor.children.length === 0;
     const isSlashOnly = checkIsBlockSlashOnly(editor);
     const headingLevel =
       blockType === "heading" ? getCurrentHeadingLevel(editor) : 0;
@@ -38,13 +38,13 @@ export const useSlateEditorState = () => {
     // Update current block state
     setCurrentBlock({
       type: blockType,
-      isEmpty,
+      isEditorEmpty,
       isSlashOnly,
       headingLevel,
     });
 
-    // initi isEmtpy state for placeholders 
-    setPlaceholderState(prev => ({...prev, show: isEmpty}));
+    // init isEmtpy state for placeholders 
+    setPlaceholderState(prev => ({...prev, show: isEditorEmpty}));
 
     const { selection } = editor;
     if (!selection) return console.log("Slate selection does not exist");
@@ -63,7 +63,6 @@ export const useSlateEditorState = () => {
 
     // set the right placeholder state
     handlePlaceholderState(
-      isEmpty,
       blockType,
       verticalPosition,
       isSlashOnly,
@@ -73,21 +72,16 @@ export const useSlateEditorState = () => {
   }, [changed]);
 
   const handlePlaceholderState = (
-    isEmpty: boolean,
     blockType: BlockType,
     verticalPosition: number,
     isSlashOnly: boolean,
     headingLevel: number
   ) => {
-    if (isEmpty && blockType !== "heading") {
-      setPlaceholderState({
-        show: true,
-        type: "default",
-        headingLevel: 0,
-        position: verticalPosition,
-      });
-    } else if (isSlashOnly && blockType === "heading") {
-      setPlaceholderState({
+    if (!editor) return;
+    const isBlockEmpty = checkIsBlockEmpty(editor);
+    
+    if ((isSlashOnly || isBlockEmpty) && blockType === "heading") {
+      setPlaceholderState({ 
         show: true,
         type: "heading",
         headingLevel: headingLevel,
