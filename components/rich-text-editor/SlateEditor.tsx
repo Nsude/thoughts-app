@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from "react"
-import { createEditor, Descendant, Transforms } from "slate"
+import { createEditor, Descendant, Editor, Transforms } from "slate"
 import { withHistory } from "slate-history"
 import { Editable, RenderElementProps, Slate, withReact } from "slate-react"
 import { BulletListElement, CodeElement, DefaultElement, HeadingElement, ListItemElement, NumberedListElement } from "./CustomElements";
@@ -12,13 +12,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useRouter } from "next/navigation";
 import { debounce, flatMap } from "lodash";
 import { useSlateStatusContext } from "../contexts/SlateStatusContext";
-import { BlockType } from "./slate";
-import { 
-  checkIsBlockSlashOnly, 
-  editorReducer, 
-  getContentLength, 
-  getCurrentBlockType, 
-  getCurrentHeadingLevel } from "./slateEditorFunctions";
+import { editorReducer, getContentLength, } from "./slateEditorFunctions";
 import { EditorState } from "../app.models";
 
 // ==== MAIN EDITOR COMPONENT ====
@@ -32,12 +26,7 @@ const initialState: EditorState = {
 interface Props {
   handleClick?: () => void;
   thoughtId: Id<"thoughts">;
-  onChange: (state: {
-    blockType: BlockType,
-    isEmpty: boolean,
-    isSlashOnly: boolean,
-    headingLevel?: number
-  }) => void;
+  onChange: (editor: Editor) => void;
 }
 
 export default function SlateEditor({ 
@@ -190,20 +179,8 @@ export default function SlateEditor({
     setIsSourceAudio(false);
     setCurrentContent(content)
     
-    
-    // set states for useSlateEditorState hook
-    const blockType = getCurrentBlockType(editor);
-    const isEmpty = editor.children.length === 0;
-    const isSlashOnly = checkIsBlockSlashOnly(editor);
-    const headingLevel = blockType === 'heading' ? getCurrentHeadingLevel(editor) : 0;
-    
     // call external on change
-    onChange({
-      blockType: blockType as BlockType,
-      isEmpty,
-      isSlashOnly,
-      headingLevel
-    });
+    onChange(editor);
     
     // prevent handle change from running when a user switches versions
     if (versionSwitched) return setVersionSwitched(false);

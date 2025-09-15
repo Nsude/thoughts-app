@@ -5,6 +5,7 @@ interface Props {
     show: boolean;
     type: 'default' | 'heading';
     headingLevel: number;
+    position: number
   };
 }
 
@@ -30,17 +31,22 @@ export const PlaceholderDisplay = ({ placeholderRef, placeholderState }: Props) 
 
   return (
     <div
-      className="absolute w-full overflow-clip"
+      className="w-full overflow-clip"
       style={{
         pointerEvents: placeholderState.show ? "all" : 'none',
-        opacity: placeholderState.show ? "1" : '0'
+        opacity: placeholderState.show ? "1" : '0',
+        top: placeholderState.headingLevel === 0 ?
+          "unset" : placeholderState.position + "px",
+        position: placeholderState.headingLevel === 0 ? "absolute" : "fixed"
       }}
     >
-      <div ref={placeholderRef} className={`leading-[1.5] ${getPlaceholderStyle()} relative flex flex-col`}>
-        <span className={`text-fade-gray`}>
+      <div 
+        ref={placeholderRef} 
+        className={`leading-[1.5] ${getPlaceholderStyle()} relative flex flex-col text-dark-gray-label`}>
+        <span>
           {getPlaceholderText()}
         </span>
-        <span className="text-fade-gray absolute -bottom-[150%]">
+        <span className="absolute -bottom-[150%]">
           Write or type '/' for commands...
         </span>
       </div>

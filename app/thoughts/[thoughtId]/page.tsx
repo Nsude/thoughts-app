@@ -24,6 +24,7 @@ import StopIcon from "@/public/icons/StopIcon";
 import { AudioModalAction, AudioModalState } from "@/components/app.models";
 import { useConfirmation } from "@/components/utility/ConfirmationContext";
 import { useToastContext } from "@/components/contexts/ToastContext";
+import { Editor } from "slate";
 
 const initialAudioModalState: AudioModalState = {
   display: false,
@@ -49,7 +50,7 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
   const [tab, setTab] = useState(0);
   const { thoughtId } = use(params);
   const placeholderRef = useRef(null);
-  const editorState = useSlateEditorState(thoughtId);
+  const editorState = useSlateEditorState();
   const { 
     slateStatus, 
     setSlateStatus, 
@@ -77,18 +78,9 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
   const { setToast } = useToastContext();
 
   // Single handler for all editor changes
-  const handleEditorChange = useCallback((newState: {
-    blockType: BlockType,
-    isEmpty: boolean,
-    isSlashOnly: boolean,
-    headingLevel?: number
-  }) => {
-    editorState.setCurrentBlock({
-      type: newState.blockType,
-      isEmpty: newState.isEmpty,
-      isSlashOnly: newState.isSlashOnly,
-      headingLevel: newState.headingLevel || 0
-    });
+  const handleEditorChange = useCallback((editor: Editor) => {
+    editorState.setEditor(editor);
+    editorState.setChanged(prev => !prev);
   }, [editorState]);
 
   // switch placeholder depending on selected tab
