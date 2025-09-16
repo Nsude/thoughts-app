@@ -29,12 +29,12 @@ interface OptionsModalProps {
   modalDispath: ActionDispatch<[action: ModalActions]>
 }
 
-export default function OptionsModal({ 
+export default function OptionsModal({
   thoughtId, y, display, modalDispath }: OptionsModalProps
 ) {
   const { confirmAction } = useConfirmation();
-  const {setCurrentContent} = useSlateStatusContext();
-  const {setToast} = useToastContext();
+  const { setCurrentContent } = useSlateStatusContext();
+  const { setToast } = useToastContext();
   const deleteThought = useMutation(api.thoughts.deleleThought);
 
   const mainRef = useRef(null);
@@ -45,11 +45,11 @@ export default function OptionsModal({
     const main = mainRef.current;
 
     if (display) {
-      gsap.set(main, { opacity: 1, pointerEvents: "all"})
+      gsap.set(main, { opacity: 1, pointerEvents: "all" })
 
       // make the modal animate from a 20px offset
       if (firstCall.current) {
-        gsap.set(main, {top: y + 20 + "px"});
+        gsap.set(main, { top: y + 20 + "px" });
       }
 
       gsap.to(main, {
@@ -59,29 +59,29 @@ export default function OptionsModal({
 
       firstCall.current = false;
     } else {
-      gsap.set(main, {opacity: 0, pointerEvents: "none"});
+      gsap.set(main, { opacity: 0, pointerEvents: "none" });
       firstCall.current = true;
     }
 
-  }, {scope: mainRef, dependencies: [y, display]})
+  }, { scope: mainRef, dependencies: [y, display] })
 
   const handleShare = useCallback((thoughtId: Id<"thoughts">) => {
   }, [])
 
   const handleRename = useCallback((thoughtId: Id<"thoughts">) => {
-    modalDispath({type: "SET_EDITING", thoughtId})
-    modalDispath({type: "TOGGLE_DISPLAY", value: false})
+    modalDispath({ type: "SET_EDITING", thoughtId })
+    modalDispath({ type: "TOGGLE_DISPLAY", value: false })
   }, [])
 
   const handleDelete = useCallback(async (thoughtId: Id<"thoughts">) => {
-    modalDispath({type: "TOGGLE_DISPLAY", value: false});
+    modalDispath({ type: "TOGGLE_DISPLAY", value: false });
     const confirmDelete = await confirmAction();
     if (!confirmDelete) return
-      
+
     try {
       const displayedThoughtId = location.href.split("/thoughts/")[1];
       const isDisplayed = displayedThoughtId === thoughtId;
-      await deleteThought({thoughtId});
+      await deleteThought({ thoughtId });
       modalDispath({ type: "TOGGLE_DISPLAY", value: false })
       setToast({
         title: "Delete Successful",
@@ -126,19 +126,19 @@ export default function OptionsModal({
       {
         optionsItems.map(({ label, icon: Icon, handleClick }, i) => (
           <span key={`options_${i}`}>
-          <button
+            <button
               data-index={i + 1}
-              className="my-optionsModalBtn
+              className={`my-optionsModalBtn ${i === 2 ? "text-accent" : ""}
               w-full py-[0.375rem] px-1 flex gap-x-1 items-center h-[2.25rem] rounded-[6px]
-            "
-            onClick={() => handleClick(thoughtId)}>
-            <Icon />
-            <span>{label}</span>
-          </button>
-          {
-            i === (optionsItems.length - 2) && 
-            <span key={`line_at_${i}`} className="block my-[0.75rem] bg-border-gray h-[1px] w-full" />
-          }
+            `}
+              onClick={() => handleClick(thoughtId)}>
+              <Icon color={i === 2 ? "#FE7A33" : ""} />
+              <span>{label}</span>
+            </button>
+            {
+              i === (optionsItems.length - 2) &&
+              <span key={`line_at_${i}`} className="block my-[0.75rem] bg-border-gray h-[1px] w-full" />
+            }
           </span>
         ))
       }
