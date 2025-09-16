@@ -12,6 +12,7 @@ export default function SlateStatusDisplay () {
   useEffect(() => {
     if (timeout.current) clearTimeout(timeout.current);
 
+    if (slateStatus === "loading") return;
     timeout.current = setTimeout(() => {
       setSlateStatus("idle")
     }, 2000)

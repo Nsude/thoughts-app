@@ -91,7 +91,7 @@ export const transcribeAudio = action({
   },
 });
 
-interface GeminiResponse {
+export interface GeminiResponse {
   candidates: Array<{
     content: {
       parts: Array<{
@@ -187,7 +187,7 @@ export const convertTranscriptionToSlate = action({
             ],
             generationConfig: {
               temperature: 0.3, // Lower temperature for more consistent formatting
-              maxOutputTokens: 2048,
+              maxOutputTokens: 2048, // max character limit
             },
           }),
         }
