@@ -25,6 +25,7 @@ import { useConfirmation } from "@/components/utility/ConfirmationContext";
 import { useToastContext } from "@/components/contexts/ToastContext";
 import { Editor } from "slate";
 import { slateToPlainText } from "@/components/rich-text-editor/slateEditorFunctions";
+import { getRandomKeyphrase } from "@/components/utility/ai-helpers";
 
 const initialAudioModalState: AudioModalState = {
   display: false,
@@ -261,7 +262,7 @@ export default function ThoughtDocument(
   const handleSurpriseMe = async () => {
     setSlateStatus("loading");
     try {
-      const content = await surpriseMe();
+      const content = await surpriseMe({keyPhrase: getRandomKeyphrase()});
       setAllowContent(true);
       setCurrentContent(content);
 

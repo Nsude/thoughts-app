@@ -206,6 +206,28 @@ export const exampleSlateOutput = `
     ]
 `;
 
+export const formatingGuideLines = `
+    - Use heading (level: 2) for main sections
+    - Use bold only for critical terms or key metrics
+    - Use bullet lists for challenges, solutions, or opportunities
+    - Always add empty paragraph after lists
+    - Use heading (level: 3) for things like solutions, implemetation details, "scaling opportunities", potential drawbacks, and any other thing that would come off a title
+    - Use italic for intriguing considerations or "what if" scenarios
+    - Do not add spacing after heading if what follows the heading block is a list
+    - Do not use **something**
+    - Do not use underscores, em dashes, or en dashes, only hyphens when absolutely necessary
+`;
+
+export const slateFormatRules = `
+  - Each block is an object with "type" and "children" properties
+  - Text nodes have a "text" property and optional formatting marks
+  - Available block types: "paragraph", "heading", "bullet-list", "numbered-list", "list-item", "code"
+  - Heading block types should have a "level" property of either 1, 2 or 3
+  - Available text marks: "bold", "italic", "highlight", "linethrough", "underline"
+  - List items must be wrapped in their respective list containers
+  - Add empty paragraphs after lists and before headings for visual spacing
+`;
+
 export const refineThought = action({
   args: { userIdea: v.string() },
   handler: async (ctx, { userIdea }) => {
@@ -218,14 +240,7 @@ export const refineThought = action({
     INPUT: A user's initial idea or concept
     OUTPUT: Valid JSON representing Slate.js nodes with refined idea analysis
 
-    SLATE.JS FORMAT RULES:
-    - Each block is an object with "type" and "children" properties
-    - Text nodes have a "text" property and optional formatting marks
-    - Available block types: "paragraph", "heading", "bullet-list", "numbered-list", "list-item", "code"
-    - Heading block types should have a "level" property of either 1, 2 or 3
-    - Available text marks: "bold", "italic", "highlight", "linethrough", "underline"
-    - List items must be wrapped in their respective list containers
-    - Add empty paragraphs after lists for visual spacing
+    SLATE.JS FORMAT RULES: ${slateFormatRules}
 
     CONTENT STRUCTURE:
     1. Start with a refined version of the core idea
@@ -242,15 +257,7 @@ export const refineThought = action({
     - Focus on viability and practical implementation
     - No need to provide a title, just go straight to your analysis
 
-    FORMATTING GUIDELINES:
-    - Use heading (level: 2) for main sections
-    - Use bold only for critical terms or key metrics
-    - Use bullet lists for challenges, solutions, or opportunities
-    - Always add empty paragraph after lists
-    - Use italic for considerations or conditional statements
-    - Do not use underscores 
-    - Use heading (level: 3) for things like solutions, implemetation details, scaling opportunities, 
-      potential drawbacks, and any other thing that would come off a title
+    FORMATTING GUIDELINES: ${formatingGuideLines}
 
     EXAMPLE OUTPUT:${exampleSlateOutput}
 
@@ -310,35 +317,25 @@ export const refineThought = action({
   },
 });
 
-export const surpriseMe = action(async () => {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error("Missing Gemini API key");
+export const surpriseMe = action({
+  args: { keyPhrase: v.string() },
+  handler: async (ctx, { keyPhrase }) => {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) throw new Error("Missing Gemini API key");
 
-  const prompt = `You are a creative idealist who generates fascinating, doable ideas across any domain imaginable. Your role is to spark curiosity and present concepts that are both innovative and achievable.
+    const prompt = `You are a creative idealist who generates fascinating, doable ideas across any domain imaginable. Your role is to spark curiosity and present concepts that are both innovative and achievable.
 
     OUTPUT: Valid JSON representing Slate.js nodes with a complete creative idea
 
-    SLATE.JS FORMAT RULES:
-    - Each block is an object with "type" and "children" properties
-    - Text nodes have a "text" property and optional formatting marks
-    - Available block types: "paragraph", "heading", "bullet-list", "numbered-list", "list-item", "code"
-    - Heading block types should have a "level" property of either 1, 2 or 3
-    - Available text marks: "bold", "italic", "highlight", "linethrough", "underline"
-    - List items must be wrapped in their respective list containers
-    - Add empty paragraphs after lists and before headings for visual spacing
+    SLATE.JS FORMAT RULES: ${slateFormatRules}
 
-    IDEA DOMAINS (choose randomly between an of the following domains):
-    - Technology and apps
-    - Physical products and inventions
-    - Social initiatives and community projects
-    - Creative arts and entertainment
-    - Business concepts and services
-    - Environmental solutions
-    - Educational innovations
-    - Urban planning and architecture
-    - Health and wellness
-    - Transportation and mobility
-    - Gaming and interactive experiences
+    KEYWORD INPUT: You will receive a single keyPhrase that must be the central focus of your idea generation.
+
+    CREATIVE APPROACH:
+    - Build the entire concept around the provided keyPhrase
+    - Find unexpected angles or applications for the keyPhrase
+    - Connect the keyPhrase to practical, achievable solutions
+    - Think beyond obvious interpretations - be creative with connections
 
     CONTENT STRUCTURE:
     1. Present the core idea with enthusiasm
@@ -356,66 +353,60 @@ export const surpriseMe = action(async () => {
     - Use bold only for key breakthrough moments or critical elements
     - Keep tone inspiring but grounded
 
-    FORMATTING GUIDELINES:
-    - Use heading (level: 2) for main sections
-    - Use bold only for critical terms or key metrics
-    - Use bullet lists for challenges, solutions, or opportunities
-    - Always add empty paragraph after lists
-    - Do not use underscores 
-    - Use heading (level: 3) for things like solutions, implemetation details, scaling opportunities, 
-      potential drawbacks, and any other thing that would come off a title
-    - Use italic for intriguing considerations or "what if" scenarios
+    FORMATTING GUIDELINES: ${formatingGuideLines}
 
     EXAMPLE OUTPUT:${exampleSlateOutput}
+    KEYWORD TO DEVELOP: "${keyPhrase}"
 
     Generate a completely random, creative idea that's both fascinating and achievable. Make it specific and compelling. Return ONLY the JSON array, no explanations.`;
-  
-  const response = await fetch(
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" +
-      apiKey,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              {
-                text: prompt,
-              },
-            ],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.5, // Lower temperature for more consistent formatting
-          maxOutputTokens: 2048, // max character limit
+
+    const response = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" +
+        apiKey,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      }),
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: prompt,
+                },
+              ],
+            },
+          ],
+          generationConfig: {
+            temperature: 0.3, // Lower temperature for more consistent formatting
+            maxOutputTokens: 2048, // max character limit
+          },
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
     }
-  );
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
-  }
+    const data: GeminiResponse = await response.json();
 
-  const data: GeminiResponse = await response.json();
+    if (!data.candidates || !data.candidates[0]) {
+      throw new Error("No response from Gemini");
+    }
 
-  if (!data.candidates || !data.candidates[0]) {
-    throw new Error("No response from Gemini");
-  }
+    const generatedText = data.candidates[0].content.parts[0].text;
 
-  const generatedText = data.candidates[0].content.parts[0].text;
+    // Clean up the response (remove markdown code blocks if present)
+    const cleanedText = generatedText
+      .replace(/```json\n?/g, "")
+      .replace(/```\n?/g, "")
+      .trim();
 
-  // Clean up the response (remove markdown code blocks if present)
-  const cleanedText = generatedText
-    .replace(/```json\n?/g, "")
-    .replace(/```\n?/g, "")
-    .trim();
+    if (!cleanedText) throw new Error("surpriseMe text is invalid");
 
-  if (!cleanedText) throw new Error("surpriseMe text is invalid");
-
-  return JSON.parse(cleanedText);  
-})
+    return JSON.parse(cleanedText);
+  },
+});
