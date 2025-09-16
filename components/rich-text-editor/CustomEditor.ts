@@ -183,7 +183,6 @@ export const CustomEditor = {
     let match = this.isHeadingElement(editor, level);
 
     const type = match ? null : { type: "heading", level };
-    !match ? Editor.addMark(editor, "bold", true) : null;
 
     Transforms.setNodes(editor, type as Partial<Element>, {
       match: (n) => Element.isElement(n) && Editor.isBlock(editor, n),

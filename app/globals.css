@@ -39,6 +39,14 @@
   --tracking-h1: -0.01ch;
   --text-title: 1.5625rem;
 
+  --font-hg-Bold: "hg-Bold";
+}
+
+@font-face {
+  font-family: "hg-Bold";
+  src: url("../public//font/hg-Bold.ttf");
+  font-weight: 700;
+  font-style: normal;
 }
 
 body {
