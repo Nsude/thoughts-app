@@ -289,16 +289,6 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
 
           {/* Suprise Me & delete version */}
           <div className="absolute bottom-[1.125rem] right-[1.125rem] flex gap-x-1.5">
-            {
-              editorState.currentBlock.isEditorEmpty && slateStatus === "idle" ?
-                <div title="Surprise me">
-                  <ClassicButton
-                    icon={<LogoIcon />}
-                    handleClick={() => console.info("Suprise-me clicked")} />
-                </div>
-                : null
-            }
-
             {/* delete button */}
             <div style={{
               opacity: selectedVersion?.isCore || thoughtId === "new" ? .5 : 1,
@@ -308,6 +298,16 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
                 icon={<DeleteIcon />}
                 handleClick={handleDeleteVersion} />
             </div>
+
+            {
+              editorState.currentBlock.isEditorEmpty && slateStatus === "idle" ?
+                <div title="Surprise me">
+                  <ClassicButton
+                    icon={<LogoIcon />}
+                    handleClick={() => console.info("Suprise-me clicked")} />
+                </div>
+                : null
+            }
           </div>
         </div>
       </div>

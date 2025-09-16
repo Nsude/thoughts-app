@@ -47,8 +47,8 @@ export const useSlateEditorState = () => {
     setPlaceholderState(prev => ({...prev, show: isEditorEmpty}));
 
     const { selection } = editor;
-    if (!selection) return console.log("Slate selection does not exist");
-    if (!Range.isCollapsed(selection)) return console.log("selection made");
+    if (!selection) return console.info("Slate selection does not exist");
+    if (!Range.isCollapsed(selection)) return console.info("selection made");
 
     // Get vertical position of cursor using ReactEditor
     let verticalPosition = 0;

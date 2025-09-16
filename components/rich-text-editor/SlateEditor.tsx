@@ -133,43 +133,48 @@ export default function SlateEditor({
   }, [thoughtId, selectedVersion?._id, hasContentChanged])
 
   // ===== CREATE A NEW THOUGHT =====
+  const createThoughtTimeout = useRef<NodeJS.Timeout>(null);
   const handleCreateThought = useCallback(async (content: any[]) => {
-    const contentLength = getContentLength(content);
-    if (contentLength < 10) return;
+    if (createThoughtTimeout.current) clearTimeout(createThoughtTimeout.current);
 
-    dispatch({ type: "CREATING_THOUGHT" });
-    setSlateStatus("saving");
-
-    try {
-      const newThoughtId = await createThought({ isPrivate: true });
-      if (!newThoughtId) return;
-
-      // create the core version for the thought
-      const versionId = await createVersion({
-        thoughtId: newThoughtId,
-        content,
-        versionNumber: 1,
-        isCore: true,
-        createdAt: Date.now()
-      })
-
-      if (!versionId) return;
-
-      // set the selected version to the only version as it stands
-      await setSelectedVersion({
-        thoughtId: newThoughtId,
-        selectedVersion: versionId
-      })
-
-      // update last saved ref
-      lastSavedContent.current = content;
-      router.replace(`/thoughts/${newThoughtId}`);
-      setSlateStatus("saved");
-
-    } catch (error) {
-      console.error("Error creating new thought: ", error);
-      setSlateStatus("error");
-    }
+    createThoughtTimeout.current = setTimeout( async () => {
+      const contentLength = getContentLength(content);
+      if (contentLength < 10) return;
+  
+      dispatch({ type: "CREATING_THOUGHT" });
+      setSlateStatus("saving");
+  
+      try {
+        const newThoughtId = await createThought({ isPrivate: true });
+        if (!newThoughtId) return;
+  
+        // create the core version for the thought
+        const versionId = await createVersion({
+          thoughtId: newThoughtId,
+          content,
+          versionNumber: 1,
+          isCore: true,
+          createdAt: Date.now()
+        })
+  
+        if (!versionId) return;
+  
+        // set the selected version to the only version as it stands
+        await setSelectedVersion({
+          thoughtId: newThoughtId,
+          selectedVersion: versionId
+        })
+  
+        // update last saved ref
+        lastSavedContent.current = content;
+        router.replace(`/thoughts/${newThoughtId}`);
+        setSlateStatus("saved");
+  
+      } catch (error) {
+        console.error("Error creating new thought: ", error);
+        setSlateStatus("error");
+      }
+    }, 2000)
   }, [thoughtId, router])
 
   // ===== HANDLE VALUE CHANGE =====

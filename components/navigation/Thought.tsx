@@ -27,34 +27,63 @@ export default function Thought({
   const [title, setTitle] = useState(description || "Untitled Thought");
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   // mutation
   const renameThought = useMutation(api.thoughts.renameThought);
 
-  // clear previous title 
+  // clear previous title !IMPORTANT
   useEffect(() => {
     if (description) return;
     setTitle("Untitled Thought")
   }, [router, _id])
 
-  // preselect title to rename 
+  // highlight title to rename 
   useEffect(() => {
-    if (!inputRef.current) return;
-    const button = inputRef.current.closest("button");
+    const button = buttonRef.current;
     if (!button) return;
 
     if (!editing) {
       button.classList.contains("is-renaming") ? 
       button.classList.remove("is-renaming") : null;
-      inputRef.current.blur();
     } else {
-      inputRef.current.focus();
-      inputRef.current.select();
-      button.classList.add("is-renaming")
+      inputRef.current?.focus();
+      inputRef.current?.select();
+      button.classList.add("is-renaming");
+    }
+  }, [editing])
+
+  // highlight selected thought on refresh
+  useEffect(() => {
+    const thoughtId = localStorage.getItem("selectedThoughtId");
+    if (!thoughtId) return;
+
+    const button = document.querySelector(`[data-id="${thoughtId}"]`);
+    if (!button) return;
+
+    if (!button.classList.contains("is-selected"))
+      button.classList.add("is-selected");
+  }, []);
+
+  const handleClick_Local = (e: React.MouseEvent) => {
+    handleClick();
+
+    const {currentTarget} = e;
+    const target = currentTarget as HTMLButtonElement;
+
+    const prevSelectedItem = document.querySelector(".my-thoughtItem.is-selected");
+    if (prevSelectedItem) prevSelectedItem.classList.remove("is-selected");
+
+    if (!target.classList.contains("is-selected")) {
+      target.classList.add("is-selected");
     }
 
+    // set selected thought Id to local storage
+    const thoughtId = target.getAttribute("data-id");
+    if (!thoughtId) return;
 
-  }, [editing])
+    localStorage.setItem("selectedThoughtId", thoughtId);
+   }
 
   // update title 
   const updateTitle = useMemo(() => {
@@ -71,8 +100,11 @@ export default function Thought({
   return (
     <div className="snap-start">
       <button
-        onClick={handleClick}
-        className="my-thoughtItem relative flex gap-x-1.5 items-center justify-between h-[2.5rem] w-full rounded-[0.375rem] px-2.5 overflow-clip">
+        ref={buttonRef}
+        onClick={handleClick_Local}
+        data-id={_id}
+        className="my-thoughtItem relative flex gap-x-1.5 items-center justify-between 
+        h-[2.5rem] w-full rounded-[0.375rem] px-2.5 overflow-clip">
         {
           fresh &&
           <span>
@@ -80,28 +112,37 @@ export default function Thought({
           </span>
         }
 
-        <input
-          ref={inputRef}
-          value={title}
-          readOnly={!editing}
-          onChange={(e) => setTitle(e.currentTarget.value)}
-          onKeyDown={(e) => {
-            const { key } = e;
-            if (key.toLowerCase() !== "enter") return;
-            updateTitle();
-          }}
-          onBlur={() => updateTitle()}
-          style={{ pointerEvents: editing ? "all" : "none" }}
-          className="
-            focus:outline-none
-            z-[1] w-[90%] leading-[2] text-left truncate text-ellipsis
-            " />
+        {
+          editing ? 
+          <input
+            ref={inputRef}
+            value={title}
+            readOnly={!editing}
+            onClick={(e) => e.stopPropagation()}
+            onChange={(e) => setTitle(e.currentTarget.value)}
+            onKeyDown={(e) => {
+              const { key } = e;
+              if (key.toLowerCase() !== "enter") return;
+              updateTitle();
+            }}
+            onBlur={() => updateTitle()}
+            style={{ pointerEvents: editing ? "all" : "none" }}
+            className="
+              focus:outline-none
+              z-[1] w-[90%] leading-[2] text-left truncate text-ellipsis
+              " />
+          : 
+          <span className="truncate">{title}</span>
+        }
 
         <span
           role="button"
-          style={{opacity: editing ? 0 : 1}}
+          style={{
+            opacity: editing ? 0 : 1,
+            pointerEvents: editing ? "none" : "all",
+          }}
           onMouseDown={(e) => e.stopPropagation()}
-          onClick={(e) => { e.stopPropagation(); handleEditClick(e) }} >
+          onClick={(e) => { e.stopPropagation(); handleEditClick(e) }}>
           <ThreeDotIcon />
         </span>
       </button>
