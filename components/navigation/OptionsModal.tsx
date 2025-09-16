@@ -74,6 +74,7 @@ export default function OptionsModal({
   }, [])
 
   const handleDelete = useCallback(async (thoughtId: Id<"thoughts">) => {
+    modalDispath({type: "TOGGLE_DISPLAY", value: false});
     const confirmDelete = await confirmAction();
     if (!confirmDelete) return
       
