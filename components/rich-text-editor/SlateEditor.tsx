@@ -35,7 +35,7 @@ export default function SlateEditor({
 
   // editor instance 
   const editor = useMemo(() => withHistory(withReact(createEditor())), []);
-  const initialValue: Descendant[] = useMemo(() => [{ type: "paragraph", children: [{ text: "" }] }], []);
+  const initialValue: any[] = useMemo(() => [], []);
   const router = useRouter();
 
   // ===== CONVEX MUTATIONS =====
@@ -61,8 +61,8 @@ export default function SlateEditor({
     slateStatus, 
     setSlateStatus, 
     setCurrentContent, 
-    setIsSourceAudio, 
-    isSourceAudio,
+    setAllowContent, 
+    allowContent,
     currentContent,
     versionSwitched, 
     setVersionSwitched
@@ -181,7 +181,7 @@ export default function SlateEditor({
   const handleSlateValueChange = useCallback(async (content: any[]) => {
     if (!content) return;
     
-    setIsSourceAudio(false);
+    setAllowContent(false);
     setCurrentContent(content)
     
     // call external on change
@@ -218,13 +218,14 @@ export default function SlateEditor({
     if (
       currentContent.length === 0 || 
       !hasContentChanged(editor.children, currentContent) ||
-      !isSourceAudio
+      !allowContent
     ) return;
 
     // update the editor 
-    Transforms.insertNodes(editor, currentContent, {at: [editor.children.length]});
-    setIsSourceAudio(false);
-    console.info("updated editor ✅")
+    Transforms.insertNodes(editor, currentContent, {
+      at: lastSavedContent.current.length === 0 ? [0] : [editor.children.length]
+    });
+    setAllowContent(false);
   }, [currentContent])
 
   // render the selected element type

@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { action, mutation } from "./_generated/server";
+import { exampleSlateOutput } from "./refine";
 
 interface TranscribeParams {
   audio_url: string;
@@ -130,34 +131,7 @@ export const convertTranscriptionToSlate = action({
       - Use numbered lists for steps or sequential items
       - Use code blocks for technical content, code, or structured data
 
-      EXAMPLE OUTPUT:
-      [
-        {
-          "type": "heading-2",
-          "children": [{"text": "Project Ideas"}]
-        },
-        {
-          "type": "paragraph", 
-          "children": [
-            {"text": "I've been thinking about "},
-            {"text": "building a voice app", "bold": true},
-            {"text": " that could help people organize their thoughts better."}
-          ]
-        },
-        {
-          "type": "bullet-list",
-          "children": [
-            {
-              "type": "list-item",
-              "children": [{"text": "Voice recording feature"}]
-            },
-            {
-              "type": "list-item", 
-              "children": [{"text": "AI transcription and formatting"}]
-            }
-          ]
-        }
-      ]
+      EXAMPLE OUTPUT:${exampleSlateOutput}
 
       CONTEXT: ${thoughtContext}
 

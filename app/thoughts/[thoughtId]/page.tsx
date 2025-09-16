@@ -60,7 +60,7 @@ export default function ThoughtDocument(
     setSlateStatus, 
     currentContent, 
     setCurrentContent,
-    setIsSourceAudio
+    setAllowContent
   } = useSlateStatusContext();
   const {confirmAction} = useConfirmation();
 
@@ -80,6 +80,7 @@ export default function ThoughtDocument(
 
   // convex actions 
   const refineThought = useAction(api.refine.refineThought);
+  const surpriseMe = useAction(api.refine.surpriseMe);
 
   // toast notification
   const { setToast } = useToastContext();
@@ -211,7 +212,7 @@ export default function ThoughtDocument(
       // set transcribed audio to current slate content
       const {storageId} = await response.json();
       const audioTranscribedToslateContent = await transcribeAudio({storageId});
-      setIsSourceAudio(true);
+      setAllowContent(true);
       setCurrentContent(audioTranscribedToslateContent);
 
       audioDispatch({type: "STATUS", status: "idle"});
@@ -256,6 +257,26 @@ export default function ThoughtDocument(
     }
   }
 
+  // generates random text
+  const handleSurpriseMe = async () => {
+    setSlateStatus("loading");
+    try {
+      const content = await surpriseMe();
+      setAllowContent(true);
+      setCurrentContent(content);
+
+      setSlateStatus("idle")
+    } catch (error) {
+      setSlateStatus("error");
+      setToast({
+        title: "A Tiny Error",
+        isError: true,
+        showToast: true
+      })
+    }
+  }
+
+  // get the right text for the parent version
   const getParentVersionLabel = ():string => {
     if (!versions) return "";
     if (selectedVersion?.parentVersionNumber === 1 || !selectedVersion?.parentVersionNumber) return "Core Version";
@@ -364,7 +385,7 @@ export default function ThoughtDocument(
                 <div title="Surprise me">
                   <ClassicButton
                     icon={<LogoIcon />}
-                    handleClick={() => console.info("Suprise-me clicked")} />
+                    handleClick={handleSurpriseMe} />
                 </div>
                 : null
             }
