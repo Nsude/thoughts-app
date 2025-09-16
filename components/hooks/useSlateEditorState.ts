@@ -53,9 +53,19 @@ export const useSlateEditorState = () => {
     // Get vertical position of cursor using ReactEditor
     let verticalPosition = 0;
     try {
+      // Validate selection exists and editor is focused
+      if (!selection || !ReactEditor.isFocused(editor)) return;
+
+      // Check if selection is valid
+      if (
+        !Editor.hasPath(editor, selection.anchor.path) ||
+        !Editor.hasPath(editor, selection.focus.path)
+      ) return;
+
+
       // Get the DOM range for the current selection
       const domRange = ReactEditor.toDOMRange(editor, selection);
-      const {top} = domRange.getBoundingClientRect();
+      const { top } = domRange.getBoundingClientRect();
       verticalPosition = top;
     } catch (error) {
       console.error("Could not get cursor position:", error);

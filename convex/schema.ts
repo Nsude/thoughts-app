@@ -49,6 +49,7 @@ const schema = defineSchema({
     isCore: v.boolean(), // Is this the original/core version?
     createdAt: v.number(),
     modifiedBy: v.id("users"),
+    parentVersionNumber: v.optional(v.number()),
   })
     // query by thoughtId and versionNumber for returning a specific version
     .index("by_thought_version", ["thoughtId", "versionNumber"])

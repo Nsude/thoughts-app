@@ -34,21 +34,18 @@ export const createVersion = mutation({
     versionNumber: v.number(),
     isCore: v.boolean(),
     createdAt: v.number(),
+    parentVersionNumber: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    try {
-      const user = await getCurrentUserHelper(ctx);
-      if (!user) throw new Error("This user is not signed in");
+    const user = await getCurrentUserHelper(ctx);
+    if (!user) throw new Error("This user is not signed in");
 
-      return await ctx.db.insert("versions", {
-        ...args,
-        modifiedBy: user._id,
-        changeLabel: "Light",
-        title: `Version ${args.versionNumber < 10 ? 0 : ""}${args.versionNumber}`,
-      });
-    } catch (error) {
-      console.error(error);
-    }
+    return await ctx.db.insert("versions", {
+      ...args,
+      modifiedBy: user._id,
+      changeLabel: "Light",
+      title: `Version ${args.versionNumber < 10 ? 0 : ""}${args.versionNumber}`,
+    });
   },
 });
 

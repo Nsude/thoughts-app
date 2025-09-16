@@ -5,7 +5,6 @@ import TabButton, { easeInOutCubic } from "@/components/buttons/TabButton";
 import { useSlateStatusContext } from "@/components/contexts/SlateStatusContext";
 import { useSlateEditorState } from "@/components/hooks/useSlateEditorState";
 import { PlaceholderDisplay } from "@/components/rich-text-editor/PlaceholderDisplay";
-import { BlockType } from "@/components/rich-text-editor/slate";
 import SlateEditor from "@/components/rich-text-editor/SlateEditor";
 import SlateStatusDisplay from "@/components/rich-text-editor/EditorStatus";
 import { api } from "@/convex/_generated/api";
@@ -25,6 +24,8 @@ import { AudioModalAction, AudioModalState } from "@/components/app.models";
 import { useConfirmation } from "@/components/utility/ConfirmationContext";
 import { useToastContext } from "@/components/contexts/ToastContext";
 import { Editor } from "slate";
+import { slateToPlainText } from "@/components/rich-text-editor/slateEditorFunctions";
+import { getRandomKeyphrase } from "@/components/utility/ai-helpers";
 
 const initialAudioModalState: AudioModalState = {
   display: false,
@@ -33,7 +34,9 @@ const initialAudioModalState: AudioModalState = {
   status: "idle"
 }
 
-const audioModalReducer = (state: AudioModalState, action: AudioModalAction):AudioModalState => {
+const audioModalReducer = (
+  state: AudioModalState, 
+  action: AudioModalAction):AudioModalState => {
   switch(action.type) {
     case "DISPLAY":
       return { ...state, display: action.display }
@@ -46,7 +49,9 @@ const audioModalReducer = (state: AudioModalState, action: AudioModalAction):Aud
   }
 }
 
-export default function ThoughtDocument({ params }: { params: Promise<{ thoughtId: Id<"thoughts"> }> }) {
+export default function ThoughtDocument(
+  { params }: { params: Promise<{ thoughtId: Id<"thoughts"> }> 
+}) {
   const [tab, setTab] = useState(0);
   const { thoughtId } = use(params);
   const placeholderRef = useRef(null);
@@ -56,7 +61,7 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
     setSlateStatus, 
     currentContent, 
     setCurrentContent,
-    setIsSourceAudio
+    setAllowContent
   } = useSlateStatusContext();
   const {confirmAction} = useConfirmation();
 
@@ -73,6 +78,10 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
     api.thoughts.getSelectedVersion,
     thoughtId !== "new" ? { thoughtId } : "skip"
   )
+
+  // convex actions 
+  const refineThought = useAction(api.refine.refineThought);
+  const surpriseMe = useAction(api.refine.surpriseMe);
 
   // toast notification
   const { setToast } = useToastContext();
@@ -98,8 +107,16 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
 
 
   // handle add versions
-  const handleAddVersion = async () => {
-    if (versions && versions.length > 9) return;
+  const handleAddVersion = async (content: any[]) => {
+    if (versions && versions.length > 9) {
+      setToast({
+        title: "Version Limit Exceeded",
+        msg: "Easy now tiger, maybe you should create a new thought thread instead",
+        isError: true,
+        showToast: true
+      })
+      return;
+    };
     setSlateStatus("loading");
 
     try {
@@ -107,10 +124,11 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
 
       await createVersion({
         thoughtId,
-        content: currentContent,
+        content: content,
         versionNumber: versions.length + 1,
         isCore: false,
-        createdAt: Date.now()
+        createdAt: Date.now(),
+        parentVersionNumber: selectedVersion?.versionNumber
       })
 
       setSlateStatus("saved");
@@ -121,6 +139,7 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
         showToast: true
       })
     } catch (error) {
+      setSlateStatus("error");
       console.error(error);
       setToast({
         title: "Add-version Failed",
@@ -194,7 +213,7 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
       // set transcribed audio to current slate content
       const {storageId} = await response.json();
       const audioTranscribedToslateContent = await transcribeAudio({storageId});
-      setIsSourceAudio(true);
+      setAllowContent(true);
       setCurrentContent(audioTranscribedToslateContent);
 
       audioDispatch({type: "STATUS", status: "idle"});
@@ -220,6 +239,52 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
     window.addEventListener("mousedown", handleMouseDown);
   }, [isRecording.current])
 
+  // handle refine idea
+  const handleRefineThought = async () => {
+    const thoughtToPlainText = slateToPlainText(currentContent);
+    setSlateStatus("loading");
+    try {
+      const refinedText = await refineThought({userIdea: thoughtToPlainText});
+      await handleAddVersion(refinedText);
+      setSlateStatus("idle");
+    } catch (error) {
+      setSlateStatus("error");
+      console.error(error);
+      setToast({
+        title: "Refine Error",
+        isError: true,
+        showToast: true
+      })
+    }
+  }
+
+  // generates random text
+  const handleSurpriseMe = async () => {
+    setSlateStatus("loading");
+    try {
+      const content = await surpriseMe({keyPhrase: getRandomKeyphrase()});
+      setAllowContent(true);
+      setCurrentContent(content);
+
+      setSlateStatus("idle")
+    } catch (error) {
+      setSlateStatus("error");
+      setToast({
+        title: "A Tiny Error",
+        isError: true,
+        showToast: true
+      })
+    }
+  }
+
+  // get the right text for the parent version
+  const getParentVersionLabel = ():string => {
+    if (!versions) return "";
+    if (selectedVersion?.parentVersionNumber === 1 || !selectedVersion?.parentVersionNumber) return "Core Version";
+    const versionNumber = selectedVersion?.parentVersionNumber;
+    return versions.length < 9 ? "Version 0" + versionNumber : "Version " + versionNumber;
+   }
+
   return (
     <div>
       <div className="relative">
@@ -232,19 +297,36 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
       </div>
 
       <div className="flex justify-center items-center h-[83vh]">
-        <div className="relative h-full w-[42.375rem] bg-myWhite border border-border-gray/50 rounded-2xl pt-[4.6rem]">
+        <div className="relative h-full w-[42.375rem] bg-myWhite border border-border-gray/50 
+          rounded-2xl pt-[4.6rem]">
 
           {/* Header */}
-          <div className="absolute top-0 left-0 w-full px-[1.125rem] h-[4.25rem] flex justify-between items-center">
-            <h3 className="text-title text-fade-gray">Core</h3>
+          <div className="absolute top-0 left-0 w-full px-[1.125rem] h-[4.25rem] flex 
+            justify-between items-center">
+
+            {/* Version Title */}
+            {
+              selectedVersion?.isCore || thoughtId === "new" ? 
+              <h3 className="text-title text-fade-gray">Core</h3>
+              : 
+                <div className="flex text-dark-gray-label items-center gap-1 text-label-14 
+                  px-[0.8rem] py-1 rounded-[20px] bg-myGray ">
+                  <span className="">Parent | </span>
+                <span className="text-myBlack">{getParentVersionLabel()}</span>
+              </div>
+            }
+
             <span className="flex items-center gap-x-1.5">
               <SlateStatusDisplay />
 
               {/* refine idea button */}
-              <ClassicButton icon={<LogoIcon />} text="Refine" />
+              <ClassicButton 
+                icon={<LogoIcon />} 
+                text="Refine" 
+                handleClick={handleRefineThought} />
 
               {/* add version button */}
-              <ClassicButton icon={<PlusIcon />} handleClick={handleAddVersion} />
+              <ClassicButton icon={<PlusIcon />} handleClick={() => handleAddVersion(currentContent)} />
             </span>
           </div>
 
@@ -304,7 +386,7 @@ export default function ThoughtDocument({ params }: { params: Promise<{ thoughtI
                 <div title="Surprise me">
                   <ClassicButton
                     icon={<LogoIcon />}
-                    handleClick={() => console.info("Suprise-me clicked")} />
+                    handleClick={handleSurpriseMe} />
                 </div>
                 : null
             }

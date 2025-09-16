@@ -33,7 +33,7 @@ export function NumberedListElement(props: RenderElementProps) {
 }
 
 export function ListItemElement(props: RenderElementProps) {
-  return <li className="list-item not-last:my-1.5" {...props.attributes} >{props.children}</li>
+  return <li className="list-item tracking-[0.03ch] leading-[1.5] not-last:my-1.5" {...props.attributes} >{props.children}</li>
 }
 
 export function DefaultElement(props: RenderElementProps) {

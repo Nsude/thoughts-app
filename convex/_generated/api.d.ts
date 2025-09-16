@@ -17,6 +17,7 @@ import type * as ResendOtp from "../ResendOtp.js";
 import type * as audio from "../audio.js";
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
+import type * as refine from "../refine.js";
 import type * as thoughts from "../thoughts.js";
 import type * as users from "../users.js";
 
@@ -33,6 +34,7 @@ declare const fullApi: ApiFromModules<{
   audio: typeof audio;
   auth: typeof auth;
   http: typeof http;
+  refine: typeof refine;
   thoughts: typeof thoughts;
   users: typeof users;
 }>;
