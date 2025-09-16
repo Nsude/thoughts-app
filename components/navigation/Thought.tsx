@@ -105,35 +105,37 @@ export default function Thought({
         data-id={_id}
         className="my-thoughtItem relative flex gap-x-1.5 items-center justify-between 
         h-[2.5rem] w-full rounded-[0.375rem] px-2.5 overflow-clip">
-        {
-          fresh &&
-          <span>
-            <FreshThoughtIcon />
-          </span>
-        }
+        <div className="flex items-center gap-x-1.5 w-[90%]">
+          {
+            fresh &&
+            <span>
+              <FreshThoughtIcon />
+            </span>
+          }
 
-        {
-          editing ? 
-          <input
-            ref={inputRef}
-            value={title}
-            readOnly={!editing}
-            onClick={(e) => e.stopPropagation()}
-            onChange={(e) => setTitle(e.currentTarget.value)}
-            onKeyDown={(e) => {
-              const { key } = e;
-              if (key.toLowerCase() !== "enter") return;
-              updateTitle();
-            }}
-            onBlur={() => updateTitle()}
-            style={{ pointerEvents: editing ? "all" : "none" }}
-            className="
-              focus:outline-none
-              z-[1] w-[90%] leading-[2] text-left truncate text-ellipsis
-              " />
-          : 
-          <span className="truncate">{title}</span>
-        }
+          {
+            editing ? 
+            <input
+              ref={inputRef}
+              value={title}
+              readOnly={!editing}
+              onClick={(e) => e.stopPropagation()}
+              onChange={(e) => setTitle(e.currentTarget.value)}
+              onKeyDown={(e) => {
+                const { key } = e;
+                if (key.toLowerCase() !== "enter") return;
+                updateTitle();
+              }}
+              onBlur={() => updateTitle()}
+              style={{ pointerEvents: editing ? "all" : "none" }}
+              className="
+                focus:outline-none
+                z-[1] leading-[2] text-left truncate text-ellipsis
+                " />
+            : 
+            <span className="truncate leading-[2]">{title}</span>
+          }
+        </div>
 
         <span
           role="button"

@@ -14,6 +14,7 @@ import { ModalActions } from "./Navigation";
 import { useRouter } from "next/navigation";
 import { useSlateStatusContext } from "../contexts/SlateStatusContext";
 import { useConfirmation } from "../utility/ConfirmationContext";
+import { useToastContext } from "../contexts/ToastContext";
 
 type OptionItem = {
   label: string;
@@ -33,6 +34,7 @@ export default function OptionsModal({
 ) {
   const { confirmAction } = useConfirmation();
   const {setCurrentContent} = useSlateStatusContext();
+  const {setToast} = useToastContext();
   const deleteThought = useMutation(api.thoughts.deleleThought);
 
   const mainRef = useRef(null);
@@ -80,6 +82,11 @@ export default function OptionsModal({
       const isDisplayed = displayedThoughtId === thoughtId;
       await deleteThought({thoughtId});
       modalDispath({ type: "TOGGLE_DISPLAY", value: false })
+      setToast({
+        title: "Delete Successful",
+        isError: false,
+        showToast: true
+      })
 
       // navigate to new thought
       setCurrentContent([]) // reset current content
