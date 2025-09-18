@@ -128,11 +128,11 @@ export default function OptionsModal({
           <span key={`options_${i}`}>
             <button
               data-index={i + 1}
-              className={`my-optionsModalBtn ${i === 2 ? "text-accent" : ""}
+              className={`my-optionsModalBtn
               w-full py-[0.375rem] px-1 flex gap-x-1 items-center h-[2.25rem] rounded-[6px]
             `}
               onClick={() => handleClick(thoughtId)}>
-              <Icon color={i === 2 ? "#FE7A33" : ""} />
+              <Icon />
               <span>{label}</span>
             </button>
             {

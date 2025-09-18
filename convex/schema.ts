@@ -54,6 +54,15 @@ const schema = defineSchema({
     // query by thoughtId and versionNumber for returning a specific version
     .index("by_thought_version", ["thoughtId", "versionNumber"])
     .index("by_modifiedBy", ["modifiedBy"]),
+
+  // shared thoughts
+  sharedThoughts: defineTable({
+    token: v.string(),
+    thoughtId: v.id("thoughts"),
+    sharedBy: v.id("users"),
+    expiresAt: v.optional(v.number())
+  })
+  .index("with_token", ["token"])
 });
 
 export default schema;

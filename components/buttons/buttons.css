@@ -99,7 +99,7 @@ button.my-optionsModalBtn:hover {
 }
 
 button.my-optionsModalBtn[data-index="3"]:hover {
-  background: color-mix(in oklab, var(--accent) 20%, transparent);
+  background: var(--accent);
 }
 
 /* versions */

@@ -143,7 +143,9 @@ export default function AudioInputModal({
         </div>
 
         {/* Audio Visualizer */}
-        <div className="absolute left-0 right-0 z-0">
+        <div 
+          style={{left: startRecording ? "30%" : "0"}}
+          className="absolute left-0 right-0 z-0">
           <VoiceVisualizer
             controls={recorderControls}
             isControlPanelShown={false}
@@ -154,6 +156,7 @@ export default function AudioInputModal({
             animateCurrentPick={true}
             isProgressIndicatorTimeShown={false}
             isProgressIndicatorTimeOnHoverShown={false}
+            isAudioProcessingTextShown={false}
           />
         </div>
 

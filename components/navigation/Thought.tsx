@@ -55,6 +55,7 @@ export default function Thought({
 
   // highlight selected thought on refresh
   useEffect(() => {
+    if (_id === "new") return;
     const thoughtId = localStorage.getItem("selectedThoughtId");
     if (!thoughtId) return;
 
@@ -63,7 +64,7 @@ export default function Thought({
 
     if (!button.classList.contains("is-selected"))
       button.classList.add("is-selected");
-  }, []);
+  }, [_id]);
 
   const handleClick_Local = (e: React.MouseEvent) => {
     handleClick();

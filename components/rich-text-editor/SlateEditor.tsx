@@ -35,7 +35,7 @@ export default function SlateEditor({
 
   // editor instance 
   const editor = useMemo(() => withHistory(withReact(createEditor())), []);
-  const initialValue: any[] = useMemo(() => [], []);
+  const initialValue: any[] = useMemo(() => [{type: "paragraph", children: [{text: ""}]}], []);
   const router = useRouter();
 
   // ===== CONVEX MUTATIONS =====
@@ -147,7 +147,7 @@ export default function SlateEditor({
       try {
         const newThoughtId = await createThought({ isPrivate: true });
         if (!newThoughtId) return;
-  
+        
         // create the core version for the thought
         const versionId = await createVersion({
           thoughtId: newThoughtId,
@@ -156,15 +156,15 @@ export default function SlateEditor({
           isCore: true,
           createdAt: Date.now()
         })
-  
+        
         if (!versionId) return;
-  
+        
         // set the selected version to the only version as it stands
         await setSelectedVersion({
           thoughtId: newThoughtId,
           selectedVersion: versionId
         })
-  
+        
         // update last saved ref
         lastSavedContent.current = content;
         router.replace(`/thoughts/${newThoughtId}`);
@@ -222,8 +222,9 @@ export default function SlateEditor({
     ) return;
 
     // update the editor 
+    const isEmpty = getContentLength(lastSavedContent.current) === 0;
     Transforms.insertNodes(editor, currentContent, {
-      at: lastSavedContent.current.length === 0 ? [0] : [editor.children.length]
+      at:  isEmpty ? [0] : [editor.children.length]
     });
     setAllowContent(false);
   }, [currentContent])
