@@ -63,6 +63,7 @@ const schema = defineSchema({
     expiresAt: v.optional(v.number())
   })
   .index("with_token", ["token"])
+  .index("with_thoughtId", ["thoughtId"])
 });
 
 export default schema;

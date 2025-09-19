@@ -18,6 +18,7 @@ import type * as audio from "../audio.js";
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
 import type * as refine from "../refine.js";
+import type * as shareThought from "../shareThought.js";
 import type * as thoughts from "../thoughts.js";
 import type * as users from "../users.js";
 
@@ -35,6 +36,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   http: typeof http;
   refine: typeof refine;
+  shareThought: typeof shareThought;
   thoughts: typeof thoughts;
   users: typeof users;
 }>;

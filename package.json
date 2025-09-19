@@ -26,8 +26,7 @@
     "slate": "^0.118.0",
     "slate-history": "^0.113.1",
     "slate-hyperscript": "^0.100.0",
-    "slate-react": "^0.117.4",
-    "zustand": "^5.0.7"
+    "slate-react": "^0.117.4"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

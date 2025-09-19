@@ -13,9 +13,10 @@ import GlobeIcon from "@/public/icons/GlobeIcon";
 import { ButtonStatus } from "../app.models";
 import CopyIcon from "@/public/icons/CopyIcon";
 import CopiedIcon from "@/public/icons/CopiedIcon";
+import LoadingIcon from "@/public/icons/LoadingIcon";
 
 export default function ShareThoughtModal() {
-  const { state, toggleDisplay, toggleAccess } = useShareThoughtContext();
+  const { state, shareThoughtActions } = useShareThoughtContext();
   const [shareButtonStatus, setShareButtonStatus] = useState<ButtonStatus>("idle");
   const [linkCopied, setLinkCopied] = useState(false);
   const mainRef = useRef(null);
@@ -31,6 +32,8 @@ export default function ShareThoughtModal() {
   }, { scope: mainRef, dependencies: [state.display] });
 
   const getButtonIcon = (): JSX.Element => {
+    if (shareButtonStatus === "loading") return <LoadingIcon />;
+
     if (linkCopied) {
       return <CopiedIcon />
     } else if (state.thoughtLink && !linkCopied) {
@@ -66,7 +69,7 @@ export default function ShareThoughtModal() {
     }
     setLinkCopied(false);
     setShareButtonStatus("loading");
-    await toggleAccess(false);
+    await shareThoughtActions.toggleAccess(false);
     setShareButtonStatus("idle");
   }
  
@@ -88,7 +91,7 @@ export default function ShareThoughtModal() {
 
           <ClassicButton
             icon={<CloseIcon size={24} color="black" />}
-            handleClick={() => toggleDisplay(false)} />
+            handleClick={() => shareThoughtActions.toggleDisplay(false)} />
         </div>
 
         <div className="relative w-full rounded-[10px] px-[0.75rem] bg-myGray">
@@ -101,7 +104,7 @@ export default function ShareThoughtModal() {
             handleClick={async () => {
               setLinkCopied(false);
               setShareButtonStatus("loading");
-              await toggleAccess(true);
+              await shareThoughtActions.toggleAccess(true);
               setShareButtonStatus("idle");
             }}
           />
@@ -114,7 +117,7 @@ export default function ShareThoughtModal() {
             icon={<GlobeIcon />}
             handleClick={async () => {
               setShareButtonStatus("loading");
-              await toggleAccess(false);
+              await shareThoughtActions.toggleAccess(false);
               setShareButtonStatus("idle");
             }}
           />

@@ -41,11 +41,11 @@ export default function RootLayout({
       <html lang="en">
         <body className={`${hostGrotesk.className} antialiased`}>
           <ConvexClientProvider>
-            <ShareThoughtProvider>
-              <ToastProvider>
+            <ToastProvider>
+              <ShareThoughtProvider>
                 {children}
-              </ToastProvider>
-            </ShareThoughtProvider>
+              </ShareThoughtProvider>
+            </ToastProvider>
           </ConvexClientProvider>
         </body>
       </html>

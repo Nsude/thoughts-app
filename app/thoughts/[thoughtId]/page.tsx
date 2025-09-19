@@ -26,6 +26,7 @@ import { useToastContext } from "@/components/contexts/ToastContext";
 import { Editor } from "slate";
 import { slateToPlainText } from "@/components/rich-text-editor/slateEditorFunctions";
 import { getRandomKeyphrase } from "@/components/utility/ai-helpers";
+import { useShareThoughtContext } from "@/components/contexts/ShareThoughtContext";
 
 const initialAudioModalState: AudioModalState = {
   display: false,
@@ -91,6 +92,14 @@ export default function ThoughtDocument(
     editorState.setEditor(editor);
     editorState.setChanged(prev => !prev);
   }, [editorState]);
+
+  // share thought state
+  const {shareThoughtActions} = useShareThoughtContext();
+
+  // give the shareThoughtContext access to the thoughtId
+  useEffect(() => {
+    shareThoughtActions.setThoughtId(thoughtId);
+  }, [thoughtId])
 
   // switch placeholder depending on selected tab
   useGSAP(() => {

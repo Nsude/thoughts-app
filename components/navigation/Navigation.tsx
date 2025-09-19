@@ -21,6 +21,7 @@ import { ThoughtId } from "../app.models";
 import { useSlateStatusContext } from "../contexts/SlateStatusContext";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { useShareThoughtContext } from "../contexts/ShareThoughtContext";
 
 
 
@@ -63,9 +64,11 @@ const modalReducer = (state: ModalState, action: ModalActions) => {
 }
 
 export default function Naviation() {
-  const [isPrivate, setIsPrivate] = useState(true);
+  const [tab, setTab] = useState(0);
+  const {state: shareThoughtState} = useShareThoughtContext();
   const currentUser = useQuery(api.users.getCurrentUser);
-  const thoughts = useQuery(api.thoughts.getUserThoughts, { isPrivate });
+  const thoughts = useQuery(api.thoughts.getUserThoughts, 
+    { isPrivate: tab === 0 ? true : false });
   const signOut = useAction(api.auth.signOut);
   const router = useRouter();
   const {setCurrentContent} = useSlateStatusContext();
@@ -90,14 +93,19 @@ export default function Naviation() {
   
   const reversedSharedThoughts = false;
 
-  // animate thoughts list 
+  // preselect the right tab for the current selected thought when isPrivate is changed
+  useEffect(() => {
+    setTab(shareThoughtState.isPrivate ? 0 : 1);
+  }, [shareThoughtState.isPrivate])
+
+  // ==== ANIMATE THE THOUGHT FILE LIST ====
   const mainRef = useRef(null);
   const thoughtsRef = useRef<HTMLDivElement>(null);
   const isAnimated = useRef(false);
 
   useLayoutEffect(() => {
     isAnimated.current = false;
-  }, [isPrivate])
+  }, [tab])
 
   useGSAP(() => {
     if (!mainRef.current || !thoughtsRef.current || isAnimated.current) return;
@@ -122,7 +130,7 @@ export default function Naviation() {
       gsap.set(thoughtsRef.current, {overflowY: "scroll"});
     }, 2000)
 
-  }, {scope: mainRef, dependencies: [thoughts, isPrivate]})
+  }, {scope: mainRef, dependencies: [thoughts, tab]})
 
   // close options modal when the user clicks outside
   useEffect(() => {
@@ -192,7 +200,8 @@ export default function Naviation() {
         <TabButton
           tab1="Private"
           tab2="public"
-          handleClick={(tab) => setIsPrivate(tab === 0 ? true : false)}
+          handleClick={(tab) => setTab(tab)}
+          preselectTab={tab}
         />
       </div>
 

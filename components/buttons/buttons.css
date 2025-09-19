@@ -22,7 +22,7 @@ button.my-classicButton:hover {
 button.my-audioControlBtn,
 button.my-noBgButton:active,
 button.my-classicButton:not(.no-scale):active {
-  transform: scale(0.93);
+  transform: scale(0.98);
 }
 
 button.my-noBgButton:hover {

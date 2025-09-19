@@ -50,7 +50,7 @@ export const createVersion = mutation({
 });
 
 // get thought
-export const getCurrentThought = mutation({
+export const getCurrentThought = query({
   args: {thoughtId: v.id("thoughts")},
   handler: async (ctx, {thoughtId}) => {
     const thought = await ctx.db.get(thoughtId);

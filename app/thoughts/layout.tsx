@@ -11,7 +11,7 @@ import { useShareThoughtContext } from "@/components/contexts/ShareThoughtContex
 import { PropsWithChildren } from "react";
 
 export default function DashboardLayout({ children }: PropsWithChildren) {
-  const {toggleDisplay} = useShareThoughtContext();
+  const {shareThoughtActions} = useShareThoughtContext();
 
   return (
     <div className="relative w-full h-screen flex gap-x-[0.75rem]">
@@ -33,7 +33,7 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
               <ClassicButton 
                 icon={<ShareIcon />} 
                 text="Share" 
-                handleClick={() => toggleDisplay(true)} />
+                handleClick={() => shareThoughtActions.toggleDisplay(true)} />
 
               <ClassicButton icon={<NotificationIcon />} />
             </div>
