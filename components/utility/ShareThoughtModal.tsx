@@ -52,7 +52,6 @@ export default function ShareThoughtModal() {
     return text;
   }
 
-
   const handleButtonClick = async () => {
     if (state.thoughtLink) {
       navigator.clipboard.writeText(state.thoughtLink);
