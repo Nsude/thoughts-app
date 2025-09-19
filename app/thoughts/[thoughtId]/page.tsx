@@ -21,7 +21,7 @@ import DeleteIcon from "@/public/icons/DeleteIcon";
 import AudioInputModal from "@/components/audio-input/AudioInputModal";
 import StopIcon from "@/public/icons/StopIcon";
 import { AudioModalAction, AudioModalState } from "@/components/app.models";
-import { useConfirmation } from "@/components/utility/ConfirmationContext";
+import { useConfirmation } from "@/components/contexts/ConfirmationContext";
 import { useToastContext } from "@/components/contexts/ToastContext";
 import { Editor } from "slate";
 import { slateToPlainText } from "@/components/rich-text-editor/slateEditorFunctions";

@@ -8,6 +8,7 @@ export interface Icon {
 }
 
 export type AccountTypes = "Freeloader" | "Premium";
+export type ThoughtType = "Private" | "Public";
 
 // Auth form types
 export interface FormProps {

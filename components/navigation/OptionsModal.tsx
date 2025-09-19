@@ -13,7 +13,7 @@ import { api } from "@/convex/_generated/api";
 import { ModalActions } from "./Navigation";
 import { useRouter } from "next/navigation";
 import { useSlateStatusContext } from "../contexts/SlateStatusContext";
-import { useConfirmation } from "../utility/ConfirmationContext";
+import { useConfirmation } from "../contexts/ConfirmationContext";
 import { useToastContext } from "../contexts/ToastContext";
 
 type OptionItem = {

@@ -40,7 +40,7 @@ export default function ConfirmationModal({display, onConfirm}: Props) {
 
       {/* modal */}
       <div 
-        className=" relative z-10 p-[1.25rem] rounded-[20px] w-[24rem] 
+        className="relative z-10 p-[1.25rem] rounded-[20px] w-[24rem] 
         bg-myWhite flex flex-col gap-y-[1.5625rem] border border-border-gray/30
       ">
         <div className="flex justify-between items-center">

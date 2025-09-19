@@ -21,7 +21,7 @@ button.my-classicButton:hover {
 /* on active */
 button.my-audioControlBtn,
 button.my-noBgButton:active,
-button.my-classicButton:active {
+button.my-classicButton:not(.no-scale):active {
   transform: scale(0.93);
 }
 
