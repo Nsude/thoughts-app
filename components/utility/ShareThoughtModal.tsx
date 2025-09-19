@@ -1,7 +1,7 @@
 "use client";
 
 import { useGSAP } from "@gsap/react";
-import { useRef, useState } from "react";
+import { JSX, useRef, useState } from "react";
 import gsap from "gsap";
 import { useShareThoughtContext } from "../contexts/ShareThoughtContext";
 import ClassicButton from "../buttons/ClassicButton";
@@ -12,10 +12,12 @@ import LockIcon from "@/public/icons/LockIcon";
 import GlobeIcon from "@/public/icons/GlobeIcon";
 import { ButtonStatus } from "../app.models";
 import CopyIcon from "@/public/icons/CopyIcon";
+import CopiedIcon from "@/public/icons/CopiedIcon";
 
 export default function ShareThoughtModal() {
   const { state, toggleDisplay, toggleAccess } = useShareThoughtContext();
   const [shareButtonStatus, setShareButtonStatus] = useState<ButtonStatus>("idle");
+  const [linkCopied, setLinkCopied] = useState(false);
   const mainRef = useRef(null);
 
   useGSAP(() => {
@@ -26,8 +28,43 @@ export default function ShareThoughtModal() {
       duration: .4
     })
 
-  }, { scope: mainRef, dependencies: [state.display] })
+  }, { scope: mainRef, dependencies: [state.display] });
 
+  const getButtonIcon = (): JSX.Element => {
+    if (linkCopied) {
+      return <CopiedIcon />
+    } else if (state.thoughtLink && !linkCopied) {
+      return <CopyIcon />;
+    }
+    return <LinkIcon color="black" size={24} />;
+  }
+
+  const getButtonText = (): string => {
+    if (shareButtonStatus === "loading") return "Create Share Link";
+    let text;
+    if (linkCopied) {
+      text = "Share Link Copied";
+    } else if (state.thoughtLink && !linkCopied) {
+      text = "Copy Share Link";
+    } else {
+      text = "Create Share Link"
+    }
+    return text;
+  }
+
+
+  const handleButtonClick = async () => {
+    if (state.thoughtLink) {
+      navigator.clipboard.writeText(state.thoughtLink);
+      setLinkCopied(true)
+      return;
+    }
+    setLinkCopied(false);
+    setShareButtonStatus("loading");
+    await toggleAccess(false);
+    setShareButtonStatus("idle");
+  }
+ 
   return (
     <div
       style={{ pointerEvents: state.display ? "all" : "none" }}
@@ -57,6 +94,7 @@ export default function ShareThoughtModal() {
             selectedAccess={state.isPrivate ? "Private" : "Public"}
             icon={<LockIcon />}
             handleClick={async () => {
+              setLinkCopied(false);
               setShareButtonStatus("loading");
               await toggleAccess(true);
               setShareButtonStatus("idle");
@@ -78,18 +116,14 @@ export default function ShareThoughtModal() {
         </div>
 
         <ClassicButton
-          handleClick={async () => {
-            setShareButtonStatus("loading");
-            await toggleAccess(false);
-            setShareButtonStatus("idle");
-          }}
+          handleClick={handleButtonClick}
           fitWidth={true}
           noScaleOnFocus={true}
-          text={state.thoughtLink ? "Copy Share Link" : "Create Share Link"}
+          text={getButtonText()}
           id="create-share-link"
           selectedId="create-share-link"
           status={shareButtonStatus}
-          icon={state.thoughtLink ? <CopyIcon /> : <LinkIcon color="black" size={24} />} />
+          icon={getButtonIcon()} />
       </div>
     </div>
   )
