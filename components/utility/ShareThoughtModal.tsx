@@ -52,10 +52,16 @@ export default function ShareThoughtModal() {
     return text;
   }
 
+  const copiedTimeout = useRef<NodeJS.Timeout>(null);
   const handleButtonClick = async () => {
+    if (copiedTimeout.current) clearTimeout(copiedTimeout.current);
     if (state.thoughtLink) {
       navigator.clipboard.writeText(state.thoughtLink);
-      setLinkCopied(true)
+      setLinkCopied(true);
+
+      copiedTimeout.current = setTimeout(() => {
+        setLinkCopied(false);
+      }, 3000)
       return;
     }
     setLinkCopied(false);
