@@ -195,11 +195,7 @@ export default function Naviation() {
       {/* search & logo */}
       <div className="flex w-full h-fit justify-between items-center mb-[1.75rem]">
         <Logo />
-
-        <div className="flex">
-          <NoBgButton icon={<SearchIcon />} />
-          <NoBgButton icon={<DbArrowLeft />} />
-        </div>
+        <NoBgButton icon={<DbArrowLeft />} />
       </div>
 
       {/* public/private filter */}

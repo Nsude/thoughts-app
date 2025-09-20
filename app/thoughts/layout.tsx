@@ -5,7 +5,6 @@ import SlateStatusContextProvider from "@/components/contexts/SlateStatusContext
 import Naviation from "@/components/navigation/Navigation";
 import { ConfirmationProvider } from "@/components/contexts/ConfirmationContext";
 import Versions from "@/components/versions/Versions";
-import NotificationIcon from "@/public/icons/NotificationIcon";
 import ShareIcon from "@/public/icons/ShareIcon";
 import { useShareThoughtContext } from "@/components/contexts/ShareThoughtContext";
 import { PropsWithChildren } from "react";
@@ -34,8 +33,6 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
                 icon={<ShareIcon />} 
                 text="Share" 
                 handleClick={() => shareThoughtActions.toggleDisplay(true)} />
-
-              <ClassicButton icon={<NotificationIcon />} />
             </div>
 
             {/* version indicator */}
