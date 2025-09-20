@@ -6,15 +6,16 @@ import EditIcon from "@/public/icons/EditIcon";
 import ShareIcon from "@/public/icons/ShareIcon";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { ActionDispatch, useCallback, useMemo, useRef } from "react";
-import { easeInOutCubic } from "../buttons/TabButton";
+import { ActionDispatch, useMemo, useRef } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { ModalActions } from "./Navigation";
 import { useRouter } from "next/navigation";
 import { useSlateStatusContext } from "../contexts/SlateStatusContext";
-import { useConfirmation } from "../utility/ConfirmationContext";
+import { useConfirmation } from "../contexts/ConfirmationContext";
 import { useToastContext } from "../contexts/ToastContext";
+import { useShareThoughtContext } from "../contexts/ShareThoughtContext";
+import { ThoughtId } from "../app.models";
 
 type OptionItem = {
   label: string;
@@ -41,6 +42,8 @@ export default function OptionsModal({
   const firstCall = useRef(true);
   const router = useRouter();
 
+  const {shareThoughtActions} = useShareThoughtContext();
+
   useGSAP(() => {
     const main = mainRef.current;
 
@@ -65,15 +68,20 @@ export default function OptionsModal({
 
   }, { scope: mainRef, dependencies: [y, display] })
 
-  const handleShare = useCallback((thoughtId: Id<"thoughts">) => {
-  }, [])
+  const handleShare = (selectedThoughtId: ThoughtId) => {
+    if (thoughtId !== selectedThoughtId) {
+      router.replace(`/thoughts/${selectedThoughtId}`);
+    }
+    
+    shareThoughtActions.toggleDisplay(true);
+  };
 
-  const handleRename = useCallback((thoughtId: Id<"thoughts">) => {
+  const handleRename = (thoughtId: ThoughtId) => {
     modalDispath({ type: "SET_EDITING", thoughtId })
     modalDispath({ type: "TOGGLE_DISPLAY", value: false })
-  }, [])
+  };
 
-  const handleDelete = useCallback(async (thoughtId: Id<"thoughts">) => {
+  const handleDelete = async (thoughtId: ThoughtId) => {
     modalDispath({ type: "TOGGLE_DISPLAY", value: false });
     const confirmDelete = await confirmAction();
     if (!confirmDelete) return
@@ -96,7 +104,7 @@ export default function OptionsModal({
     } catch (error) {
       console.error("Error deleting thought: ", error);
     }
-  }, [])
+  };
 
   const optionsItems: OptionItem[] = useMemo(() => [
     {

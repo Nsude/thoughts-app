@@ -31,6 +31,7 @@ const schema = defineSchema({
       date: v.number(),
     }),
     owner: v.id("users"),
+    thoughtLink: v.optional(v.string())
   })
     .index("by_owner", ["owner"])
     .index("by_owner_privacy", ["owner", "isPrivate"]),
@@ -63,6 +64,7 @@ const schema = defineSchema({
     expiresAt: v.optional(v.number())
   })
   .index("with_token", ["token"])
+  .index("with_thoughtId", ["thoughtId"])
 });
 
 export default schema;

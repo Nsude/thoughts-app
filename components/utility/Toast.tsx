@@ -50,7 +50,7 @@ export default function Toast() {
       ref={mainRef}
       className={`fixed right-[0.75rem] top-[0.75rem] rounded-[10px] 
         text-label-14 border-x-4 bg-myWhite border border-tab-gray 
-        z-30 w-[17.5rem] py-[0.9375rem] px-[0.625rem] translate-y-[-150%]
+        z-[60] w-[17.5rem] py-[0.9375rem] px-[0.625rem] translate-y-[-150%]
         ${toast.isError ? "border-x-accent" : "border-x-sec-accent"} `}>
       <div className="flex gap-x-[0.625rem]">
         <div
@@ -64,7 +64,7 @@ export default function Toast() {
           <span className="text-dark-gray-label">{ getToastTitle() }</span>
 
           {/* toast message */}
-          <span className="w-[80%]">{ getToastMessage() }</span>
+          <span className="w-[87%]">{ getToastMessage() }</span>
 
           <button 
             onClick={() => toggleToast(false)}

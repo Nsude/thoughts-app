@@ -50,7 +50,7 @@ export const createVersion = mutation({
 });
 
 // get thought
-export const getCurrentThought = mutation({
+export const getCurrentThought = query({
   args: {thoughtId: v.id("thoughts")},
   handler: async (ctx, {thoughtId}) => {
     const thought = await ctx.db.get(thoughtId);
@@ -134,8 +134,7 @@ export const setSelectedVersion = mutation({
 
 // fetch user thoughts
 export const getUserThoughts = query({
-  args: { isPrivate: v.boolean() },
-  handler: async (ctx, { isPrivate }) => {
+  handler: async (ctx) => {
     try {
       const user = await getCurrentUserHelper(ctx);
       if (!user) throw new Error("this user is not signed in");
@@ -143,7 +142,6 @@ export const getUserThoughts = query({
       let thoughts = await ctx.db
         .query("thoughts")
         .withIndex("by_owner", (q) => q.eq("owner", user._id))
-        .filter((q) => q.eq(q.field("isPrivate"), isPrivate))
         .collect();
 
       if (!thoughts) return [];

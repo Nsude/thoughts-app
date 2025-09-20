@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, PropsWithChildren, SetStateAction, useCallback, useContext, useEffect, useRef, useState } from "react";
+import Toast from "../utility/Toast";
 
 interface Toast {
   title: string;
@@ -56,6 +57,7 @@ export function ToastProvider({ children }: PropsWithChildren) {
       setToast,
       toggleToast
     }}>
+      <Toast />
       {children}
     </ToastContext.Provider>
   );
