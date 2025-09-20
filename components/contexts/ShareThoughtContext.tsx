@@ -54,7 +54,10 @@ const ShareThoughtProvider = ({ children }: PropsWithChildren) => {
   // init isPrivate on load
   useEffect(() => {
     if (!currentThought) return
-    setShareState(prev => ({ ...prev, isPrivate: currentThought.isPrivate }));
+    setShareState(prev => ({ ...prev, 
+      isPrivate: currentThought.isPrivate, 
+      thoughtLink: currentThought.thoughtLink ? currentThought.thoughtLink : ""
+    }));
   }, [currentThought, state.thoughtId])
 
   const makePublic = async () => {

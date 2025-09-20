@@ -7,7 +7,7 @@ import { ToastProvider } from "@/components/contexts/ToastContext";
 import ShareThoughtProvider from "@/components/contexts/ShareThoughtContext";
 
 export const metadata: Metadata = {
-  title: "thoughts-app",
+  title: "Thoughts",
   description: "A companion for your thoughts",
 };
 

@@ -26,11 +26,14 @@ export const shareThought = mutation({
       sharedBy: user._id,
     });
 
+    const link = `${process.env.SITE_URL}/shared/${token}`;
+
     await ctx.db.patch(thoughtId, {
       isPrivate: false,
+      thoughtLink: link
     });
 
-    return { link: `${process.env.SITE_URL}/shared/${token}` };
+    return { link };
   },
 });
 
