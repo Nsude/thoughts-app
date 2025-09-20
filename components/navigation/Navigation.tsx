@@ -31,12 +31,12 @@ type ModalState = {
   isEditing: ThoughtId
 }
 
-export type ModalActions = 
-| {type: "TOGGLE_DISPLAY", value: boolean}
-| {type: "SET_EDITING", thoughtId: ThoughtId}
-| {type: "SET_POS", pos: number};
+export type ModalActions =
+  | { type: "TOGGLE_DISPLAY", value: boolean }
+  | { type: "SET_EDITING", thoughtId: ThoughtId }
+  | { type: "SET_POS", pos: number };
 
-const initialState:ModalState = {
+const initialState: ModalState = {
   display: false,
   y: 0,
   isEditing: "" as ThoughtId
@@ -44,7 +44,7 @@ const initialState:ModalState = {
 
 // modal state reducer
 const modalReducer = (state: ModalState, action: ModalActions) => {
-  switch(action.type) {
+  switch (action.type) {
     case "TOGGLE_DISPLAY":
       return {
         ...state,
@@ -65,13 +65,12 @@ const modalReducer = (state: ModalState, action: ModalActions) => {
 
 export default function Naviation() {
   const [tab, setTab] = useState(0);
-  const {state: shareThoughtState} = useShareThoughtContext();
+  const { state: shareThoughtState } = useShareThoughtContext();
   const currentUser = useQuery(api.users.getCurrentUser);
-  const thoughts = useQuery(api.thoughts.getUserThoughts, 
-    { isPrivate: tab === 0 ? true : false });
+  const thoughts = useQuery(api.thoughts.getUserThoughts);
   const signOut = useAction(api.auth.signOut);
   const router = useRouter();
-  const {setCurrentContent} = useSlateStatusContext();
+  const { setCurrentContent } = useSlateStatusContext();
 
   // modal central state 
   const [modalState, modalDispath] = useReducer(modalReducer, initialState);
@@ -87,11 +86,19 @@ export default function Naviation() {
   let modalTimeout = useRef<NodeJS.Timeout>(null);
 
   // reverse thoughts array to be last-thought-first display
-  const reversedThoughts = useMemo(() => 
-      thoughts ? thoughts.slice().reverse() : []
-    , [thoughts]);
-  
-  const reversedSharedThoughts = false;
+  const reversedThoughts = useMemo(() => {
+    if (!thoughts) return [];
+    const isPrivate = tab === 0 ? true : false;
+    const privateThoughts = thoughts.filter(thought => thought.isPrivate === isPrivate);
+    console.log(privateThoughts)
+    return privateThoughts.slice().reverse();
+  }, [thoughts, tab]);
+
+  const reversedSharedThoughts = useMemo(() => {
+    if (!thoughts) return [];
+    const sharedThoughts = thoughts.filter(thought => thought.isPrivate === false);
+    return sharedThoughts.slice().reverse()
+  }, [thoughts]);
 
   // preselect the right tab for the current selected thought when isPrivate is changed
   useEffect(() => {
@@ -113,12 +120,12 @@ export default function Naviation() {
     const thoughts = thoughtsRef.current.children;
     if (thoughts.length === 0) return
 
-    gsap.set(thoughts, {y: 40, opacity: 0});
+    gsap.set(thoughts, { y: 40, opacity: 0 });
 
-    gsap.set(thoughtsRef.current, {overflowY: "hidden"});
+    gsap.set(thoughtsRef.current, { overflowY: "hidden" });
 
     gsap.to(thoughts, {
-      y: 0, 
+      y: 0,
       opacity: 1,
       ease: "power2.inOut",
       stagger: .08
@@ -127,10 +134,10 @@ export default function Naviation() {
     isAnimated.current = true;
 
     setTimeout(() => {
-      gsap.set(thoughtsRef.current, {overflowY: "scroll"});
+      gsap.set(thoughtsRef.current, { overflowY: "scroll" });
     }, 2000)
 
-  }, {scope: mainRef, dependencies: [thoughts, tab]})
+  }, { scope: mainRef, dependencies: [thoughts, tab] })
 
   // close options modal when the user clicks outside
   useEffect(() => {
@@ -154,13 +161,13 @@ export default function Naviation() {
     const { top, height } = button.getBoundingClientRect();
     const prevId = prevThoughtId.current;
     const currentId = currentThoughtId.current;
-    
-    modalDispath({ 
-      type: "TOGGLE_DISPLAY", 
-      value: prevId === currentId || prevId === null ? !modalState.display : true 
+
+    modalDispath({
+      type: "TOGGLE_DISPLAY",
+      value: prevId === currentId || prevId === null ? !modalState.display : true
     })
-    
-    modalDispath({type: "SET_POS", pos: top + height});
+
+    modalDispath({ type: "SET_POS", pos: top + height });
 
     // reset the prev pos
     if (modalTimeout.current) clearTimeout(modalTimeout.current);
@@ -219,13 +226,13 @@ export default function Naviation() {
       </div>
 
       {/* Thoughts */}
-      <div 
-        className="w-full max-h-[38.5%] overflow-y-scroll" 
+      <div
+        className="w-full max-h-[38.5%] overflow-y-scroll"
         onScroll={(e) => {
           // hide modal on scroll
           if (!modalState.display) return
-          modalDispath({type: "TOGGLE_DISPLAY", value: false});
-          }}>
+          modalDispath({ type: "TOGGLE_DISPLAY", value: false });
+        }}>
 
         <span
           className="block mb-[0.75rem] text-fade-gray">
@@ -236,8 +243,8 @@ export default function Naviation() {
           {/* Thoughts go here */}
           {
             reversedThoughts.map((item) => (
-              <Thought 
-                key={item._id} 
+              <Thought
+                key={item._id}
                 thought={item}
                 editing={modalState.isEditing === item._id}
                 modalDispath={modalDispath}
@@ -245,7 +252,7 @@ export default function Naviation() {
                   setCurrentContent([]) // reset current content
                   router.replace(`/thoughts/${item._id}`);
                   currentThoughtId.current = item._id;
-                }} 
+                }}
                 handleEditClick={(e) => {
                   currentThoughtId.current = item._id;
                   handleThoughtEditOptions(e);
@@ -256,18 +263,38 @@ export default function Naviation() {
       </div>
 
       {/* ==== Options Modal ==== */}
-      <OptionsModal 
+      <OptionsModal
         display={modalState.display} y={modalState.y}
-        thoughtId={currentThoughtId.current as ThoughtId} 
+        thoughtId={currentThoughtId.current as ThoughtId}
         modalDispath={modalDispath} />
 
       {/* Shared Thoughts */}
-      <div className="w-full max-h-[14%] mt-[2.5rem]">
-        <span 
-          style={{opacity: reversedSharedThoughts ? 1 : 0}}
+      <div
+        style={{ opacity: (tab === 0 && reversedSharedThoughts.length > 0) ? 1 : 0 }}
+        className="w-full max-h-[14%] mt-[2.5rem]">
+        <span
+          style={{ opacity: reversedSharedThoughts ? 1 : 0 }}
           className="block mb-[0.75rem] text-fade-gray">Shared</span>
         <div className="flex flex-col h-[95%] overflow-y-scroll snap-y slim-scrollbar reduce-sb-height">
           {/* Thoughts go here */}
+          {
+            reversedSharedThoughts.map((item) => (
+              <Thought
+                key={item._id}
+                thought={item}
+                editing={modalState.isEditing === item._id}
+                modalDispath={modalDispath}
+                handleClick={() => {
+                  setCurrentContent([]) // reset current content
+                  router.replace(`/thoughts/${item._id}`);
+                  currentThoughtId.current = item._id;
+                }}
+                handleEditClick={(e) => {
+                  currentThoughtId.current = item._id;
+                  handleThoughtEditOptions(e);
+                }} />
+            ))
+          }
         </div>
       </div>
 
