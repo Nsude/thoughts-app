@@ -52,3 +52,30 @@ export const makePrivate = mutation({
     });
   },
 });
+
+export const addSharedThoughtToDashboard = mutation({
+  args: {token: v.string()},
+  handler: async (ctx, {token}) => {
+    const shared = await ctx.db
+      .query("sharedThoughts")
+      .withIndex("with_token", (q) => q.eq("token", token))
+      .unique();
+    
+    if (!shared) throw new Error("token is invalid");
+    
+    const thought = await ctx.db.get(shared.thoughtId);
+    if (!thought) throw new Error("ThoughtId is invalid");
+
+    const alreadyExists = await ctx.db
+      .query("thoughts")
+      .withIndex("by_id", (q) => q.eq("_id", thought._id))
+      .unique();
+
+    if (alreadyExists) {
+      return {thoughtId: alreadyExists._id, title: alreadyExists.description};
+    }
+
+    await ctx.db.insert("thoughts", {...thought});
+    return {thoughtId: thought._id, title: thought.description};
+  }
+})
