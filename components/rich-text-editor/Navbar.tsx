@@ -184,7 +184,7 @@ export default function SlateNavbar() {
     <div
       ref={mainRef}
       onMouseDown={(e) => e.preventDefault()} // stop browser from clearing selections when the navbar is clicked
-      style={{ left: `${position.x}px`, top: `${position.y}px` }}
+      style={{ left: `${position.x || 300}px`, top: `${position.y}px` }}
       className="
       fixed z-10 -translate-x-1/5 bg-dark-gray p-1 rounded-[30px]
       flex gap-x-1.5 items-center border-2 border-border-gray
