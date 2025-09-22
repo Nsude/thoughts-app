@@ -10,6 +10,7 @@ import PlayIcon from "@/public/icons/PlayIcon";
 import { useVoiceVisualizer, VoiceVisualizer } from "react-voice-visualizer-react19";
 import { ButtonStatus } from "../app.models";
 import LoadingIcon from "@/public/icons/LoadingIcon";
+import { useToastContext } from "../contexts/ToastContext";
 
 interface Props {
   display: boolean;
@@ -24,6 +25,7 @@ export default function AudioInputModal({
   display, startRecording, uploadAudio, 
   handleExceedRecordLimit, status, targetId }: Props) {
   const mainRef = useRef(null);
+  const {setToast} = useToastContext();
   const [isPlaying, setIsPlaying] = useState(false);
   const limitReached = useRef(false);
   const uploadIconCon = useRef(null);
@@ -166,7 +168,18 @@ export default function AudioInputModal({
       <button
         onMouseEnter={() => animateUploadIcon(true)}
         onMouseLeave={() => animateUploadIcon(false)}
-        onClick={() => uploadAudio(recordedBlob)}
+        onClick={() => {
+          if (isRecordingInProgress) {
+            setToast({
+              title: "upload Error",
+              msg: "Can't upload while recording a new audio.",
+              isError: true,
+              showToast: true
+            })
+            return;
+          };
+          uploadAudio(recordedBlob);
+        }}
         className="relative h-[2.25rem] pl-0.5 aspect-square bg-myWhite border-tab-gray border-3 flex items-center justify-between rounded-full overflow-clip">
         
         <span 
