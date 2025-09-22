@@ -1,17 +1,17 @@
 "use client";
 
-import DefaultIcon from "@/public/icons/DefaultIcon";
 import { AccountTypes } from "../app.models"
 import NoBgButton from "../buttons/NoBgButton";
 import LogoutIcon from "@/public/icons/LogoutIcon";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useRef } from "react";
+import Image from "next/image";
 
 interface Props {
   userName: string;
   accoutType: AccountTypes;
-  avatarUrl?: string;
+  avatarUrl: string;
   collapse: boolean;
   handleSignout: () => void;
 }
@@ -43,15 +43,19 @@ export default function ProfileDisplay({
       border-t border-border-gray/55 bottom-0 left-0 w-full h-[4.5rem] p-[0.9375rem] 
       justify-between`} >
       <div className="flex gap-x-2.5 items-center">
-        <div ref={avatarRef} 
+        <div ref={avatarRef}
           className="relative w-[2.25rem] aspect-square bg-myGray rounded-full flex items-center 
-          justify-center">
-          {
-            !avatarUrl && <DefaultIcon />
-          }
-          <span 
-            role="button" 
-            data-collapse={collapse} 
+          justify-center overflow-clip">
+          <Image
+            src={avatarUrl}
+            alt="profile avatar"
+            width={40}
+            height={40}
+          />
+          
+          <span
+            role="button"
+            data-collapse={collapse}
             className="collpase-signout-btn absolute left-0 top-0 z-10">
             <NoBgButton icon={<LogoutIcon />} handleClick={handleSignout} />
           </span>

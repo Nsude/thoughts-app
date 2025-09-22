@@ -24,6 +24,7 @@ import { useShareThoughtContext } from "../contexts/ShareThoughtContext";
 import LogoMark from "@/public/LogoMark";
 import LogoIcon from "@/public/icons/LogoIcon";
 import DbArrowRight from "@/public/icons/DbArrowRight";
+import { defaultImage } from "@/public/profile-images/allProfiles";
 
 
 
@@ -92,7 +93,6 @@ export default function Naviation() {
     if (!thoughts) return [];
     const isPrivate = tab === 0 ? true : false;
     const privateThoughts = thoughts.filter(thought => thought.isPrivate === isPrivate);
-    console.log(privateThoughts)
     return privateThoughts.slice().reverse();
   }, [thoughts, tab]);
 
@@ -229,7 +229,7 @@ export default function Naviation() {
 
         <span 
           role="button"
-          data-isCollapsed={isCollapsed} 
+          data-collapse={isCollapsed} 
           style={{
             left: isCollapsed ? "-3px" : "unset", 
             right: isCollapsed ? "unset" : "0"
@@ -309,10 +309,9 @@ export default function Naviation() {
 
       {/* Shared Thoughts */}
       <div
-        style={{ opacity: (tab === 0 && reversedSharedThoughts.length > 0) ? 1 : 0 }}
         className={`${hideOnCollapse} w-full max-h-[14%] mt-[2.5rem]`}>
         <span
-          style={{ opacity: reversedSharedThoughts ? 1 : 0 }}
+          style={{ opacity: (tab === 0 && reversedSharedThoughts.length > 0) ? 1 : 0 }}
           className="block mb-[0.75rem] text-fade-gray">Shared</span>
         <div className="flex flex-col h-[95%] overflow-y-scroll snap-y slim-scrollbar reduce-sb-height">
           {/* Thoughts go here */}
@@ -341,6 +340,7 @@ export default function Naviation() {
       <ProfileDisplay
         userName={currentUser?.name?.split(" ")[0] || currentUser?.email || "name"}
         accoutType={"Freeloader"} 
+        avatarUrl={currentUser?.image || defaultImage.src}
         collapse={isCollapsed} 
         handleSignout={handleSignout}/>
     </div>

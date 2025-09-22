@@ -13,6 +13,7 @@ import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { useToastContext } from "../contexts/ToastContext";
+import { getRandomAvatar } from "@/public/profile-images/allProfiles";
 
 // ==== Auth Map ====
 type AuthDetails = {
@@ -155,7 +156,7 @@ export default function AuthForm({ authType }: Props) {
 
       // wait to avoid updating a profile that doesn't yet exit
       await new Promise<void>((resolve) => setTimeout(resolve, 200));
-      await updateProfile({ name: state.form.name });
+      await updateProfile({ name: state.form.name, image: getRandomAvatar().src });
       dispatch({ type: "RESET_FORM", reset: true });
 
       router.replace("/thoughts/new");

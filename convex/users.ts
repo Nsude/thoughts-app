@@ -32,14 +32,14 @@ export const getCurrentUser = query({
 
 // add username to user table
 export const updateProfile = mutation({
-  args: { name: v.string() },
-  handler: async (ctx, args) => {
+  args: { name: v.string(), image: v.string() },
+  handler: async (ctx, {name, image}) => {
     const currentUser = await ctx.auth.getUserIdentity();
     if (!currentUser) throw new Error("User is not authenticated");
 
     const user = await getCurrentUserHelper(ctx);
     if (!user) return;
 
-    await ctx.db.patch(user._id, { name: args.name });
+    await ctx.db.patch(user._id, { name, image });
   },
 });

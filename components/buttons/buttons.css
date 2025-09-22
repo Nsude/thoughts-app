@@ -122,13 +122,13 @@ button.my-audioControlBtn:disabled {
 }
 
 /* collapse dashboard btn */
-.collapse-dashboard-btn[data-isCollapsed="true"] {
+.collapse-dashboard-btn[data-collapse="true"] {
   rotate: 180deg;
   opacity: 0;
 }
 
 .collpase-signout-btn[data-collapse="true"]:hover,
-.collapse-dashboard-btn[data-isCollapsed="true"]:hover {
+.collapse-dashboard-btn[data-collapse="true"]:hover {
   opacity: 1;
 }
 
