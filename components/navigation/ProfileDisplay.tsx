@@ -29,7 +29,7 @@ export default function ProfileDisplay({
     })
 
     gsap.to(avatarRef.current, {
-      x: collapse ? -3 : 0,
+      x: collapse ? -2 : 0,
       duration: .25,
       ease: "power3.out"
     })
@@ -44,11 +44,17 @@ export default function ProfileDisplay({
       justify-between`} >
       <div className="flex gap-x-2.5 items-center">
         <div ref={avatarRef} 
-          className="w-[2.25rem] aspect-square bg-myGray rounded-full flex items-center 
+          className="relative w-[2.25rem] aspect-square bg-myGray rounded-full flex items-center 
           justify-center">
           {
             !avatarUrl && <DefaultIcon />
           }
+          <span 
+            role="button" 
+            data-collapse={collapse} 
+            className="collpase-signout-btn absolute left-0 top-0 z-10">
+            <NoBgButton icon={<LogoutIcon />} handleClick={handleSignout} />
+          </span>
         </div>
         <div
           className={`${hideOnCollapse} flex flex-col items-start gap-y-0.5`}>

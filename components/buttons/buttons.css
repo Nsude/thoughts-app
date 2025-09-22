@@ -127,6 +127,11 @@ button.my-audioControlBtn:disabled {
   opacity: 0;
 }
 
+.collpase-signout-btn[data-collapse="true"]:hover,
 .collapse-dashboard-btn[data-isCollapsed="true"]:hover {
   opacity: 1;
+}
+
+.collpase-signout-btn {
+  opacity: 0;
 }
