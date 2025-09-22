@@ -1,4 +1,3 @@
-import DefaultIcon from "@/public/icons/DefaultIcon";
 import { Editor } from "slate";
 import { CustomEditor } from "./CustomEditor";
 import TextIcon from "@/public/icons/TextIcon";
@@ -8,6 +7,7 @@ import HeadingThreeIcon from "@/public/icons/HeadingThreeIcon";
 import BulletListIcon from "@/public/icons/BulletListIcon";
 import NumberedListIcon from "@/public/icons/NumberedListIcon";
 import CodeIcon from "@/public/icons/CodeIcon";
+import { ComponentType, SVGProps } from "react";
 
 type ElementName = 
   "Text" 
@@ -21,7 +21,7 @@ type ElementName =
 
 export interface MyElement {
   name: ElementName;
-  icon: any;
+  icon: ComponentType<SVGProps<SVGAElement>>;
   handleClick: (editor: Editor) => void;
   shortCutLabel?: string;
 }
