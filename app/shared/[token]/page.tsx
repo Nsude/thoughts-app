@@ -31,6 +31,7 @@ export default function AddSharedThought({ params }: { params: Promise<{ token: 
           showToast: true
         })
       } catch (error) {
+        console.error(error);
         setToast({
           title: "Token is invalid",
           msg: "The token is wrong or expired, ask the owner to create a new link.",
@@ -46,7 +47,7 @@ export default function AddSharedThought({ params }: { params: Promise<{ token: 
       updateThoughts();
     }
 
-  }, [currentUser])
+  }, [currentUser, addSharedThoughtToDashboard, router, setToast, token])
 
   return (
     <div className="relative w-full h-screen flex flex-col justify-center items-center">

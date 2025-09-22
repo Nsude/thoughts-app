@@ -222,7 +222,7 @@ export default function Naviation() {
       ref={mainRef}
       className="
         relative w-[19%] min-w-[18rem] h-full bg-myWhite p-[0.9375rem] z-[5] 
-        border-r-1 border-border-gray/50 overflow-clip text-nowrap">
+        border-r-1 border-border-gray/50 text-nowrap">
       {/* search & logo */}
       <div className="relative flex w-full h-fit justify-between items-center mb-[1.75rem]">
         <Logo collapse={isCollapsed} />
@@ -309,6 +309,7 @@ export default function Naviation() {
 
       {/* Shared Thoughts */}
       <div
+        style={{opacity: reversedSharedThoughts.length > 0 && tab !== 1 ? 1 : 0}}
         className={`${hideOnCollapse} w-full max-h-[14%] mt-[2.5rem]`}>
         <span
           style={{ opacity: (tab === 0 && reversedSharedThoughts.length > 0) ? 1 : 0 }}

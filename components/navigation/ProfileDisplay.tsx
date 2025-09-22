@@ -44,14 +44,16 @@ export default function ProfileDisplay({
       justify-between`} >
       <div className="flex gap-x-2.5 items-center">
         <div ref={avatarRef}
-          className="relative w-[2.25rem] aspect-square bg-myGray rounded-full flex items-center 
-          justify-center overflow-clip">
-          <Image
-            src={avatarUrl}
-            alt="profile avatar"
-            width={40}
-            height={40}
-          />
+          className="relative w-[2.25rem] aspect-square flex items-center 
+          justify-center">
+          <span className="rounded-full overflow-clip h-full w-full" >
+            <Image
+              src={avatarUrl}
+              alt="profile avatar"
+              width={40}
+              height={40}
+            />
+          </span>
           
           <span
             role="button"
