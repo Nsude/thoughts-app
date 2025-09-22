@@ -204,6 +204,16 @@ export default function ThoughtDocument(
   const generateUploadUrl = useMutation(api.audio.generateUploadUrl);
   const transcribeAudio = useAction(api.audio.transcribeAudio);
   const handleTranscribeAudio = async (recordedBlob: Blob | null) => {
+    if (audioState.status === "loading") {
+      setToast({
+        title: "Multiple Upload Request",
+        msg: "The current audio is already being transcribed, please wait.",
+        isError: true,
+        showToast: true
+      })
+      return;
+    };
+
     audioDispatch({type: "PRESSED_BUTTON", targetId: "upload-button"});
     audioDispatch({type: "STATUS", status: "loading"});
 
