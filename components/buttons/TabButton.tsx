@@ -59,7 +59,7 @@ export default function TabButton({
     <div 
       onMouseDown={(e) => e.stopPropagation()} 
       ref={container} 
-      className={` z-10
+      className={` z-10 text-nowrap min-w-fit
       my-tabButton relative flex items-center w-full bg-tab-gray
     ${tabIcon1 ? 'rounded-[40px]' : 'rounded-[9px]'}`}>
       <button 

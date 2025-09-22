@@ -1,7 +1,6 @@
 "use client";
 
 import NoBgButton from "../buttons/NoBgButton";
-import SearchIcon from "@/public/icons/SearchIcon";
 import DbArrowLeft from "@/public/icons/DbArrowLeft";
 import TabButton from "../buttons/TabButton";
 import Logo from "../Logo";
@@ -22,6 +21,9 @@ import { useSlateStatusContext } from "../contexts/SlateStatusContext";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useShareThoughtContext } from "../contexts/ShareThoughtContext";
+import LogoMark from "@/public/LogoMark";
+import LogoIcon from "@/public/icons/LogoIcon";
+import DbArrowRight from "@/public/icons/DbArrowRight";
 
 
 
@@ -190,16 +192,55 @@ export default function Naviation() {
     }
   }
 
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const hideOnCollapse = "hide-on-collapse";
+  const showOnCollapse = "show-on-collapse";
+  const handleCollapse = () => {
+    gsap.to(mainRef.current, {
+      width: isCollapsed ? "19%" : "4rem",
+      minWidth: isCollapsed ? "18rem" : "4rem",
+      duration: .4,
+    })
+
+    gsap.to(`.${hideOnCollapse}`, {
+      opacity: isCollapsed ? 1 : 0,
+      duration: .25,
+      delay: isCollapsed ? .25 : 0
+    })
+
+    gsap.to(`.${showOnCollapse}`, {
+      opacity: isCollapsed ? 0 : 1,
+      duration: .25,
+      delay: isCollapsed ? 0 : .25
+    })
+
+    setIsCollapsed(prev => !prev);
+  }
+
   return (
-    <div ref={mainRef} className="w-full h-full">
+    <div
+      ref={mainRef}
+      className="
+        relative w-[19%] min-w-[18rem] h-full bg-myWhite p-[0.9375rem] z-[5] 
+        border-r-1 border-border-gray/50 overflow-clip text-nowrap">
       {/* search & logo */}
-      <div className="flex w-full h-fit justify-between items-center mb-[1.75rem]">
-        <Logo />
-        <NoBgButton icon={<DbArrowLeft />} />
+      <div className="relative flex w-full h-fit justify-between items-center mb-[1.75rem]">
+        <Logo collapse={isCollapsed} />
+
+        <span 
+          role="button"
+          data-isCollapsed={isCollapsed} 
+          style={{
+            left: isCollapsed ? "-3px" : "unset", 
+            right: isCollapsed ? "unset" : "0"
+          }}
+          className="collapse-dashboard-btn absolute right-0">
+          <NoBgButton icon={<DbArrowLeft />} handleClick={handleCollapse} />
+        </span>
       </div>
 
       {/* public/private filter */}
-      <div>
+      <div className={`${hideOnCollapse}`}>
         <TabButton
           tab1="Private"
           tab2="public"
@@ -209,21 +250,23 @@ export default function Naviation() {
       </div>
 
       {/* Menu Items */}
-      <div className="flex flex-col w-full my-[2.5rem]">
+      <div className={`flex flex-col w-full my-[2.5rem]`}>
         <NavMenuItem
           icon={<NewThoughtIcon />}
           handleClick={handleNewThought}
+          hideWord={isCollapsed}
           label="New Thought" />
 
         <NavMenuItem
           icon={<ExploreIcon />}
           handleClick={() => { }}
+          hideWord={isCollapsed}
           label="Explore" />
       </div>
 
       {/* Thoughts */}
       <div
-        className="w-full max-h-[38.5%] overflow-y-scroll"
+        className={`${hideOnCollapse} w-full max-h-[38.5%] overflow-y-scroll`}
         onScroll={(e) => {
           // hide modal on scroll
           if (!modalState.display) return
@@ -267,7 +310,7 @@ export default function Naviation() {
       {/* Shared Thoughts */}
       <div
         style={{ opacity: (tab === 0 && reversedSharedThoughts.length > 0) ? 1 : 0 }}
-        className="w-full max-h-[14%] mt-[2.5rem]">
+        className={`${hideOnCollapse} w-full max-h-[14%] mt-[2.5rem]`}>
         <span
           style={{ opacity: reversedSharedThoughts ? 1 : 0 }}
           className="block mb-[0.75rem] text-fade-gray">Shared</span>
@@ -295,15 +338,11 @@ export default function Naviation() {
       </div>
 
       {/* profile */}
-      <div className="
-        rounded-[20px]
-        flex bg-myWhite z-[2] items-center absolute border-t border-border-gray/55 bottom-0 left-0 w-full h-[4.5rem] p-[0.9375rem] justify-between">
-        {/* not logged in */}
-        <ProfileDisplay
-          userName={currentUser?.name?.split(" ")[0] || currentUser?.email || "name"}
-          accoutType={"Freeloader"} />
-        <NoBgButton icon={<LogoutIcon />} handleClick={handleSignout} />
-      </div>
+      <ProfileDisplay
+        userName={currentUser?.name?.split(" ")[0] || currentUser?.email || "name"}
+        accoutType={"Freeloader"} 
+        collapse={isCollapsed} 
+        handleSignout={handleSignout}/>
     </div>
   )
 }

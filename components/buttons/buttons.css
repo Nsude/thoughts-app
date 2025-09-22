@@ -64,6 +64,14 @@ button.my-navMenuItem:hover {
   background: var(--gray);
 }
 
+button.my-navMenuItem {
+  transition: transform 250ms linear;
+}
+
+button.my-navMenuItem[data-hideword="true"] {
+  transform: translateX(-6px);
+}
+
 /* My Auth Provider Button */
 button.my-authProviderButton:hover {
   background: var(--black);
@@ -111,4 +119,14 @@ button.my-versionItem[data-selected="false"]:hover {
 button.my-audioControlBtn:disabled {
   opacity: .5;
   pointer-events: none;
+}
+
+/* collapse dashboard btn */
+.collapse-dashboard-btn[data-isCollapsed="true"] {
+  rotate: 180deg;
+  opacity: 0;
+}
+
+.collapse-dashboard-btn[data-isCollapsed="true"]:hover {
+  opacity: 1;
 }

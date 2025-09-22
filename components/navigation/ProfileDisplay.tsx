@@ -1,24 +1,68 @@
+"use client";
+
 import DefaultIcon from "@/public/icons/DefaultIcon";
 import { AccountTypes } from "../app.models"
+import NoBgButton from "../buttons/NoBgButton";
+import LogoutIcon from "@/public/icons/LogoutIcon";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { useRef } from "react";
 
 interface Props {
   userName: string;
   accoutType: AccountTypes;
   avatarUrl?: string;
+  collapse: boolean;
+  handleSignout: () => void;
 }
 
-export default function ProfileDisplay ({userName, accoutType, avatarUrl}: Props) {
+export default function ProfileDisplay({
+  userName, accoutType, avatarUrl,
+  collapse, handleSignout }: Props) {
+  const avatarRef = useRef(null);
+  const hideOnCollapse = "hide-on-collapse";
+
+  useGSAP(() => {
+    gsap.to(`.${hideOnCollapse}`, {
+      opacity: collapse ? 0 : 1,
+      duration: .25
+    })
+
+    gsap.to(avatarRef.current, {
+      x: collapse ? -3 : 0,
+      duration: .25,
+      ease: "power3.out"
+    })
+
+  }, { dependencies: [collapse] })
+
   return (
-    <div className="flex gap-x-2.5 items-center">
-      <div className="w-[2.25rem] aspect-square bg-myGray rounded-full flex items-center justify-center">
-        {
-          !avatarUrl && <DefaultIcon />
-        }
+    <div
+      style={{ borderTopWidth: collapse ? "0" : "1px" }}
+      className={`rounded-[20px] flex bg-myWhite z-[2] items-center absolute 
+      border-t border-border-gray/55 bottom-0 left-0 w-full h-[4.5rem] p-[0.9375rem] 
+      justify-between`} >
+      <div className="flex gap-x-2.5 items-center">
+        <div ref={avatarRef} 
+          className="w-[2.25rem] aspect-square bg-myGray rounded-full flex items-center 
+          justify-center">
+          {
+            !avatarUrl && <DefaultIcon />
+          }
+        </div>
+        <div
+          className={`${hideOnCollapse} flex flex-col items-start gap-y-0.5`}>
+          <span>{userName}</span>
+          <span className="text-label-small tracking-label-small text-dark-gray-label">
+            {accoutType}
+          </span>
+        </div>
       </div>
-      <div className="flex flex-col items-start gap-y-0.5">
-        <span>{userName}</span>
-        <span className="text-label-small tracking-label-small text-dark-gray-label">{accoutType}</span>
-      </div>
+
+      {/* Sign out button */}
+      <span className={`${hideOnCollapse}`}>
+        <NoBgButton icon={<LogoutIcon />} handleClick={handleSignout} />
+      </span>
     </div>
   )
 }
