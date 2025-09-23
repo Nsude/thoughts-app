@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Id } from "@/convex/_generated/dataModel";
 import DeleteIcon from "@/public/icons/DeleteIcon";
@@ -106,23 +107,11 @@ export default function OptionsModal({
     }
   };
 
-  const optionsItems: OptionItem[] = useMemo(() => [
-    {
-      label: "Share",
-      icon: ShareIcon,
-      handleClick: handleShare
-    },
-    {
-      label: "Rename",
-      icon: EditIcon,
-      handleClick: handleRename
-    },
-    {
-      label: "Delete",
-      icon: DeleteIcon,
-      handleClick: handleDelete
-    },
-  ], [])
+  const optionsItems: OptionItem[] = [
+    { label: "Share", icon: ShareIcon, handleClick: handleShare },
+    { label: "Rename", icon: EditIcon, handleClick: handleRename },
+    { label: "Delete", icon: DeleteIcon, handleClick: handleDelete },
+  ];
 
   return (
     <div

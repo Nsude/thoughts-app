@@ -70,14 +70,14 @@ export default function AudioInputModal({
       stopRecording();
     }
 
-  }, [display, startRecording])
+  }, [display, startRecording, _startRecording, stopRecording])
 
   // stop the recording input when limit duration is reached
   useEffect(() => {
     if (!limitReached.current) return;
     handleExceedRecordLimit()
 
-  }, [limitReached.current])
+  }, [limitReached.current, handleExceedRecordLimit])
 
   // display and hide modal
   useGSAP(() => {

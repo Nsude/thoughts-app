@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode, PropsWithChildren } from 'react';
+import React, { createContext, useContext, useState, PropsWithChildren } from 'react';
 import ConfirmationModal from '../utility/ConfirmationModal';
 
 interface ConfirmationContextType {

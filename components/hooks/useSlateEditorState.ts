@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { BlockType } from "../rich-text-editor/slate";
-import { Editor, Element, Range, Transforms } from "slate";
+import { Editor, Range } from "slate";
 import {
   checkIsBlockEmpty,
   checkIsBlockSlashOnly,
@@ -25,6 +25,31 @@ export const useSlateEditorState = () => {
     headingLevel: 0,
     position: 0,
   });
+
+  const handlePlaceholderState = useCallback(
+    (
+      blockType: BlockType,
+      verticalPosition: number,
+      isSlashOnly: boolean,
+      headingLevel: number
+    ) => {
+      if (!editor) return;
+      const isBlockEmpty = checkIsBlockEmpty(editor);
+
+      if ((isSlashOnly || isBlockEmpty) && blockType === "heading") {
+        setPlaceholderState({
+          show: true,
+          type: "heading",
+          headingLevel,
+          position: verticalPosition,
+        });
+      } else {
+        setPlaceholderState((prev) => ({ ...prev, show: false }));
+      }
+    },
+    [editor, setPlaceholderState]
+  );
+
 
   useEffect(() => {
     if (!editor) return;
@@ -79,28 +104,7 @@ export const useSlateEditorState = () => {
       headingLevel
     )
     
-  }, [changed]);
-
-  const handlePlaceholderState = (
-    blockType: BlockType,
-    verticalPosition: number,
-    isSlashOnly: boolean,
-    headingLevel: number
-  ) => {
-    if (!editor) return;
-    const isBlockEmpty = checkIsBlockEmpty(editor);
-    
-    if ((isSlashOnly || isBlockEmpty) && blockType === "heading") {
-      setPlaceholderState({ 
-        show: true,
-        type: "heading",
-        headingLevel: headingLevel,
-        position: verticalPosition,
-      });
-    } else {
-      setPlaceholderState((prev) => ({ ...prev, show: false }));
-    }
-  }
+  }, [changed, editor, handlePlaceholderState]);
 
   return {
     placeholderState,

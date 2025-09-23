@@ -1,7 +1,7 @@
 "use client";
 
 import { Id } from "@/convex/_generated/dataModel";
-import { createContext, PropsWithChildren, SetStateAction, useContext, useEffect, useState } from "react";
+import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import ShareThoughtModal from "../utility/ShareThoughtModal";
 import { ThoughtId } from "../app.models";
 import { useMutation, useQuery } from "convex/react";
@@ -60,7 +60,7 @@ const ShareThoughtProvider = ({ children }: PropsWithChildren) => {
     }));
   }, [currentThought, state.thoughtId])
 
-  const makePublic = async () => {
+  const makePublic = useCallback( async () => {
     if (state.thoughtId === "new") {
       setToast({
         title: "Error Sharing Thought",
@@ -73,7 +73,7 @@ const ShareThoughtProvider = ({ children }: PropsWithChildren) => {
 
     try {
       await new Promise(async (resolve) => {
-        const response = await shareThought({thoughtId: state.thoughtId});
+        const response = await shareThought({ thoughtId: state.thoughtId });
         setShareState(prev => ({ ...prev, isPrivate: false, thoughtLink: response.link }));
         resolve(response);
       })
@@ -85,12 +85,12 @@ const ShareThoughtProvider = ({ children }: PropsWithChildren) => {
         isError: true
       })
     }
-  }
+  }, [setToast, state.thoughtId, shareThought, setShareState])
 
-  const makePrivate = async () => {
+  const makePrivate = useCallback(async () => {
     try {
-      await new Promise( async (resolve) => {
-        await makePrivateMutation({thoughtId: state.thoughtId});
+      await new Promise(async (resolve) => {
+        await makePrivateMutation({ thoughtId: state.thoughtId });
         setShareState(prev => ({ ...prev, isPrivate: true, thoughtLink: "" }));
         resolve(null);
       })
@@ -102,9 +102,9 @@ const ShareThoughtProvider = ({ children }: PropsWithChildren) => {
         isError: true
       })
     }
-  }
+  }, [setToast, state.thoughtId, makePrivateMutation, setShareState])
 
-  const shareThoughtActions = {
+  const shareThoughtActions = useMemo(() => ({
     toggleDisplay(display: boolean) {
       setShareState(prev => ({ ...prev, display }));
     },
@@ -115,14 +115,15 @@ const ShareThoughtProvider = ({ children }: PropsWithChildren) => {
 
     async toggleAccess(isPrivate: boolean) {
       if (state.isPrivate === isPrivate) return;
-      
+
       if (!isPrivate) {
         await makePublic();
       } else {
         await makePrivate();
       }
     }
-  }
+  }), [state.isPrivate, makePublic, makePrivate]);
+
 
   return (
     <ShareThoughtContext.Provider value={{ state, shareThoughtActions}}>

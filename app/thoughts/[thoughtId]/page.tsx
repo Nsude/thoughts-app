@@ -23,7 +23,7 @@ import StopIcon from "@/public/icons/StopIcon";
 import { AudioModalAction, AudioModalState } from "@/components/app.models";
 import { useConfirmation } from "@/components/contexts/ConfirmationContext";
 import { useToastContext } from "@/components/contexts/ToastContext";
-import { Editor } from "slate";
+import { Descendant, Editor } from "slate";
 import { slateToPlainText } from "@/components/rich-text-editor/slateEditorFunctions";
 import { getRandomKeyphrase } from "@/components/utility/ai-helpers";
 import { useShareThoughtContext } from "@/components/contexts/ShareThoughtContext";
@@ -99,7 +99,7 @@ export default function ThoughtDocument(
   // give the shareThoughtContext access to the thoughtId
   useEffect(() => {
     shareThoughtActions.setThoughtId(thoughtId);
-  }, [thoughtId])
+  }, [thoughtId, shareThoughtActions])
 
   // switch placeholder depending on selected tab
   useGSAP(() => {
@@ -116,7 +116,7 @@ export default function ThoughtDocument(
 
 
   // handle add versions
-  const handleAddVersion = async (content: any[]) => {
+  const handleAddVersion = async (content: Descendant[]) => {
     if (versions && versions.length > 9) {
       setToast({
         title: "Version Limit Exceeded",
@@ -256,7 +256,7 @@ export default function ThoughtDocument(
     }
     
     window.addEventListener("mousedown", handleMouseDown);
-  }, [isRecording.current])
+  }, [])
 
   // handle refine idea
   const handleRefineThought = async () => {
@@ -288,6 +288,7 @@ export default function ThoughtDocument(
       setSlateStatus("idle")
     } catch (error) {
       setSlateStatus("error");
+      console.error(error);
       setToast({
         title: "A Tiny Error",
         isError: true,

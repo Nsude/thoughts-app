@@ -3,8 +3,6 @@
 import "@/components/buttons/buttons.css";
 import { ButtonStatus } from "../app.models";
 import LoadingIcon from "@/public/icons/LoadingIcon";
-import ErrorIcon from "@/public/icons/ErrorIcon";
-import { useEffect } from "react";
 
 interface Props {
   label?: string;

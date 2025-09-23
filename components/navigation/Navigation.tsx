@@ -10,7 +10,6 @@ import ExploreIcon from "@/public/icons/ExploreIcon";
 import ProfileDisplay from "./ProfileDisplay";
 import { useAction, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import LogoutIcon from "@/public/icons/LogoutIcon";
 import { redirect, useRouter } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState } from "react";
 import Thought from "./Thought";
@@ -21,9 +20,6 @@ import { useSlateStatusContext } from "../contexts/SlateStatusContext";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useShareThoughtContext } from "../contexts/ShareThoughtContext";
-import LogoMark from "@/public/LogoMark";
-import LogoIcon from "@/public/icons/LogoIcon";
-import DbArrowRight from "@/public/icons/DbArrowRight";
 import { defaultImage } from "@/public/profile-images/allProfiles";
 
 
@@ -86,7 +82,7 @@ export default function Naviation() {
   }, [currentUser])
 
   const prevThoughtId = useRef<Id<"thoughts">>(null);
-  let modalTimeout = useRef<NodeJS.Timeout>(null);
+  const modalTimeout = useRef<NodeJS.Timeout>(null);
 
   // reverse thoughts array to be last-thought-first display
   const reversedThoughts = useMemo(() => {
@@ -143,7 +139,7 @@ export default function Naviation() {
 
   // close options modal when the user clicks outside
   useEffect(() => {
-    const handleOutsideMouseDown = (e: MouseEvent) => {
+    const handleOutsideMouseDown = () => {
       if (!modalState.display) return;
       modalDispath({ type: "TOGGLE_DISPLAY", value: false });
     }
@@ -267,7 +263,7 @@ export default function Naviation() {
       {/* Thoughts */}
       <div
         className={`${hideOnCollapse} w-full max-h-[38.5%] overflow-y-scroll`}
-        onScroll={(e) => {
+        onScroll={() => {
           // hide modal on scroll
           if (!modalState.display) return
           modalDispath({ type: "TOGGLE_DISPLAY", value: false });

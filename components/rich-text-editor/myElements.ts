@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { Editor } from "slate";
 import { CustomEditor } from "./CustomEditor";
 import TextIcon from "@/public/icons/TextIcon";
@@ -8,15 +10,15 @@ import BulletListIcon from "@/public/icons/BulletListIcon";
 import NumberedListIcon from "@/public/icons/NumberedListIcon";
 import CodeIcon from "@/public/icons/CodeIcon";
 
-type ElementName = 
-  "Text" 
-  | "Heading 1" 
-  | "Heading 2" 
+type ElementName =
+  | "Text"
+  | "Heading 1"
+  | "Heading 2"
   | "Heading 3"
   | "Bullet List"
   | "Numbered List"
   | "Code"
-  | "Quote"
+  | "Quote";
 
 export interface MyElement {
   name: ElementName;
@@ -53,18 +55,18 @@ export const myElements: MyElement[] = [
     name: "Bullet List",
     icon: BulletListIcon,
     handleClick: (editor) => CustomEditor.toggleBulletList(editor),
-    shortCutLabel: "ctrl shift b"
+    shortCutLabel: "ctrl shift b",
   },
   {
     name: "Numbered List",
     icon: NumberedListIcon,
     handleClick: (editor) => CustomEditor.toggleNumberedList(editor),
-    shortCutLabel: "ctrl shift o"
+    shortCutLabel: "ctrl shift o",
   },
   {
     name: "Code",
     icon: CodeIcon,
     handleClick: (editor) => CustomEditor.toggleCode(editor),
-    shortCutLabel: "ctrl `"
-  }
+    shortCutLabel: "ctrl `",
+  },
 ];

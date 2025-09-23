@@ -1,4 +1,6 @@
-import { Editor, Element, Node, Path, Text, Transforms } from "slate";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { Editor, Element, Node, Transforms } from "slate";
 import { CustomText } from "./slate";
 import { checkIsBlockSlashOnly } from "./slateEditorFunctions";
 
@@ -180,7 +182,7 @@ export const CustomEditor = {
   },
 
   toggleHeadings(editor: Editor, level: number) {
-    let match = this.isHeadingElement(editor, level);
+    const match = this.isHeadingElement(editor, level);
 
     const type = match ? null : { type: "heading", level };
 

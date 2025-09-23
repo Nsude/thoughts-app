@@ -170,7 +170,7 @@ export default function AuthForm({ authType }: Props) {
       })
     }
 
-  }, [state.form, state.emailOtp, state.flow, updateProfile, signIn, router]);
+  }, [state.form, state.emailOtp, state.flow, updateProfile, signIn, router, setToast]);
 
   const updateFormValidation = (field: keyof FormValidation, isValid: boolean) => {
     dispatch({ type: "FORM_VALIDATION", isFormValid: { ...state.isValidProp, [field]: isValid } });
@@ -206,7 +206,7 @@ export default function AuthForm({ authType }: Props) {
         <div className="mb-[3.125rem]">
           <span className="text-fade-gray">Think out loud.</span>
           <h1 className="text-h1 tracking-h1 text-center mt-5">
-            Great ideas don't <br /> come fully formed
+            {"Great ideas don't "} <br /> {"come fully formed"}
           </h1>
         </div>
 

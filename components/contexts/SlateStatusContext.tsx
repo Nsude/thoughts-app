@@ -1,8 +1,8 @@
 "use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { createContext, PropsWithChildren, SetStateAction, useContext, useState } from "react";
 import { SlateStatusTypes } from "../app.models";
-import { Id } from "@/convex/_generated/dataModel";
 
 interface SlateStatus {
   slateStatus: SlateStatusTypes;

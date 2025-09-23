@@ -17,7 +17,7 @@ export default function SlateStatusDisplay () {
       setSlateStatus("idle")
     }, 2000)
 
-  }, [slateStatus])
+  }, [slateStatus, setSlateStatus])
 
   if (slateStatus === "idle") return null;
 

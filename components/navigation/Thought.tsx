@@ -1,9 +1,8 @@
 "use client";
 
-import DefaultIcon from "@/public/icons/DefaultIcon";
 import FreshThoughtIcon from "@/public/icons/FreshThoughtIcon";
 import ThreeDotIcon from "@/public/icons/ThreeDotsIcon";
-import { ActionDispatch, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ActionDispatch, useEffect, useMemo, useRef, useState } from "react";
 import { ThoughtId, type Thought } from "../app.models";
 import { ModalActions } from "./Navigation";
 import { useRouter } from "next/navigation";
@@ -36,7 +35,7 @@ export default function Thought({
   useEffect(() => {
     if (description) return;
     setTitle("Untitled Thought")
-  }, [router, _id])
+  }, [router, _id, description])
 
   // highlight title to rename 
   useEffect(() => {
@@ -87,16 +86,14 @@ export default function Thought({
    }
 
   // update title 
-  const updateTitle = useMemo(() => {
-    return async () => {
-      modalDispath({ type: "SET_EDITING", thoughtId: "" as ThoughtId });
-      try {
-        await renameThought({ thoughtId: _id, newTitle: title })
-      } catch (error) {
-        console.log("Error renaming thought: ", error);
-      }
+  const updateTitle = async () => {
+    modalDispath({ type: "SET_EDITING", thoughtId: "" as ThoughtId });
+    try {
+      await renameThought({ thoughtId: _id, newTitle: title })
+    } catch (error) {
+      console.log("Error renaming thought: ", error);
     }
-  }, [title])
+  }
 
   return (
     <div className="snap-start">
