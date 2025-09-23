@@ -53,10 +53,15 @@ export const createVersion = mutation({
 export const getCurrentThought = query({
   args: {thoughtId: v.id("thoughts")},
   handler: async (ctx, {thoughtId}) => {
-    const thought = await ctx.db.get(thoughtId);
-    if (!thought) throw new Error("error getting current thought, thoughId is invalid");
+    try {
+      const thought = await ctx.db.get(thoughtId);
+      if (!thought) throw new Error("error getting current thought, thoughId is invalid");
+      
+      return thought;
+    } catch (error) {
+      console.error(error) 
+    }
 
-    return thought;
   }
 })
 
