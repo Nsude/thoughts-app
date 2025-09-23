@@ -1,5 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/exhaustive-deps */
+
 import { useCallback, useEffect, useMemo, useReducer, useRef } from "react"
-import { createEditor, Descendant, Editor, Transforms } from "slate"
+import { createEditor, Editor, Transforms } from "slate"
 import { withHistory } from "slate-history"
 import { Editable, RenderElementProps, Slate, withReact } from "slate-react"
 import { BulletListElement, CodeElement, DefaultElement, HeadingElement, ListItemElement, NumberedListElement } from "./CustomElements";
@@ -10,7 +13,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useRouter } from "next/navigation";
-import { debounce, flatMap } from "lodash";
+import { debounce } from "lodash";
 import { useSlateStatusContext } from "../contexts/SlateStatusContext";
 import { editorReducer, getContentLength, } from "./slateEditorFunctions";
 import { EditorState } from "../app.models";
@@ -67,31 +70,6 @@ export default function SlateEditor({
     versionSwitched, 
     setVersionSwitched
   } = useSlateStatusContext();
-
-  // ===== DISPLAY THE SELECTED VERSION CONTENT ON FIRST LOAD =====
-  useEffect(() => {
-    if (state.isInitialised) return;
-    const selectedContent = selectedVersion?.content;
-
-    dispatch({ type: "INIT_CONTENT" });
-    setSlateStatus("loading");
-
-    if (thoughtId === "new") {
-      editor.children = initialValue;
-      dispatch({ type: "CONTENT_LOADED" });
-      lastSavedContent.current = initialValue;
-
-    } else if (selectedContent && thoughtId !== "new") {
-      editor.children = selectedContent;
-      // notify the placeholder state that the editor isn't empty
-      handleSlateValueChange(selectedContent); 
-
-      dispatch({ type: "CONTENT_LOADED" });
-      lastSavedContent.current = selectedContent;
-    }
-
-    setSlateStatus("idle");
-  }, [thoughtId, selectedVersion?.content])
 
   // UPDATE THE DISPLAYED CONTENT ON VERSION SWITCH;
   useEffect(() => {
@@ -178,6 +156,7 @@ export default function SlateEditor({
   }, [thoughtId, router])
 
   // ===== HANDLE VALUE CHANGE =====
+
   const handleSlateValueChange = useCallback(async (content: any[]) => {
     if (!content) return;
     
@@ -206,12 +185,40 @@ export default function SlateEditor({
       await handleCreateThought(content);
     }
 
-
   }, [onChange, handleCreateThought, thoughtId, state.isInitialised, state.isCreatingThought])
 
+  // ===== DISPLAY THE SELECTED VERSION CONTENT ON FIRST LOAD =====
   useEffect(() => {
+    if (state.isInitialised) return;
+    const selectedContent = selectedVersion?.content;
 
-  }, [currentContent])
+    dispatch({ type: "INIT_CONTENT" });
+    setSlateStatus("loading");
+
+    if (thoughtId === "new") {
+      editor.children = initialValue;
+      dispatch({ type: "CONTENT_LOADED" });
+      lastSavedContent.current = initialValue;
+
+    } else if (selectedContent && thoughtId !== "new") {
+      editor.children = selectedContent;
+      // notify the placeholder state that the editor isn't empty
+      handleSlateValueChange(selectedContent);
+
+      dispatch({ type: "CONTENT_LOADED" });
+      lastSavedContent.current = selectedContent;
+    }
+
+    setSlateStatus("idle");
+  }, [
+    thoughtId, 
+    selectedVersion?.content, 
+    editor, 
+    handleSlateValueChange, 
+    initialValue,
+    setSlateStatus, 
+    state.isInitialised
+  ])
 
   // display content on editor after recording in transcribed 
   useEffect(() => {

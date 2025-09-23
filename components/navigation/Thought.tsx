@@ -2,7 +2,7 @@
 
 import FreshThoughtIcon from "@/public/icons/FreshThoughtIcon";
 import ThreeDotIcon from "@/public/icons/ThreeDotsIcon";
-import { ActionDispatch, useEffect, useMemo, useRef, useState } from "react";
+import { ActionDispatch, useEffect, useRef, useState } from "react";
 import { ThoughtId, type Thought } from "../app.models";
 import { ModalActions } from "./Navigation";
 import { useRouter } from "next/navigation";
@@ -42,15 +42,14 @@ export default function Thought({
     const button = buttonRef.current;
     if (!button) return;
 
-    if (!editing) {
-      button.classList.contains("is-renaming") ? 
-      button.classList.remove("is-renaming") : null;
-    } else {
+    if (editing) {
       inputRef.current?.focus();
       inputRef.current?.select();
-      button.classList.add("is-renaming");
     }
-  }, [editing])
+
+    button.classList.toggle("is-renaming", editing);
+  }, [editing]);
+
 
   // highlight selected thought on refresh
   useEffect(() => {

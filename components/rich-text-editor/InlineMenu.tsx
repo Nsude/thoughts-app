@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Editor, Element, Range, Text } from "slate";
 import { useSlate } from "slate-react";
 import ElementsMenu from "./ElementsMenu";
@@ -33,7 +33,7 @@ export default function InlineMenu() {
         top + 38
       });
 
-  }, [editor.selection])
+  }, [editor.selection, editor, openMenu])
 
   // clear menu when block is empty
   useEffect(() => {
@@ -45,18 +45,18 @@ export default function InlineMenu() {
     const {offset} = selection.anchor;
     if (offset === 0) setOpenMenu(false);
 
-  }, [editor.selection]);
+  }, [editor.selection, editor, openMenu]);
 
 
   // check if the "/" is on its own
-  const isSlashIndependent = ():boolean => {
-    const {selection} = editor;
+  const isSlashIndependent = useCallback((): boolean => {
+    const { selection } = editor;
     if (!selection || Range.isExpanded(selection)) return false
 
     const [currentBlock] = Editor.nodes(editor, {
       match: n => Element.isElement(n) && Editor.isBlock(editor, n) && n.type !== "code",
       mode: "lowest"
-    }) 
+    })
 
     if (!currentBlock) return false;
 
@@ -67,7 +67,7 @@ export default function InlineMenu() {
     if (!textNode) return false;
 
     const [text] = textNode;
-    const {offset: currentPosition} = selection.anchor;
+    const { offset: currentPosition } = selection.anchor;
 
     const charBefore = currentPosition > 0 ? text.text[currentPosition - 1] : null;
     const charAfter = currentPosition < text.text.length ? text.text[currentPosition] : null
@@ -80,7 +80,7 @@ export default function InlineMenu() {
       (!charAfter || /\s/.test(charAfter));
 
     return isIndependent;
-  }
+  }, [editor])
 
   // keydown interactions
   useEffect(() => {
@@ -107,7 +107,7 @@ export default function InlineMenu() {
     }
 
     document.addEventListener("keydown", handleSlashPressed);
-  }, []);
+  }, [isSlashIndependent]);
 
 
   // hide/display inline menu
