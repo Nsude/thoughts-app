@@ -7,7 +7,7 @@ import EditIcon from "@/public/icons/EditIcon";
 import ShareIcon from "@/public/icons/ShareIcon";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { ActionDispatch, useMemo, useRef } from "react";
+import { ActionDispatch, useRef } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { ModalActions } from "./Navigation";

@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import LogoIcon from "@/public/icons/LogoIcon";
 import NavMenuButton from "../buttons/NavmenuButton";
@@ -43,8 +44,10 @@ export default function SlateNavbar() {
     if (!hasMultiBlockTypes) return setDisableIndButtons(false);
 
     setDisableIndButtons(true);
+    // TODO: remove after build
+    setSelectedElem("Text");
 
-  }, [editor.selection])
+  }, [editor.selection, editor])
 
 
   const getSelectedBlocks = (editor: Editor) => {
@@ -83,7 +86,7 @@ export default function SlateNavbar() {
     const isEmpty = isBlockEmpty(editor);
     if (isEmpty && display) setDisplay(false);
     
-  }, [editor.selection])
+  }, [editor.selection, display, editor])
 
   // handle selection
   useEffect(() => {
@@ -114,7 +117,7 @@ export default function SlateNavbar() {
       };
     }
 
-  }, [editor.selection, manuallyHidden]);
+  }, [editor.selection, manuallyHidden, display]);
 
   // Reset manuallyHidden when selection actually changes (new selection made)
   useEffect(() => {
@@ -133,7 +136,7 @@ export default function SlateNavbar() {
     // i need this because after deselection the menu pops up again 
     // because it hasn't been deselected in slate
     Transforms.deselect(editor);
-  }, [])
+  }, [editor])
 
   // handle clicks outside the navbar
   useEffect(() => {
@@ -149,7 +152,7 @@ export default function SlateNavbar() {
     document.addEventListener("mousedown", handleMouseDown);
 
     return () => document.removeEventListener("mousedown", handleMouseDown);
-  }, [display])
+  }, [display, handleClose])
 
 
   // display and hide navbar
@@ -176,9 +179,9 @@ export default function SlateNavbar() {
   }, { scope: mainRef, dependencies: [display] })
 
   const [displayElemMenu, setDisplayElemMenu] = useState(false);
-  const toggleElementsMenu = useCallback(() => {
+  const toggleElementsMenu = () => {
     setDisplayElemMenu(prev => !prev);
-  }, [])
+  };
 
   return (
     <div
@@ -213,27 +216,27 @@ export default function SlateNavbar() {
 
       <NavMenuButton
         icon={<BoldIcon />}
-        handleClick={useCallback(() => CustomEditor.toggleBold(editor), [])} />
+        handleClick={() => CustomEditor.toggleBold(editor)} />
 
       <NavMenuButton
         icon={<ItalicIcon />}
-        handleClick={useCallback(() => CustomEditor.toggleItalic(editor), [])} />
+        handleClick={() => CustomEditor.toggleItalic(editor)} />
 
       <NavMenuButton
         icon={<UnderlineIcon />}
-        handleClick={useCallback(() => CustomEditor.toggleUnderline(editor), [])} />
+        handleClick={() => CustomEditor.toggleUnderline(editor)} />
 
       <NavMenuButton
         icon={<LineThroughIcon />}
-        handleClick={useCallback(() => { CustomEditor.toggleLineThrough(editor)}, [])} />
+        handleClick={() => { CustomEditor.toggleLineThrough(editor)}} />
 
       <div className="my-nav-ind-button" data-disable={disableIndButtons}>
         <NavMenuButton
           icon={<CodeIcon />}
-          handleClick={useCallback(() => {
+          handleClick={() => {
             CustomEditor.toggleCode(editor);
             handleClose()
-          }, [])} />
+          }} />
       </div>
 
       <div className="my-nav-ind-button" data-disable={disableIndButtons}>

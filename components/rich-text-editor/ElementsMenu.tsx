@@ -118,7 +118,7 @@ export default function ElementsMenu({ navHeight, display, closeMenu, variant }:
             onClick={() => {
               closeMenu();
             }} >
-            <span className="text-label-small text-dark-gray-label">type "/" instead</span>
+            <span className="text-label-small text-dark-gray-label">{`type "/" instead`}</span>
             <span className="absolute text-[0.625rem] text-dark-gray-label right-1.5 top-1/2 -translate-y-1/2">
               ecs
             </span>

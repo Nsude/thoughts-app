@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { Editor, Element } from "slate";
 import { EditorAction, EditorState } from "../app.models";
 
@@ -141,7 +143,7 @@ export function slateToPlainText(slateContent: any[]) {
       return node.text;
     }
 
-    // If it has children, recursively extract text from them 
+    // If it has children, recursively extract text from them
     // then join it into a single strign
     if (node.children && Array.isArray(node.children)) {
       return node.children.map(extractTextFromNode).join("");

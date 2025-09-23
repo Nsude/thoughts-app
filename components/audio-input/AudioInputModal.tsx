@@ -77,7 +77,7 @@ export default function AudioInputModal({
     if (!limitReached.current) return;
     handleExceedRecordLimit()
 
-  }, [limitReached.current, handleExceedRecordLimit])
+  }, [handleExceedRecordLimit])
 
   // display and hide modal
   useGSAP(() => {
