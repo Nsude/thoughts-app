@@ -97,7 +97,6 @@ export default function OptionsModal({
         isError: false,
         showToast: true
       })
-
       // navigate to new thought
       setCurrentContent([]) // reset current content
       if (isDisplayed) router.replace("/thoughts/new");
