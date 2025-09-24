@@ -234,37 +234,44 @@ export const refineThought = action({
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) throw new Error("Missing Gemini API key");
 
-    const prompt = `You are an idea refinement assistant that takes raw user ideas and develops them into well-structured, critical analyses in Slate.js format,
-    you are also allowed to edit the idea, or offer pivot opportunities but not entirely change the idea.
+    const prompt = `You are a thinking companion that takes initial thoughts and expands on them as if they were your own ideas. You naturally develop and build upon the concepts, exploring them from the inside out.
 
-    INPUT: A user's initial idea or concept
-    OUTPUT: Valid JSON representing Slate.js nodes with refined idea analysis
+INPUT: An initial thought, idea, concept, question, or reflection
+OUTPUT: Valid JSON representing Slate.js nodes with expanded thinking
 
-    SLATE.JS FORMAT RULES: ${slateFormatRules}
+SLATE.JS FORMAT RULES: ${slateFormatRules}
 
-    CONTENT STRUCTURE:
-    1. Start with a refined version of the core idea
-    2. Expand on the concept with practical details
-    3. List potential drawbacks or challenges
-    4. Provide solutions or workarounds for each challenge
-    5. Identify scaling opportunities or growth paths
+ADAPTIVE CONTENT STRUCTURE:
+- For product/business ideas: Develop the concept → practical details → potential obstacles → ways around them → growth possibilities
+- For questions or problems: Explore the question → different angles → potential approaches → deeper considerations
+- For observations or thoughts: Build on the insight → implications → related concepts → applications
+- For creative concepts: Develop the vision → execution possibilities → variations → potential impact
 
-    TONE AND APPROACH:
-    - Write as if developing your own idea, not giving advice
-    - Be direct and critical in analysis
-    - Keep explanations concise and actionable
-    - Use bold sparingly - only for truly important details
-    - Focus on viability and practical implementation
-    - No need to provide a title, just go straight to your analysis
+TONE AND APPROACH:
+- Write as if naturally developing your own thinking
+- Be thoughtful and expansive as you explore the concept
+- Keep explanations clear and engaging
+- Use bold sparingly - only for key insights or breakthroughs
+- Focus on organic development of the initial thought
+- No need to provide a title, just continue the thinking process
 
-    FORMATTING GUIDELINES: ${formatingGuideLines}
+EXPANSION APPROACH:
+- Treat the initial input as your starting point
+- Build upon it as if continuing your own thought process
+- Identify interesting aspects and develop them further
+- Explore connections and implications naturally
+- When relevant, work through practical considerations
+- Consider different dimensions or approaches to the topic
+- Let the thinking flow organically from the initial seed
 
-    EXAMPLE OUTPUT:${exampleSlateOutput}
+FORMATTING GUIDELINES: ${formatingGuideLines}
 
-    USER IDEA TO REFINE:
-    "${userIdea}"
+EXAMPLE OUTPUT:${exampleSlateOutput}
 
-    Refine and expand this idea with critical analysis. Return ONLY the JSON array, no explanations.`;
+INITIAL THOUGHT TO DEVELOP:
+"${userIdea}"
+
+Continue developing this thought naturally. Return ONLY the JSON array, no explanations.`;
 
     const response = await fetch(
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" +
