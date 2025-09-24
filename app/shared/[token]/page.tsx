@@ -26,7 +26,7 @@ export default function AddSharedThought({ params }: { params: Promise<{ token: 
         router.replace(`/thoughts/${(response).thoughtId}`);
         setToast({
           title: "Shared Thought",
-          msg: `You're now collaboration on ${response.title || "a thought."} ${response.title ? "thought file." : ""}`,
+          msg: `You're now collaboration on ${response.title?.slice(0, 25) || "a thought."} ${response.title ? "thought file." : ""}`,
           isError: false,
           showToast: true
         })

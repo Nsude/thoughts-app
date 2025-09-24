@@ -52,6 +52,7 @@ export const makePrivate = mutation({
 
     await ctx.db.patch(thoughtId, {
       isPrivate: true,
+      thoughtLink: undefined
     });
   },
 });

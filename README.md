@@ -28,7 +28,8 @@ Then you need to create a production deploy key on convex found in `settings -> 
 
 Also be sure to include the necessary production env variables on both convex and vercel. They are however, some variables that are only used by either convex or vercel; in that case you can just include that on the necessary platform.
 
-`💡IMPORTANT`
+
+`💡IMPORTANT` <br>
 2. When using Github OAuth for authentification with convex, the Authorization call back URL shouldn't be set to the `.cloud` default endpoint that comes from the provided deployment URL from convex. 
 
 ```
@@ -40,7 +41,8 @@ The reason for this is that the `.cloud` endpoint is reserved for backend API ca
 
 3. Be sure to include `NEXT_PUBLIC_CONVEX_URL: deplyment url from convex` as an environment variable on vercel, then `SITE_URL: domain url from vercel` on convex.
 
-`💡IMPORTANT`
+
+`💡IMPORTANT` <br>
 Also set a `NEXTAUTH_URL: vercel-prod-domain-url` and `NEXTAUTH_SECRET: [generate-random-UUID](https://generate-secret.vercel.app/32)`
 
 The next-auth-url helps vercel build absolute URLs when necessary, by default NEXT regards your projects URL as `https://localhost:3000` and it auto detects this by default but on prod, you need to explicitly define your app's URL.
