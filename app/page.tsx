@@ -1,7 +1,7 @@
 "use client";
 
 import { useConvexAuth } from "convex/react";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 
@@ -15,7 +15,7 @@ export default function Home() {
       return router.replace("/login")
     }
     
-    redirect("/thoughts/new");
+    router.replace("/thoughts/new");
   }, [currentUser.isAuthenticated, currentUser.isLoading, router])
 
 }

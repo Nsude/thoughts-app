@@ -132,7 +132,7 @@ export default function Naviation() {
     isAnimated.current = true;
 
     setTimeout(() => {
-      gsap.set(thoughtsRef.current, { overflowY: "scroll" });
+      gsap.set(thoughtsRef.current, { overflowY: "auto" });
     }, 2000)
 
   }, { scope: mainRef, dependencies: [thoughts, tab] })
@@ -223,11 +223,11 @@ export default function Naviation() {
       <div className="relative flex w-full h-fit justify-between items-center mb-[1.75rem]">
         <Logo collapse={isCollapsed} />
 
-        <span 
+        <span
           role="button"
-          data-collapse={isCollapsed} 
+          data-collapse={isCollapsed}
           style={{
-            left: isCollapsed ? "-3px" : "unset", 
+            left: isCollapsed ? "-3px" : "unset",
             right: isCollapsed ? "unset" : "0"
           }}
           className="collapse-dashboard-btn absolute right-0">
@@ -262,7 +262,7 @@ export default function Naviation() {
 
       {/* Thoughts */}
       <div
-        className={`${hideOnCollapse} w-full max-h-[38.5%] overflow-y-scroll`}
+        className={`${hideOnCollapse} w-full h-[38.5%]`}
         onScroll={() => {
           // hide modal on scroll
           if (!modalState.display) return
@@ -274,7 +274,9 @@ export default function Naviation() {
           Your Thoughts
         </span>
 
-        <div ref={thoughtsRef} className="relative flex flex-col h-[90%] overflow-y-scroll snap-y overflow-x-hidden slim-scrollbar">
+        <div ref={thoughtsRef}
+          className="relative flex flex-col h-full overflow-y-auto 
+          snap-y snap-mandatory slim-scrollbar">
           {/* Thoughts go here */}
           {
             reversedThoughts.map((item) => (
@@ -305,12 +307,13 @@ export default function Naviation() {
 
       {/* Shared Thoughts */}
       <div
-        style={{opacity: reversedSharedThoughts.length > 0 && tab !== 1 ? 1 : 0}}
-        className={`${hideOnCollapse} w-full max-h-[14%] mt-[2.5rem]`}>
+        style={{ opacity: reversedSharedThoughts.length > 0 && tab !== 1 ? 1 : 0 }}
+        className={`${hideOnCollapse} w-full h-[14%] mt-[2.5rem]`}>
         <span
           style={{ opacity: (tab === 0 && reversedSharedThoughts.length > 0) ? 1 : 0 }}
           className="block mb-[0.75rem] text-fade-gray">Shared</span>
-        <div className="flex flex-col h-[95%] overflow-y-scroll snap-y slim-scrollbar reduce-sb-height">
+        <div className="flex flex-col h-[95%] overflow-y-auto slim-scrollbar 
+        snap-y snap-mandatory">
           {/* Thoughts go here */}
           {
             reversedSharedThoughts.map((item) => (
@@ -336,10 +339,10 @@ export default function Naviation() {
       {/* profile */}
       <ProfileDisplay
         userName={currentUser?.name?.split(" ")[0] || currentUser?.email || "name"}
-        accoutType={"Freeloader"} 
+        accoutType={"Freeloader"}
         avatarUrl={currentUser?.image || defaultImage.src}
-        collapse={isCollapsed} 
-        handleSignout={handleSignout}/>
+        collapse={isCollapsed}
+        handleSignout={handleSignout} />
     </div>
   )
 }
