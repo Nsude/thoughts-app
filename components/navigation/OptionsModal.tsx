@@ -43,7 +43,7 @@ export default function OptionsModal({
   const firstCall = useRef(true);
   const router = useRouter();
 
-  const {shareThoughtActions} = useShareThoughtContext();
+  const {shareThoughtActions, state} = useShareThoughtContext();
 
   useGSAP(() => {
     const main = mainRef.current;
@@ -70,8 +70,8 @@ export default function OptionsModal({
   }, { scope: mainRef, dependencies: [y, display] })
 
   const handleShare = (selectedThoughtId: ThoughtId) => {
-    if (thoughtId !== selectedThoughtId) {
-      router.replace(`/thoughts/${selectedThoughtId}`);
+    if (thoughtId !== state.thoughtId) {
+      router.replace(`/thoughts/${thoughtId}`);
     }
     
     shareThoughtActions.toggleDisplay(true);

@@ -73,7 +73,8 @@ export default function Naviation() {
 
   // modal central state 
   const [modalState, modalDispath] = useReducer(modalReducer, initialState);
-  const currentThoughtId = useRef<ThoughtId>(null);
+  const [optionsCurrentThoughtId, setOptionsCurrentThoughtId] = 
+    useState<ThoughtId>("" as ThoughtId);
 
   useEffect(() => {
     if (currentUser !== undefined && !currentUser) {
@@ -158,7 +159,7 @@ export default function Naviation() {
 
     const { top, height } = button.getBoundingClientRect();
     const prevId = prevThoughtId.current;
-    const currentId = currentThoughtId.current;
+    const currentId = optionsCurrentThoughtId;
 
     modalDispath({
       type: "TOGGLE_DISPLAY",
@@ -170,7 +171,7 @@ export default function Naviation() {
     // reset the prev pos
     if (modalTimeout.current) clearTimeout(modalTimeout.current);
     modalTimeout.current = setTimeout(() => {
-      prevThoughtId.current = currentThoughtId.current;
+      prevThoughtId.current = optionsCurrentThoughtId;
     }, 10)
   }, [modalState])
 
@@ -285,13 +286,14 @@ export default function Naviation() {
                 thought={item}
                 editing={modalState.isEditing === item._id}
                 modalDispath={modalDispath}
+                optionsCurrentThoughtId={optionsCurrentThoughtId}
                 handleClick={() => {
                   setCurrentContent([]) // reset current content
                   router.replace(`/thoughts/${item._id}`);
-                  currentThoughtId.current = item._id;
+                  setOptionsCurrentThoughtId(item._id);
                 }}
                 handleEditClick={(e) => {
-                  currentThoughtId.current = item._id;
+                  setOptionsCurrentThoughtId(item._id);
                   handleThoughtEditOptions(e);
                 }} />
             ))
@@ -302,7 +304,7 @@ export default function Naviation() {
       {/* ==== Options Modal ==== */}
       <OptionsModal
         display={modalState.display} y={modalState.y}
-        thoughtId={currentThoughtId.current as ThoughtId}
+        thoughtId={optionsCurrentThoughtId}
         modalDispath={modalDispath} />
 
       {/* Shared Thoughts */}
@@ -322,13 +324,14 @@ export default function Naviation() {
                 thought={item}
                 editing={modalState.isEditing === item._id}
                 modalDispath={modalDispath}
+                optionsCurrentThoughtId={optionsCurrentThoughtId}
                 handleClick={() => {
                   setCurrentContent([]) // reset current content
                   router.replace(`/thoughts/${item._id}`);
-                  currentThoughtId.current = item._id;
+                  setOptionsCurrentThoughtId(item._id);
                 }}
                 handleEditClick={(e) => {
-                  currentThoughtId.current = item._id;
+                  setOptionsCurrentThoughtId(item._id);
                   handleThoughtEditOptions(e);
                 }} />
             ))
