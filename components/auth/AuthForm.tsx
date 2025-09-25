@@ -8,10 +8,10 @@ import GithubIcon from "@/public/icons/GithubIcon";
 import Logo from "../Logo";
 import { AuthType, AuthFormState, authFormAction, FormValidation } from "../app.models";
 import { useAuthActions } from "@convex-dev/auth/react";
-import { useCallback, useReducer } from "react";
+import { useCallback, useReducer} from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useToastContext } from "../contexts/ToastContext";
 import { getRandomAvatar } from "@/public/profile-images/allProfiles";
 
@@ -96,9 +96,10 @@ export default function AuthForm({ authType }: Props) {
   const [state, dispatch] = useReducer(reducer, initialState(authType));
   const updateProfile = useMutation(api.users.updateProfile);
   const router = useRouter();
+  const params = useSearchParams();
+  const redirectURL = params.get("redirect") ?? "/thoughts/new";
 
   const wait = 30;
-
   const resendCountDown = () => {
     dispatch({ type: "RESEND_TIMER", time: wait });
     let count = wait;
@@ -143,7 +144,7 @@ export default function AuthForm({ authType }: Props) {
       return;
     }
 
-    if (state.flow === "signIn") return router.replace("/thoughts/new");
+    if (state.flow === "signIn") return router.replace(redirectURL);
   };
 
   // verify email
@@ -159,7 +160,7 @@ export default function AuthForm({ authType }: Props) {
       await updateProfile({ name: state.form.name, image: getRandomAvatar().src });
       dispatch({ type: "RESET_FORM", reset: true });
 
-      router.replace("/thoughts/new");
+      router.replace(redirectURL);
     } catch {
       dispatch({type: "STATUS", status: "error"});
       setToast({
@@ -176,13 +177,13 @@ export default function AuthForm({ authType }: Props) {
     dispatch({ type: "FORM_VALIDATION", isFormValid: { ...state.isValidProp, [field]: isValid } });
   };
 
-  // google sign in
+  // AUTH PROVIDER SIGN IN
   const authProviderSignIn = async (provider: "github" | "google", id: string) => {
     dispatch({type: "PRESSED_AUTH_BUTTON", targetId: id});
 
     try {
       dispatch({type: "STATUS", status: "loading"});
-      await signIn(provider);
+      await signIn(provider, {redirectTo: redirectURL});
     } catch (error) {
       dispatch({ type: "STATUS", status: "error" });
       setToast({

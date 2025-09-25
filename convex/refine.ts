@@ -250,7 +250,7 @@ ADAPTIVE CONTENT STRUCTURE:
 TONE AND APPROACH:
 - Write as if naturally developing your own thinking
 - Be thoughtful and expansive as you explore the concept
-- Keep explanations clear and engaging
+- Keep explanations clear, engaging and concise
 - Use bold sparingly - only for key insights or breakthroughs
 - Focus on organic development of the initial thought
 - No need to provide a title, just continue the thinking process

@@ -12,7 +12,7 @@ type State = {
   thoughtId: Id<"thoughts">;
   isPrivate: boolean;
   display: boolean;
-  thoughtLink: string;
+  thoughtLink?: string;
 }
 
 type Props = {
@@ -41,6 +41,7 @@ const ShareThoughtProvider = ({ children }: PropsWithChildren) => {
     thoughtLink: ""
   })
 
+  // Toast
   const {setToast} = useToastContext();
 
   // mutations & queries
@@ -56,7 +57,7 @@ const ShareThoughtProvider = ({ children }: PropsWithChildren) => {
     if (!currentThought) return
     setShareState(prev => ({ ...prev, 
       isPrivate: currentThought.isPrivate, 
-      thoughtLink: currentThought.thoughtLink ? currentThought.thoughtLink : ""
+      thoughtLink: currentThought.thoughtLink ? currentThought.thoughtLink : undefined
     }));
   }, [currentThought, state.thoughtId])
 
@@ -71,10 +72,15 @@ const ShareThoughtProvider = ({ children }: PropsWithChildren) => {
       return;
     }
 
+    // async make-public
     try {
       await new Promise(async (resolve) => {
         const response = await shareThought({ thoughtId: state.thoughtId });
-        setShareState(prev => ({ ...prev, isPrivate: false, thoughtLink: response.link }));
+        setShareState(prev => ({ 
+          ...prev, 
+          isPrivate: false, 
+          thoughtLink: response.link 
+        }));
         resolve(response);
       })
     } catch (error) {
