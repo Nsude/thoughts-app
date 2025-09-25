@@ -178,6 +178,12 @@ export default function Naviation() {
   const handleNewThought = () => {
     setCurrentContent([]); // reset current content
     router.replace("/thoughts/new");
+
+    const highlightedThought = document.querySelector('.my-thoughtItem.is-selected');
+    if (highlightedThought) highlightedThought.classList.remove("is-selected");
+
+    // reset stored thought
+    localStorage.setItem("selectedThoughtId", "");
   }
 
   const handleSignout = async () => {

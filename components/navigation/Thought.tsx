@@ -58,7 +58,7 @@ export default function Thought({
       const button = document.querySelector(`[data-id="${optionsCurrentThoughtId}"]`);
       if (!button) return;
 
-      hightlightSelectedThought(button as HTMLButtonElement);
+      highlightSelectedThought(button as HTMLButtonElement);
     }
 
   }, [optionsCurrentThoughtId, display])
@@ -82,10 +82,10 @@ export default function Thought({
     const { currentTarget } = e;
     const target = currentTarget as HTMLButtonElement;
 
-    hightlightSelectedThought(target);
+    highlightSelectedThought(target);
   }
 
-  const hightlightSelectedThought = (target: HTMLButtonElement) => {
+  const highlightSelectedThought = (target: HTMLButtonElement) => {
     const prevSelectedItem = document.querySelector(".my-thoughtItem.is-selected");
     if (prevSelectedItem) prevSelectedItem.classList.remove("is-selected");
 
