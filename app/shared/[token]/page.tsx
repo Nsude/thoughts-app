@@ -7,7 +7,7 @@ import { api } from "@/convex/_generated/api";
 import LoadingIcon from "@/public/icons/LoadingIcon";
 import LogoIcon from "@/public/icons/LogoIcon";
 import { useConvexAuth, useMutation } from "convex/react";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { use, useEffect } from "react";
 
 export default function AddSharedThought({ params }: { params: Promise<{ token: string }> }) {
@@ -41,8 +41,14 @@ export default function AddSharedThought({ params }: { params: Promise<{ token: 
       }
     }
 
+    // redirect user to auth then to shared thought
+    const redirectUser = () => {
+      const redirectUrl = window.location.href;
+      router.replace(`/login?redirect=${encodeURIComponent(redirectUrl)}`)
+    }
+
     if (!currentUser.isLoading && !currentUser.isAuthenticated) {
-      redirect("/login");
+      redirectUser();
     } else if (!currentUser.isLoading && currentUser.isAuthenticated) {
       updateThoughts();
     }

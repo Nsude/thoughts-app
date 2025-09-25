@@ -363,7 +363,7 @@ export default function ThoughtDocument(
 
           {/* ===== BODY ===== */}
           <div className="relative slim-scrollbar my-slateContainer px-[1.125rem] w-full 
-            overflow-y-scroll overflow-x-clip max-h-full">
+            overflow-y-auto overflow-x-clip max-h-full">
             {/* Placeholder msg */}
             <PlaceholderDisplay
               placeholderRef={placeholderRef}

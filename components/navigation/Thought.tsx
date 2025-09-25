@@ -8,6 +8,7 @@ import { ModalActions } from "./Navigation";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { useShareThoughtContext } from "../contexts/ShareThoughtContext";
 
 interface Props {
   handleClick: () => void;
@@ -15,11 +16,12 @@ interface Props {
   editing: boolean;
   thought: Thought;
   modalDispath: ActionDispatch<[action: ModalActions]>
+  optionsCurrentThoughtId: ThoughtId;
 }
 
 export default function Thought({
   handleClick, handleEditClick,
-  editing, modalDispath,
+  editing, modalDispath, optionsCurrentThoughtId,
   thought: { _id, _creationTime, description } }: Props) {
 
   const fresh = _creationTime > (Date.now() - 300000);
@@ -30,6 +32,7 @@ export default function Thought({
 
   // mutation
   const renameThought = useMutation(api.thoughts.renameThought);
+  const {state: {display}} = useShareThoughtContext();
 
   // clear previous title !IMPORTANT
   useEffect(() => {
@@ -50,6 +53,15 @@ export default function Thought({
     button.classList.toggle("is-renaming", editing);
   }, [editing]);
 
+  useEffect(() => {
+    if (display) {
+      const button = document.querySelector(`[data-id="${optionsCurrentThoughtId}"]`);
+      if (!button) return;
+
+      highlightSelectedThought(button as HTMLButtonElement);
+    }
+
+  }, [optionsCurrentThoughtId, display])
 
   // highlight selected thought on refresh
   useEffect(() => {
@@ -67,9 +79,13 @@ export default function Thought({
   const handleClick_Local = (e: React.MouseEvent) => {
     handleClick();
 
-    const {currentTarget} = e;
+    const { currentTarget } = e;
     const target = currentTarget as HTMLButtonElement;
 
+    highlightSelectedThought(target);
+  }
+
+  const highlightSelectedThought = (target: HTMLButtonElement) => {
     const prevSelectedItem = document.querySelector(".my-thoughtItem.is-selected");
     if (prevSelectedItem) prevSelectedItem.classList.remove("is-selected");
 
@@ -82,7 +98,7 @@ export default function Thought({
     if (!thoughtId) return;
 
     localStorage.setItem("selectedThoughtId", thoughtId);
-   }
+  }
 
   // update title 
   const updateTitle = async () => {
@@ -111,26 +127,26 @@ export default function Thought({
           }
 
           {
-            editing ? 
-            <input
-              ref={inputRef}
-              value={title}
-              readOnly={!editing}
-              onClick={(e) => e.stopPropagation()}
-              onChange={(e) => setTitle(e.currentTarget.value)}
-              onKeyDown={(e) => {
-                const { key } = e;
-                if (key.toLowerCase() !== "enter") return;
-                updateTitle();
-              }}
-              onBlur={() => updateTitle()}
-              style={{ pointerEvents: editing ? "all" : "none" }}
-              className="
+            editing ?
+              <input
+                ref={inputRef}
+                value={title}
+                readOnly={!editing}
+                onClick={(e) => e.stopPropagation()}
+                onChange={(e) => setTitle(e.currentTarget.value)}
+                onKeyDown={(e) => {
+                  const { key } = e;
+                  if (key.toLowerCase() !== "enter") return;
+                  updateTitle();
+                }}
+                onBlur={() => updateTitle()}
+                style={{ pointerEvents: editing ? "all" : "none" }}
+                className="
                 focus:outline-none
                 z-[1] leading-[2] text-left truncate text-ellipsis
                 " />
-            : 
-            <span className="truncate leading-[2]">{title}</span>
+              :
+              <span className="truncate leading-[2]">{title}</span>
           }
         </div>
 

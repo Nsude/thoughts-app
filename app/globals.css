@@ -79,6 +79,7 @@ button {
 *.slim-scrollbar {
   scrollbar-color: var(--fade-gray) transparent;
   scrollbar-width: thin;
+  scrollbar-gutter: stable;
 }
 
 *.slim-scrollbar::-webkit-scrollbar-track {
