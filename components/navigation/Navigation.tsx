@@ -79,7 +79,7 @@ export default function Naviation() {
   useEffect(() => {
     if (currentUser !== undefined && !currentUser) {
       // TODO: uncomment
-      // router.replace("/login");
+      router.replace("/login");
     }
   }, [currentUser, router])
 
