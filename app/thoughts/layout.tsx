@@ -13,7 +13,8 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
   const { shareThoughtActions } = useShareThoughtContext();
 
   return (
-    <div className="relative w-full h-screen flex gap-x-[0.75rem]">
+    <div className="relative overflow-clip w-full h-[100dvh] max-h-[100dvh] lg:h-screen 
+      flex gap-x-[0.75rem]">
       {/* navigation */}
       <ConfirmationProvider>
         <SlateStatusContextProvider>
@@ -25,7 +26,8 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
           </div>
 
           {/* top-right-buttons */}
-          <div className="absolute top-[0.75rem] right-[1.38rem] w-fit h-fit flex gap-x-[0.38rem]">
+          <div className="absolute bottom-5 lg:bottom-[unset] left-5 lg:left-[unset] lg:top-[0.75rem] lg:right-[1.38rem] w-fit h-fit flex 
+            gap-x-[0.38rem]">
             <ClassicButton
               icon={<ShareIcon />}
               text="Share"
@@ -33,7 +35,9 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
           </div>
 
           {/* version indicator */}
-          <div className="absolute right-[1.5rem] top-[10rem]">
+          <div className="absolute right-[1.5rem] top-[8rem] lg:top-[10rem] rounded-[10px] 
+            bg-myGray/40 backdrop-blur-[4px] py-[0.75rem] pl-[0.75rem] lg:bg-[unset] 
+            lg:backdrop-blur-[unset] lg:py-[unset] lg:pl-[unset]">
             <Versions />
           </div>
         </SlateStatusContextProvider>

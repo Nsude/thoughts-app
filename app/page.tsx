@@ -12,7 +12,8 @@ export default function Home() {
   useEffect(() => {
     if (currentUser.isLoading) return;
     if (!currentUser.isAuthenticated) {
-      return router.replace("/login")
+      // TODO: uncomment
+      // return router.replace("/login")
     }
     
     router.replace("/thoughts/new");
