@@ -95,7 +95,7 @@ export default function ThoughtDocument(
     if (currentUser.isLoading) return;
     if (!currentUser.isAuthenticated) {
       // TODO: uncomment
-      // router.replace("/login");
+      router.replace("/login");
     }
   }, [router, currentUser.isLoading, currentUser.isAuthenticated]);
 

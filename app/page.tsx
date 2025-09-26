@@ -13,7 +13,7 @@ export default function Home() {
     if (currentUser.isLoading) return;
     if (!currentUser.isAuthenticated) {
       // TODO: uncomment
-      // return router.replace("/login")
+      return router.replace("/login")
     }
     
     router.replace("/thoughts/new");
