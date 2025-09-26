@@ -10,7 +10,7 @@ import ExploreIcon from "@/public/icons/ExploreIcon";
 import ProfileDisplay from "./ProfileDisplay";
 import { useAction, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState } from "react";
 import Thought from "./Thought";
 import { Id } from "@/convex/_generated/dataModel";
@@ -78,9 +78,9 @@ export default function Naviation() {
 
   useEffect(() => {
     if (currentUser !== undefined && !currentUser) {
-      redirect("/login");
+      router.replace("/login");
     }
-  }, [currentUser])
+  }, [currentUser, router])
 
   const prevThoughtId = useRef<Id<"thoughts">>(null);
   const modalTimeout = useRef<NodeJS.Timeout>(null);
