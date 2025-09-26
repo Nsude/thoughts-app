@@ -94,7 +94,8 @@ export default function ThoughtDocument(
   useEffect(() => {
     if (currentUser.isLoading) return;
     if (!currentUser.isAuthenticated) {
-      router.replace("/login");
+      // TODO: uncomment
+      // router.replace("/login");
     }
   }, [router, currentUser.isLoading, currentUser.isAuthenticated]);
 
@@ -317,8 +318,8 @@ export default function ThoughtDocument(
    }
 
   return (
-    <div>
-      <div className="relative">
+    <div className="w-full h-full lg:w-[unset] lg:h-[unset]">
+      <div className="hidden lg:block relative">
         <span
           className="absolute z-0 h-[83vh] w-[40.125rem] rounded-2xl bg-[#DCDCDC] 
           -top-[0.8125rem] left-[1.125rem]" />
@@ -327,9 +328,9 @@ export default function ThoughtDocument(
           -top-[1.625rem] left-[2.25rem]" />
       </div>
 
-      <div className="flex justify-center items-center h-[83vh]">
-        <div className="relative h-full w-[42.375rem] bg-myWhite border border-border-gray/50 
-          rounded-2xl pt-[4.6rem]">
+      <div className="flex justify-center items-center w-full h-full lg:h-[83vh] lg:w-[unset]">
+        <div className="relative h-full w-full lg:w-[42.375rem] bg-myWhite border 
+          border-border-gray/50 rounded-2xl pt-[4.6rem]">
 
           {/* Header */}
           <div className="absolute top-0 left-0 w-full px-[1.125rem] h-[4.25rem] flex 
@@ -340,9 +341,10 @@ export default function ThoughtDocument(
               selectedVersion?.isCore || thoughtId === "new" ? 
               <h3 className="text-title text-fade-gray">Core</h3>
               : 
-                <div className="flex text-dark-gray-label items-center gap-1 text-label-14 
-                  px-[0.8rem] py-1 rounded-[20px] bg-myGray ">
-                  <span className="">Parent | </span>
+                <div className="flex flex-row text-dark-gray-label items-center gap-1 text-label-14 
+                  px-[0.8rem] py-1 rounded-[20px] bg-myGray min-w-fit">
+                  <span className="hidden md:block">Parent | </span>
+                  <span className="md:hidden block">P | </span>
                 <span className="text-myBlack">{getParentVersionLabel()}</span>
               </div>
             }

@@ -78,7 +78,8 @@ export default function Naviation() {
 
   useEffect(() => {
     if (currentUser !== undefined && !currentUser) {
-      router.replace("/login");
+      // TODO: uncomment
+      // router.replace("/login");
     }
   }, [currentUser, router])
 
@@ -223,7 +224,7 @@ export default function Naviation() {
   return (
     <div
       ref={mainRef}
-      className="
+      className="hidden lg:block
         relative w-[19%] min-w-[18rem] h-full bg-myWhite p-[0.9375rem] z-[5] 
         border-r-1 border-border-gray/50 text-nowrap">
       {/* search & logo */}
@@ -237,7 +238,7 @@ export default function Naviation() {
             left: isCollapsed ? "-3px" : "unset",
             right: isCollapsed ? "unset" : "0"
           }}
-          className="collapse-dashboard-btn absolute right-0">
+          className="collapse-dashboard-btn absolute right-0 hidden lg:inline-block">
           <NoBgButton icon={<DbArrowLeft />} handleClick={handleCollapse} />
         </span>
       </div>

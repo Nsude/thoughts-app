@@ -206,7 +206,7 @@ export default function AuthForm({ authType }: Props) {
 
         <div className="mb-[3.125rem]">
           <span className="text-fade-gray">Think out loud.</span>
-          <h1 className="text-h1 tracking-h1 text-center mt-5">
+          <h1 className="text-[2rem] md:text-h1 tracking-h1 text-center mt-5">
             {"Great ideas don't "} <br /> {"come fully formed"}
           </h1>
         </div>
