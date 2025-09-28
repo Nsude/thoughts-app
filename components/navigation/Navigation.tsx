@@ -6,7 +6,6 @@ import TabButton from "../buttons/TabButton";
 import Logo from "../Logo";
 import NavMenuItem from "./NavMenuItem";
 import NewThoughtIcon from "@/public/icons/NewThoughtIcon";
-import ExploreIcon from "@/public/icons/ExploreIcon";
 import ProfileDisplay from "./ProfileDisplay";
 import { useAction, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -76,13 +75,6 @@ export default function Naviation() {
   const [modalState, modalDispath] = useReducer(modalReducer, initialState);
   const [optionsCurrentThoughtId, setOptionsCurrentThoughtId] = 
     useState<ThoughtId>("" as ThoughtId);
-
-  useEffect(() => {
-    if (currentUser !== undefined && !currentUser) {
-      // TODO: uncomment
-      router.replace("/login");
-    }
-  }, [currentUser, router])
 
   const prevThoughtId = useRef<Id<"thoughts">>(null);
   const modalTimeout = useRef<NodeJS.Timeout>(null);

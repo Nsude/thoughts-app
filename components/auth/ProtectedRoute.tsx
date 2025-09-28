@@ -4,19 +4,16 @@ import { useConvexAuth } from "convex/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-
-export default function Home() {
-  const {isAuthenticated, isLoading} = useConvexAuth();
+export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isLoading, isAuthenticated } = useConvexAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (isLoading) return;
     if (!isAuthenticated) {
-      // TODO: uncomment
-      return router.replace("/login")
+      router.replace("/login");
     }
-    
-    router.replace("/thoughts/new");
-  }, [isAuthenticated, isLoading, router])
+  }, [isLoading, isAuthenticated, router]);
 
+  return <>{children}</>;
 }

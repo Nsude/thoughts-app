@@ -14,7 +14,7 @@ import MicrophoneIcon from "@/public/icons/MicrophoneIcon";
 import PlusIcon from "@/public/icons/PlusIcon";
 import TextIcon from "@/public/icons/TextIcon";
 import { useGSAP } from "@gsap/react";
-import { useAction, useConvexAuth, useMutation, useQuery } from "convex/react";
+import { useAction, useMutation, useQuery } from "convex/react";
 import gsap from "gsap";
 import { use, useCallback, useEffect, useReducer, useRef, useState } from "react";
 import DeleteIcon from "@/public/icons/DeleteIcon";
@@ -27,7 +27,6 @@ import { Descendant, Editor } from "slate";
 import { slateToPlainText } from "@/components/rich-text-editor/slateEditorFunctions";
 import { getRandomKeyphrase } from "@/components/utility/ai-helpers";
 import { useShareThoughtContext } from "@/components/contexts/ShareThoughtContext";
-import { useRouter } from "next/navigation";
 import ExploreIcon from "@/public/icons/ExploreIcon";
 
 const initialAudioModalState: AudioModalState = {
@@ -59,8 +58,7 @@ export default function ThoughtDocument(
   const { thoughtId } = use(params);
   const placeholderRef = useRef(null);
   const editorState = useSlateEditorState();
-  const router = useRouter();
-  const currentUser = useConvexAuth();
+
   const { 
     slateStatus, 
     setSlateStatus, 
@@ -90,15 +88,6 @@ export default function ThoughtDocument(
 
   // toast notification
   const { setToast } = useToastContext();
-
-  // reroute to login if user is not signed in
-  useEffect(() => {
-    if (currentUser.isLoading) return;
-    if (!currentUser.isAuthenticated) {
-      // TODO: uncomment
-      router.replace("/login");
-    }
-  }, [router, currentUser.isLoading, currentUser.isAuthenticated]);
 
   // Single handler for all editor changes
   const handleEditorChange = useCallback((editor: Editor) => {
