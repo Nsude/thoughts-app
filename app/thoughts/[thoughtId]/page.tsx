@@ -28,6 +28,7 @@ import { slateToPlainText } from "@/components/rich-text-editor/slateEditorFunct
 import { getRandomKeyphrase } from "@/components/utility/ai-helpers";
 import { useShareThoughtContext } from "@/components/contexts/ShareThoughtContext";
 import { useRouter } from "next/navigation";
+import ExploreIcon from "@/public/icons/ExploreIcon";
 
 const initialAudioModalState: AudioModalState = {
   display: false,
@@ -354,7 +355,7 @@ export default function ThoughtDocument(
 
               {/* refine idea button */}
               <ClassicButton 
-                icon={<LogoIcon />} 
+                icon={<ExploreIcon />} 
                 text="Refine" 
                 handleClick={handleRefineThought} />
 

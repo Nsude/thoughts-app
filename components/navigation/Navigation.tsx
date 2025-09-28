@@ -21,6 +21,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useShareThoughtContext } from "../contexts/ShareThoughtContext";
 import { defaultImage } from "@/public/profile-images/allProfiles";
+import GiftIcon from "@/public/icons/GiftIcon";
 
 
 
@@ -262,7 +263,7 @@ export default function Naviation() {
           label="New Thought" />
 
         <NavMenuItem
-          icon={<ExploreIcon />}
+          icon={<GiftIcon />}
           handleClick={() => { }}
           hideWord={isCollapsed}
           label="Explore" />
