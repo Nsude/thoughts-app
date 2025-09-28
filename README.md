@@ -20,7 +20,7 @@ The thoughts web app is designed to be a thinking companion of some sort, levera
 
 About [Convex](https://docs.convex.dev)
 
-1. When deploying a [convex app on vercel](https://docs.convex.dev/production/hosting/vercel), be sure to override the build command on vercel to be `npx convex deploy --cmd 'npm run build'` instead of the default `next build`.
+[x] When deploying a [convex app on vercel](https://docs.convex.dev/production/hosting/vercel), be sure to override the build command on vercel to be `npx convex deploy --cmd 'npm run build'` instead of the default `next build`.
 
 This ensures that your backend schemas, mutations and queries are deployed alongside the frontend hence the `-cmd npm run build`.
 
@@ -30,7 +30,7 @@ Also be sure to include the necessary production env variables on both convex an
 
 
 `💡IMPORTANT` <br>
-2. When using Github OAuth for authentification with convex, the Authorization call back URL shouldn't be set to the `.cloud` default endpoint that comes from the provided deployment URL from convex. 
+[x] When using Github OAuth for authentification with convex, the Authorization call back URL shouldn't be set to the `.cloud` default endpoint that comes from the provided deployment URL from convex. 
 
 ```
 Deployment URL: https://gaitle-abena-396.convex.cloud
@@ -39,7 +39,7 @@ Github Authorization callback URL: https://gaitle-abena-396.convex.site
 
 The reason for this is that the `.cloud` endpoint is reserved for backend API calls `(mutations, queries, actions, etc)` and does not have routes like `/api/auth/...`, that is set on the `.site` endpoint which hosts your app's HTTP endpoints.
 
-3. Be sure to include `NEXT_PUBLIC_CONVEX_URL: deplyment url from convex` as an environment variable on vercel, then `SITE_URL: domain url from vercel` on convex.
+[x] Be sure to include `NEXT_PUBLIC_CONVEX_URL: deplyment url from convex` as an environment variable on vercel, then `SITE_URL: domain url from vercel` on convex.
 
 
 `💡IMPORTANT` <br>
@@ -62,3 +62,28 @@ About [NextJS](https://nextjs.org/docs):
 - When rendering lists in _NextJS/React_, you probably shouldn't use the index as the key prop, it is quite unreliable. If the list is updated in any way that affects it's length, that becomes problematic in very weird ways (and ofcourse I didn't make this rookie mistake... just sharing it 🥲).
 
 - React state's are not very reliable when used for synchronous operations, use refs in addition to the states so you can trigger a rerender and still have your application working.
+
+
+About [Gemini Models](https://ai.google.dev/gemini-api/docs/models)
+
+To get a list of the models available to you, run this command in the terminal: <br>
+
+```
+curl "https://generativelanguage.googleapis.com/v1beta/models?key=$Your_GEMINI_API_KEY"
+
+```
+
+Then choose a model from there that best fits your needs, you can find more info about these models from the [Gemini's Docs](https://ai.google.dev/gemini-api/docs/models).
+
+This helps you avoid runtime errors such as: <br>
+
+```
+28/09/2025, 12:10:12 [CONVEX A(refine:refineThought)] Uncaught Error: Gemini API error: 404 - {
+  "error": {
+    "code": 404,
+    "message": "models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+```
