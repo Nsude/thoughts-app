@@ -26,7 +26,7 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
               <Navigation />
 
               {/* content */}
-              <div className="min-w-screen w-screen lg:w-full h-full flex justify-center items-center">
+              <div className="min-w-screen w-screen lg:min-w-[unset] lg:w-full h-full flex justify-center items-center">
                 {children}
               </div>
 

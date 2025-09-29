@@ -106,12 +106,22 @@ export default function Navigation() {
   const {showNavigation} = useNavigationContext();
   useGSAP(() => {
     if (!mainRef.current) return;
+    if (window.innerWidth > 1020) return;
+
     gsap.to(mainRef.current, {
       xPercent: showNavigation ? 0 : -100 ,
       duration: .4,
       ease: "power2.out",
     });
-  }, { dependencies: [showNavigation] });
+  }, { dependencies: [showNavigation, window.innerWidth] });
+
+  useEffect( () => {
+    const handleResize = () => {
+      if (window.innerWidth < 1020) return;
+      gsap.set(mainRef.current, {xPercent: 0});
+    }
+    window.addEventListener("resize", handleResize);
+  }, [])
 
   useLayoutEffect(() => {
     isAnimated.current = false;

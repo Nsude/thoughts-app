@@ -16,7 +16,7 @@ import TextIcon from "@/public/icons/TextIcon";
 import { useGSAP } from "@gsap/react";
 import { useAction, useMutation, useQuery } from "convex/react";
 import gsap from "gsap";
-import { SetStateAction, use, useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { use, useCallback, useEffect, useReducer, useRef, useState } from "react";
 import DeleteIcon from "@/public/icons/DeleteIcon";
 import AudioInputModal from "@/components/audio-input/AudioInputModal";
 import StopIcon from "@/public/icons/StopIcon";
@@ -326,6 +326,7 @@ export default function ThoughtDocument(
    const navOverlay = useRef(null);
    useGSAP(() => {
     if (!mainRef.current || !navOverlay.current) return;
+    if (window.innerWidth > 1020) return;
 
     gsap.to(mainRef.current, {
       x: showNavigation ? 0 : -320,
@@ -338,7 +339,16 @@ export default function ThoughtDocument(
       duration: .4
     })
 
-   }, {dependencies: [showNavigation, navOverlay, mainRef]})
+   }, {dependencies: [showNavigation, navOverlay, mainRef, window.innerWidth]})
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1020) return;
+      gsap.set(mainRef.current, { x: 0 });
+      gsap.set(navOverlay, {opacity: 0});
+    }
+    window.addEventListener("resize", handleResize);
+  }, [])
 
   return (
     <div ref={mainRef} className="relative lg:static w-full h-full lg:w-[unset] lg:h-[unset]">
