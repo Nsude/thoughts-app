@@ -277,6 +277,7 @@ export default function ThoughtDocument(
 
   // handle refine idea
   const handleRefineThought = async () => {
+    if (thoughtId === "new") return;
     const thoughtToPlainText = slateToPlainText(currentContent);
     setSlateStatus("loading");
     try {
