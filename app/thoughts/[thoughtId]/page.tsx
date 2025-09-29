@@ -16,7 +16,7 @@ import TextIcon from "@/public/icons/TextIcon";
 import { useGSAP } from "@gsap/react";
 import { useAction, useMutation, useQuery } from "convex/react";
 import gsap from "gsap";
-import { use, useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { SetStateAction, use, useCallback, useEffect, useReducer, useRef, useState } from "react";
 import DeleteIcon from "@/public/icons/DeleteIcon";
 import AudioInputModal from "@/components/audio-input/AudioInputModal";
 import StopIcon from "@/public/icons/StopIcon";
@@ -28,6 +28,8 @@ import { slateToPlainText } from "@/components/rich-text-editor/slateEditorFunct
 import { getRandomKeyphrase } from "@/components/utility/ai-helpers";
 import { useShareThoughtContext } from "@/components/contexts/ShareThoughtContext";
 import ExploreIcon from "@/public/icons/ExploreIcon";
+import HamburgerMenu from "@/public/icons/HamburgerMenu";
+import { useNavigationContext } from "@/components/contexts/NavigationContext";
 
 const initialAudioModalState: AudioModalState = {
   display: false,
@@ -51,9 +53,13 @@ const audioModalReducer = (
   }
 }
 
+interface Props {
+  params: Promise<{ thoughtId: Id<"thoughts"> }>;
+}
+
 export default function ThoughtDocument(
-  { params }: { params: Promise<{ thoughtId: Id<"thoughts"> }> 
-}) {
+  { params}: Props) {
+  const mainRef = useRef(null);
   const [tab, setTab] = useState(0);
   const { thoughtId } = use(params);
   const placeholderRef = useRef(null);
@@ -97,6 +103,9 @@ export default function ThoughtDocument(
 
   // share thought state
   const {shareThoughtActions} = useShareThoughtContext();
+
+  // navigation display context for mobile
+  const {showNavigation, setShowNavigation} = useNavigationContext();
 
   // give the shareThoughtContext access to the thoughtId
   useEffect(() => {
@@ -250,15 +259,21 @@ export default function ThoughtDocument(
     }
   }
 
-  // close audio modal
+  // close audio modal and close navigation on mobile
   useEffect(() => {
     const handleMouseDown = () => {
-      if (isRecording.current) return;
+      if (audioState.startRecording === false) return;
       audioDispatch({type: "DISPLAY", display: false})
+    }
+
+    const handleTouchstart = () => {
+      if (!showNavigation) return;
+      setShowNavigation(false);
     }
     
     window.addEventListener("mousedown", handleMouseDown);
-  }, [])
+    window.addEventListener("touchstart", handleTouchstart);
+  }, [audioState.startRecording, showNavigation])
 
   // handle refine idea
   const handleRefineThought = async () => {
@@ -307,8 +322,31 @@ export default function ThoughtDocument(
     return versions.length < 9 ? "Version 0" + versionNumber : "Version " + versionNumber;
    }
 
+  // move document for when navigation is displayed
+   const navOverlay = useRef(null);
+   useGSAP(() => {
+    if (!mainRef.current || !navOverlay.current) return;
+
+    gsap.to(mainRef.current, {
+      x: showNavigation ? 0 : -320,
+      duration: .4, 
+      ease: "power2.out"
+    })
+
+    gsap.to(navOverlay.current, {
+      opacity: showNavigation ? 1 : 0,
+      duration: .4
+    })
+
+   }, {dependencies: [showNavigation, navOverlay, mainRef]})
+
   return (
-    <div className="w-full h-full lg:w-[unset] lg:h-[unset]">
+    <div ref={mainRef} className="relative lg:static w-full h-full lg:w-[unset] lg:h-[unset]">
+      <span 
+        ref={navOverlay} 
+        className="absolute left-0 top-0 w-full h-full lg:hidden bg-myBlack/40 
+           z-[10] opacity-0 pointer-events-none" />
+
       <div className="hidden lg:block relative">
         <span
           className="absolute z-0 h-[83vh] w-[40.125rem] rounded-2xl bg-[#DCDCDC] 
@@ -320,24 +358,29 @@ export default function ThoughtDocument(
 
       <div className="flex justify-center items-center w-full h-full lg:h-[83vh] lg:w-[unset]">
         <div className="relative h-full w-full lg:w-[42.375rem] bg-myWhite border 
-          border-border-gray/50 rounded-2xl pt-[4.6rem]">
+          border-border-gray/50 lg:rounded-2xl pt-[4.6rem]">
 
           {/* Header */}
           <div className="absolute top-0 left-0 w-full px-[1.125rem] h-[4.25rem] flex 
             justify-between items-center">
 
             {/* Version Title */}
-            {
-              selectedVersion?.isCore || thoughtId === "new" ? 
-              <h3 className="text-title text-fade-gray">Core</h3>
-              : 
-                <div className="flex flex-row text-dark-gray-label items-center gap-1 text-label-14 
-                  px-[0.8rem] py-1 rounded-[20px] bg-myGray min-w-fit">
-                  <span className="hidden md:block">Parent | </span>
-                  <span className="md:hidden block">P | </span>
-                <span className="text-myBlack">{getParentVersionLabel()}</span>
-              </div>
-            }
+            <div className="flex justify-center items-center gap-x-[1rem]">
+              <button onClick={() => setShowNavigation(prev => !prev)}>
+                <HamburgerMenu />
+              </button>
+              {
+                selectedVersion?.isCore || thoughtId === "new" ? 
+                <h3 className="text-title text-fade-gray">Core</h3>
+                : 
+                  <div className="flex flex-row text-dark-gray-label items-center gap-1 text-label-14 
+                    px-[0.8rem] py-1 rounded-[20px] bg-myGray min-w-fit">
+                    <span className="hidden md:block">Parent | </span>
+                    <span className="md:hidden block">P | </span>
+                  <span className="text-myBlack">{getParentVersionLabel()}</span>
+                </div>
+              }
+            </div>
 
             <span className="flex items-center gap-x-1.5">
               <SlateStatusDisplay />
@@ -349,7 +392,9 @@ export default function ThoughtDocument(
                 handleClick={handleRefineThought} />
 
               {/* add version button */}
-              <ClassicButton icon={<PlusIcon />} handleClick={() => handleAddVersion(currentContent)} />
+              <ClassicButton 
+                icon={<PlusIcon />} 
+                handleClick={() => handleAddVersion(currentContent)} />
             </span>
           </div>
 

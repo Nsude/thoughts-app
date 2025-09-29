@@ -2,7 +2,7 @@
 
 import NoBgButton from "../buttons/NoBgButton";
 import DbArrowLeft from "@/public/icons/DbArrowLeft";
-import TabButton from "../buttons/TabButton";
+import TabButton, { easeInOutCubic } from "../buttons/TabButton";
 import Logo from "../Logo";
 import NavMenuItem from "./NavMenuItem";
 import NewThoughtIcon from "@/public/icons/NewThoughtIcon";
@@ -21,8 +21,7 @@ import gsap from "gsap";
 import { useShareThoughtContext } from "../contexts/ShareThoughtContext";
 import { defaultImage } from "@/public/profile-images/allProfiles";
 import GiftIcon from "@/public/icons/GiftIcon";
-
-
+import { useNavigationContext } from "../contexts/NavigationContext";
 
 type ModalState = {
   display: boolean;
@@ -62,7 +61,7 @@ const modalReducer = (state: ModalState, action: ModalActions) => {
   }
 }
 
-export default function Naviation() {
+export default function Navigation() {
   const [tab, setTab] = useState(0);
   const { state: shareThoughtState } = useShareThoughtContext();
   const currentUser = useQuery(api.users.getCurrentUser);
@@ -73,7 +72,7 @@ export default function Naviation() {
 
   // modal central state 
   const [modalState, modalDispath] = useReducer(modalReducer, initialState);
-  const [optionsCurrentThoughtId, setOptionsCurrentThoughtId] = 
+  const [optionsCurrentThoughtId, setOptionsCurrentThoughtId] =
     useState<ThoughtId>("" as ThoughtId);
 
   const prevThoughtId = useRef<Id<"thoughts">>(null);
@@ -102,6 +101,17 @@ export default function Naviation() {
   const mainRef = useRef(null);
   const thoughtsRef = useRef<HTMLDivElement>(null);
   const isAnimated = useRef(false);
+
+  // show and hide navigation
+  const {showNavigation} = useNavigationContext();
+  useGSAP(() => {
+    if (!mainRef.current) return;
+    gsap.to(mainRef.current, {
+      xPercent: showNavigation ? 0 : -100 ,
+      duration: .4,
+      ease: "power2.out",
+    });
+  }, { dependencies: [showNavigation] });
 
   useLayoutEffect(() => {
     isAnimated.current = false;
@@ -217,135 +227,139 @@ export default function Naviation() {
   return (
     <div
       ref={mainRef}
-      className="hidden lg:block
-        relative w-[19%] min-w-[18rem] h-full bg-myWhite p-[0.9375rem] z-[5] 
-        border-r-1 border-border-gray/50 text-nowrap">
+      onTouchStart={(e) => e.stopPropagation()}
+      className="
+        relative min-w-[20rem] w-[20rem] lg:w-[19%] lg:min-w-[18rem] h-full bg-myWhite z-[5] 
+        border-r-1 border-border-gray/50 text-nowrap overflow-hidden">
       {/* search & logo */}
-      <div className="relative flex w-full h-fit justify-between items-center mb-[1.75rem]">
-        <Logo collapse={isCollapsed} />
+      <div className="p-[0.9375rem] w-full h-full">
 
-        <span
-          role="button"
-          data-collapse={isCollapsed}
-          style={{
-            left: isCollapsed ? "-3px" : "unset",
-            right: isCollapsed ? "unset" : "0"
-          }}
-          className="collapse-dashboard-btn absolute right-0 hidden lg:inline-block">
-          <NoBgButton icon={<DbArrowLeft />} handleClick={handleCollapse} />
-        </span>
-      </div>
+        <div className="relative flex w-full h-fit justify-between items-center mb-[1.75rem]">
+          <Logo collapse={isCollapsed} />
 
-      {/* public/private filter */}
-      <div className={`${hideOnCollapse}`}>
-        <TabButton
-          tab1="Private"
-          tab2="public"
-          handleClick={(tab) => setTab(tab)}
-          preselectTab={tab}
-        />
-      </div>
+          <span
+            role="button"
+            data-collapse={isCollapsed}
+            style={{
+              left: isCollapsed ? "-3px" : "unset",
+              right: isCollapsed ? "unset" : "0"
+            }}
+            className="collapse-dashboard-btn absolute right-0 hidden lg:inline-block">
+            <NoBgButton icon={<DbArrowLeft />} handleClick={handleCollapse} />
+          </span>
+        </div>
 
-      {/* Menu Items */}
-      <div className={`flex flex-col w-full my-[2.5rem]`}>
-        <NavMenuItem
-          icon={<NewThoughtIcon />}
-          handleClick={handleNewThought}
-          hideWord={isCollapsed}
-          label="New Thought" />
+        {/* public/private filter */}
+        <div className={`${hideOnCollapse}`}>
+          <TabButton
+            tab1="Private"
+            tab2="public"
+            handleClick={(tab) => setTab(tab)}
+            preselectTab={tab}
+          />
+        </div>
 
-        <NavMenuItem
-          icon={<GiftIcon />}
-          handleClick={() => { }}
-          hideWord={isCollapsed}
-          label="Explore" />
-      </div>
+        {/* Menu Items */}
+        <div className={`flex flex-col w-full my-[2.5rem]`}>
+          <NavMenuItem
+            icon={<NewThoughtIcon />}
+            handleClick={handleNewThought}
+            hideWord={isCollapsed}
+            label="New Thought" />
 
-      {/* Thoughts */}
-      <div
-        className={`${hideOnCollapse} w-full h-[38.5%]`}
-        onScroll={() => {
-          // hide modal on scroll
-          if (!modalState.display) return
-          modalDispath({ type: "TOGGLE_DISPLAY", value: false });
-        }}>
+          <NavMenuItem
+            icon={<GiftIcon />}
+            handleClick={() => { }}
+            hideWord={isCollapsed}
+            label="Explore" />
+        </div>
 
-        <span
-          className="block mb-[0.75rem] text-fade-gray">
-          Your Thoughts
-        </span>
+        {/* Thoughts */}
+        <div
+          className={`${hideOnCollapse} w-full h-[38.5%]`}
+          onScroll={() => {
+            // hide modal on scroll
+            if (!modalState.display) return
+            modalDispath({ type: "TOGGLE_DISPLAY", value: false });
+          }}>
 
-        <div ref={thoughtsRef}
-          className="relative flex flex-col h-full overflow-y-auto 
+          <span
+            className="block mb-[0.75rem] text-fade-gray">
+            Your Thoughts
+          </span>
+
+          <div ref={thoughtsRef}
+            className="relative flex flex-col h-full overflow-y-auto 
           snap-y snap-mandatory slim-scrollbar">
-          {/* Thoughts go here */}
-          {
-            reversedThoughts.map((item) => (
-              <Thought
-                key={item._id}
-                thought={item}
-                editing={modalState.isEditing === item._id}
-                modalDispath={modalDispath}
-                optionsCurrentThoughtId={optionsCurrentThoughtId}
-                handleClick={() => {
-                  setCurrentContent([]) // reset current content
-                  router.replace(`/thoughts/${item._id}`);
-                  setOptionsCurrentThoughtId(item._id);
-                }}
-                handleEditClick={(e) => {
-                  setOptionsCurrentThoughtId(item._id);
-                  handleThoughtEditOptions(e);
-                }} />
-            ))
-          }
+            {/* Thoughts go here */}
+            {
+              reversedThoughts.map((item) => (
+                <Thought
+                  key={item._id}
+                  thought={item}
+                  editing={modalState.isEditing === item._id}
+                  modalDispath={modalDispath}
+                  optionsCurrentThoughtId={optionsCurrentThoughtId}
+                  handleClick={() => {
+                    setCurrentContent([]) // reset current content
+                    router.replace(`/thoughts/${item._id}`);
+                    setOptionsCurrentThoughtId(item._id);
+                  }}
+                  handleEditClick={(e) => {
+                    setOptionsCurrentThoughtId(item._id);
+                    handleThoughtEditOptions(e);
+                  }} />
+              ))
+            }
+          </div>
         </div>
-      </div>
 
-      {/* ==== Options Modal ==== */}
-      <OptionsModal
-        display={modalState.display} y={modalState.y}
-        thoughtId={optionsCurrentThoughtId}
-        modalDispath={modalDispath} />
+        {/* ==== Options Modal ==== */}
+        <OptionsModal
+          display={modalState.display} y={modalState.y}
+          thoughtId={optionsCurrentThoughtId}
+          modalDispath={modalDispath} />
 
-      {/* Shared Thoughts */}
-      <div
-        style={{ opacity: reversedSharedThoughts.length > 0 && tab !== 1 ? 1 : 0 }}
-        className={`${hideOnCollapse} w-full h-[14%] mt-[2.5rem]`}>
-        <span
-          style={{ opacity: (tab === 0 && reversedSharedThoughts.length > 0) ? 1 : 0 }}
-          className="block mb-[0.75rem] text-fade-gray">Shared</span>
-        <div className="flex flex-col h-[95%] overflow-y-auto slim-scrollbar 
+        {/* Shared Thoughts */}
+        <div
+          style={{ opacity: reversedSharedThoughts.length > 0 && tab !== 1 ? 1 : 0 }}
+          className={`${hideOnCollapse} w-full h-[14%] mt-[2.5rem]`}>
+          <span
+            style={{ opacity: (tab === 0 && reversedSharedThoughts.length > 0) ? 1 : 0 }}
+            className="block mb-[0.75rem] text-fade-gray">Shared</span>
+          <div className="flex flex-col h-[95%] overflow-y-auto slim-scrollbar 
         snap-y snap-mandatory">
-          {/* Thoughts go here */}
-          {
-            reversedSharedThoughts.map((item) => (
-              <Thought
-                key={item._id}
-                thought={item}
-                editing={modalState.isEditing === item._id}
-                modalDispath={modalDispath}
-                optionsCurrentThoughtId={optionsCurrentThoughtId}
-                handleClick={() => {
-                  setCurrentContent([]) // reset current content
-                  router.replace(`/thoughts/${item._id}`);
-                  setOptionsCurrentThoughtId(item._id);
-                }}
-                handleEditClick={(e) => {
-                  setOptionsCurrentThoughtId(item._id);
-                  handleThoughtEditOptions(e);
-                }} />
-            ))
-          }
+            {/* Thoughts go here */}
+            {
+              reversedSharedThoughts.map((item) => (
+                <Thought
+                  key={item._id}
+                  thought={item}
+                  editing={modalState.isEditing === item._id}
+                  modalDispath={modalDispath}
+                  optionsCurrentThoughtId={optionsCurrentThoughtId}
+                  handleClick={() => {
+                    setCurrentContent([]) // reset current content
+                    router.replace(`/thoughts/${item._id}`);
+                    setOptionsCurrentThoughtId(item._id);
+                  }}
+                  handleEditClick={(e) => {
+                    setOptionsCurrentThoughtId(item._id);
+                    handleThoughtEditOptions(e);
+                  }} />
+              ))
+            }
+          </div>
         </div>
-      </div>
 
-      {/* profile */}
-      <ProfileDisplay
-        userName={currentUser?.name?.split(" ")[0] || currentUser?.email || "name"}
-        accoutType={"Freeloader"}
-        avatarUrl={currentUser?.image || defaultImage.src}
-        collapse={isCollapsed}
-        handleSignout={handleSignout} />
+        {/* profile */}
+        <ProfileDisplay
+          userName={currentUser?.name?.split(" ")[0] || currentUser?.email || "name"}
+          accoutType={"Freeloader"}
+          avatarUrl={currentUser?.image || defaultImage.src}
+          collapse={isCollapsed}
+          handleSignout={handleSignout} />
+      </div>
     </div>
   )
 }

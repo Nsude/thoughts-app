@@ -10,6 +10,8 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useParams } from "next/navigation";
 import { useSlateStatusContext } from "../contexts/SlateStatusContext";
+import { useNavigationContext } from "../contexts/NavigationContext";
+import { useGSAP } from "@gsap/react";
 
 export default function Versions() {
   // thought id
@@ -21,7 +23,6 @@ export default function Versions() {
   const mainRef = useRef(null);
   const { slateStatus, setSlateStatus, currentContent, setVersionSwitched } = useSlateStatusContext();
 
-
   // convex queries
   const thoughtVersions = useQuery(
     api.thoughts.getThoughtVersions,
@@ -31,6 +32,9 @@ export default function Versions() {
     api.thoughts.getSelectedVersion,
     thoughtId !== "new" ? { thoughtId } : "skip"
   )
+
+  // navigation context 
+  const { showNavigation } = useNavigationContext();
 
   // convex mutations
   const setConvexSelectedVersion = useMutation(api.thoughts.setSelectedVersion);
@@ -192,6 +196,16 @@ export default function Versions() {
       ease: easeInOutCubic
     })
   }
+
+  useGSAP(() => {
+    if (!mainRef.current) return;
+    gsap.to(mainRef.current, {
+      opacity: showNavigation ? 0 : 1,
+      pointerEvents: showNavigation ? "none" : "all",
+      duration: .2
+    })
+
+  }, { dependencies: [showNavigation, mainRef] })
 
   if (!thoughtVersions) return null;
 
