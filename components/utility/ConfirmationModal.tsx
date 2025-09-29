@@ -33,14 +33,13 @@ export default function ConfirmationModal({display, onConfirm}: Props) {
       fixed z-30 left-0 top-0 bg-myBlack/10 backdrop-blur-[5px]
       w-screen h-screen flex justify-center items-center
     ">
-
       <span 
-        className=" absolute top-1/2 left-1/2 -translate-1/2 bg-border-gray 
-        h-[13rem] w-[21.5rem] rounded-[20px] z-[8]" />
+        className="absolute top-1/2 left-1/2 -translate-1/2 bg-border-gray 
+        h-[13rem] w-[17.5rem] md:w-[21.5rem] rounded-[20px] z-[8]" />
 
       {/* modal */}
       <div 
-        className="relative z-10 p-[1.25rem] rounded-[20px] w-[24rem] 
+        className="relative z-10 p-[1.25rem] rounded-[20px] w-[20rem] md:w-[24rem] 
         bg-myWhite flex flex-col gap-y-[1.5625rem] border border-border-gray/30
       ">
         <div className="flex justify-between items-center">
