@@ -113,7 +113,7 @@ export default function Navigation() {
       duration: .4,
       ease: "power2.out",
     });
-  }, { dependencies: [showNavigation, window.innerWidth] });
+  }, { dependencies: [showNavigation] });
 
   useEffect( () => {
     const handleResize = () => {
