@@ -117,7 +117,10 @@ export default function Navigation() {
 
   useEffect( () => {
     const handleResize = () => {
-      if (window.innerWidth < 1020) return;
+      if (window.innerWidth < 1020) {
+        gsap.set(mainRef.current, {xPercent: -100});
+        return;
+      };
       gsap.set(mainRef.current, {xPercent: 0});
     }
     window.addEventListener("resize", handleResize);

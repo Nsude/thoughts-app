@@ -344,9 +344,12 @@ export default function ThoughtDocument(
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 1020) return;
+      if (window.innerWidth < 1020) {
+        gsap.set(mainRef.current, {x: -320});
+        return;
+      } 
       gsap.set(mainRef.current, { x: 0 });
-      gsap.set(navOverlay, {opacity: 0});
+      gsap.set(navOverlay.current, {opacity: 0});
     }
     window.addEventListener("resize", handleResize);
   }, [])

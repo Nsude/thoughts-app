@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useShareThoughtContext } from "../contexts/ShareThoughtContext";
+import { useNavigationContext } from "../contexts/NavigationContext";
 
 interface Props {
   handleClick: () => void;
@@ -33,6 +34,9 @@ export default function Thought({
   // mutation
   const renameThought = useMutation(api.thoughts.renameThought);
   const {state: {display}} = useShareThoughtContext();
+
+  // navigation for mobile
+  const {setShowNavigation} = useNavigationContext();
 
   // clear previous title !IMPORTANT
   useEffect(() => {
@@ -77,6 +81,7 @@ export default function Thought({
   }, [_id]);
 
   const handleClick_Local = (e: React.MouseEvent) => {
+    if (window.innerWidth < 1020) setShowNavigation(false);
     handleClick();
 
     const { currentTarget } = e;
