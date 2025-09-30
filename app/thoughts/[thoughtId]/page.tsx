@@ -325,13 +325,14 @@ export default function ThoughtDocument(
 
   // move document for when navigation is displayed
    const navOverlay = useRef(null);
+   const firstRender = useRef(true);
    useGSAP(() => {
     if (!mainRef.current || !navOverlay.current) return;
     if (window.innerWidth > 1020) return;
 
     gsap.to(mainRef.current, {
       x: showNavigation ? 0 : -320,
-      duration: .4, 
+      duration: firstRender.current ? 0 : .4, 
       ease: "power2.out"
     })
 
@@ -339,6 +340,8 @@ export default function ThoughtDocument(
       opacity: showNavigation ? 1 : 0,
       duration: .4
     })
+
+    firstRender.current = false;
 
    }, {dependencies: [showNavigation, navOverlay, mainRef, window.innerWidth]})
 

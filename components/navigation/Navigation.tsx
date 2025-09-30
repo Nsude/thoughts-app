@@ -104,15 +104,18 @@ export default function Navigation() {
 
   // show and hide navigation
   const {showNavigation} = useNavigationContext();
+  const firstRender = useRef(true);
   useGSAP(() => {
     if (!mainRef.current) return;
     if (window.innerWidth > 1020) return;
 
     gsap.to(mainRef.current, {
       xPercent: showNavigation ? 0 : -100 ,
-      duration: .4,
+      duration: firstRender.current ? 0 : .4,
       ease: "power2.out",
     });
+
+    firstRender.current = false;
   }, { dependencies: [showNavigation] });
 
   useEffect( () => {

@@ -81,7 +81,7 @@ export default function ShareThoughtModal() {
       fixed z-30 left-0 top-0 bg-myBlack/10 backdrop-blur-[5px]
       w-screen h-screen flex justify-center items-center
     ">
-      <div className="relative z-10 p-[1.25rem] rounded-[20px] w-[24rem] lg:w-[26rem]
+      <div className="relative z-10 p-[1.25rem] rounded-[20px] w-[90%] lg:w-[26rem]
         bg-myWhite flex flex-col gap-y-[1.5625rem] border-3 border-border-gray/50">
         <div className="flex justify-between w-full">
           <div className="flex flex-col gap-y-1.5">
