@@ -358,7 +358,12 @@ export default function ThoughtDocument(
   }, [])
 
   return (
-    <div ref={mainRef} className="relative lg:static w-full h-full lg:w-[unset] lg:h-[unset]">
+    <div ref={mainRef} 
+      style={{
+        pointerEvents: window.innerWidth < 1020 && showNavigation ?
+         "none" : "all" // stops buttons from being when trying to close navigation on mobile
+      }}
+      className="relative lg:static w-full h-full lg:w-[unset] lg:h-[unset]">
       <span 
         ref={navOverlay} 
         className="absolute left-0 top-0 w-full h-full lg:hidden bg-myBlack/40 
