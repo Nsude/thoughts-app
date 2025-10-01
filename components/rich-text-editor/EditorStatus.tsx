@@ -22,7 +22,7 @@ export default function SlateStatusDisplay () {
   if (slateStatus === "idle") return null;
 
   return (
-    <div className="text-dark-gray-label flex items-center gap-x-1 mr-2">
+    <div className="text-dark-gray-label flex items-center gap-x-1 mr-2 text-nowrap">
       <span style={{
         opacity: slateStatus === "saved" || slateStatus === "unsaved_change" ? 0 : 1
       }}> <LoadingIcon /> </span>

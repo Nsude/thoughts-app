@@ -41,7 +41,7 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
               </div>
 
               {/* version indicator */}
-              <div className="absolute right-[1.5rem] top-[8rem] lg:top-[10rem]">
+              <div className="absolute right-[1.5rem] top-[12rem] lg:top-[10rem]">
                 <Versions />
               </div>
             </NavigationProvider>

@@ -16,7 +16,7 @@ export default function Toast() {
     const tl = gsap.timeline({ defaults: { ease: easeInOutCubic, duration: .4, delay: 0 } });
 
     tl.to(mainRef.current, { 
-      transform: toast.showToast ? "translateY(0)" : "translateY(-150%)"
+      transform: toast.showToast ? "translateY(0)" : "translateY(-200%)"
     })
 
   }, { scope: mainRef, dependencies: [toast.showToast] })
@@ -50,7 +50,7 @@ export default function Toast() {
       ref={mainRef}
       className={`fixed right-[0.75rem] top-[0.75rem] rounded-[10px] 
         text-label-14 border-x-4 bg-myWhite border border-tab-gray
-        z-[60] w-[17.5rem] py-[0.9375rem] px-[0.625rem] translate-y-[-150%]
+        z-[60] w-[17.5rem] py-[0.9375rem] px-[0.625rem] translate-y-[-200%]
         ${toast.isError ? "border-x-accent" : "border-x-sec-accent"} `}>
       <div className="flex gap-x-[0.625rem]">
         <div

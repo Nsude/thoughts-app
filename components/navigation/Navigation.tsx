@@ -103,7 +103,7 @@ export default function Navigation() {
   const isAnimated = useRef(false);
 
   // show and hide navigation
-  const {showNavigation} = useNavigationContext();
+  const {showNavigation, setShowNavigation} = useNavigationContext();
   const firstRender = useRef(true);
   useGSAP(() => {
     if (!mainRef.current) return;
@@ -117,6 +117,10 @@ export default function Navigation() {
 
     firstRender.current = false;
   }, { dependencies: [showNavigation] });
+
+  useEffect(() => {
+    setShowNavigation(false);
+  }, [router, setShowNavigation, location.href])
 
   useEffect( () => {
     const handleResize = () => {

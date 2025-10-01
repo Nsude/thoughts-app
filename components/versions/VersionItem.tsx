@@ -26,11 +26,12 @@ const VersionItem = React.memo(function VersionItem({
       data-version-id={_id}
       onClick={(e) => handleClick(e, _id)}
       style={{ opacity: isSelected ? 1 : .45 }}
-      className="my-versionItem focus:outline-none">
+      className="my-versionItem focus:outline-none text-myWhite lg:text-[unset]">
       {
         isCore ?
           <div className="flex items-center gap-0.5">
-            <FreshThoughtIcon />
+            <span className="hidden lg:inline-flex"><FreshThoughtIcon /></span>
+            <span className="lg:hidden inline-flex"><FreshThoughtIcon color="#fff" /></span>
             <span>Core</span>
           </div>
           :
@@ -45,6 +46,7 @@ const VersionItem = React.memo(function VersionItem({
 
             {/* change label */}
             <span
+              style={{color: isSelected ? "var(--black)" : ""}}
               className={` absolute bottom-0
                 ${isSelected ? "rounded-[20px] px-[0.5rem] py-0.5 leading-[1]" : ""} 
                 text-label-small tracking-label-small pointer-events-none
