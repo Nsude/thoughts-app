@@ -332,13 +332,13 @@ export default function ThoughtDocument(
 
     gsap.to(mainRef.current, {
       x: showNavigation ? 0 : -320,
-      duration: firstRender.current ? 0 : .4, 
+      duration: firstRender.current ? 0 : .25, 
       ease: "power2.out"
     })
 
     gsap.to(navOverlay.current, {
       opacity: showNavigation ? 1 : 0,
-      duration: .4
+      duration: .25
     })
 
     firstRender.current = false;

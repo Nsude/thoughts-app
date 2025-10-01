@@ -111,7 +111,7 @@ export default function Navigation() {
 
     gsap.to(mainRef.current, {
       xPercent: showNavigation ? 0 : -100 ,
-      duration: firstRender.current ? 0 : .4,
+      duration: firstRender.current ? 0 : .25,
       ease: "power2.out",
     });
 
