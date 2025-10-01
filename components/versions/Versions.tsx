@@ -10,6 +10,10 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useParams } from "next/navigation";
 import { useSlateStatusContext } from "../contexts/SlateStatusContext";
+import { useNavigationContext } from "../contexts/NavigationContext";
+import { useGSAP } from "@gsap/react";
+import FourDotsIcon from "@/public/icons/FourDotsIcon";
+import CloseIcon from "@/public/icons/CloseIcon";
 
 export default function Versions() {
   // thought id
@@ -21,7 +25,6 @@ export default function Versions() {
   const mainRef = useRef(null);
   const { slateStatus, setSlateStatus, currentContent, setVersionSwitched } = useSlateStatusContext();
 
-
   // convex queries
   const thoughtVersions = useQuery(
     api.thoughts.getThoughtVersions,
@@ -31,6 +34,9 @@ export default function Versions() {
     api.thoughts.getSelectedVersion,
     thoughtId !== "new" ? { thoughtId } : "skip"
   )
+
+  // navigation context 
+  const { showNavigation } = useNavigationContext();
 
   // convex mutations
   const setConvexSelectedVersion = useMutation(api.thoughts.setSelectedVersion);
@@ -193,27 +199,99 @@ export default function Versions() {
     })
   }
 
+  useGSAP(() => {
+    if (!mainRef.current) return;
+    gsap.to(mainRef.current, {
+      opacity: showNavigation ? 0 : 1,
+      pointerEvents: showNavigation ? "none" : "all",
+      duration: .2
+    })
+
+  }, { dependencies: [showNavigation, mainRef] })
+
+  const mobileBtn = useRef(null);
+  const toggleDisplayVersions = (display: boolean) => {
+    if (!mainRef.current) return;
+    const container = mainRef.current as HTMLDivElement;
+    const children = container.children;
+    const duration = .25;
+
+    gsap.to(container, { 
+      background: display ? "#2c2c2c" : "transparent", 
+      pointerEvents: display ? "all" : "none" ,
+      duration
+    });
+
+    gsap.to(children, {
+      opacity: display ? 1 : 0,
+      duration
+    })
+
+    gsap.to(mobileBtn.current, {
+      opacity: display ? 0 : 1,
+      pointerEvents: display ? "none" : "all",
+      duration: display ? .25 : .4
+    })
+  }
+
+  // remove all gsap styles when a user switches sizes and ensure the mobile button is visible
+  useEffect(() => {
+    const hanldeResize = () => {
+      if (window.innerWidth < 1020) return;
+      if (!mainRef.current) return;
+      const container = mainRef.current as HTMLDivElement;
+      const children = container.children;
+
+      gsap.set(container, {clearProps: true});
+      gsap.set(children, {clearProps: true});
+      gsap.set(mobileBtn.current, {opacity: 1, pointerEvents: "all"});
+    }
+
+    window.addEventListener("resize", hanldeResize);
+  }, [mainRef, mobileBtn])
+
   if (!thoughtVersions) return null;
 
   return (
-    <div ref={mainRef} className="relative pr-[2rem] flex items-center justify-between gap-x-3">
-      {/* ==== Versions ==== */}
-      <div className="flex flex-col gap-y-[0.9375rem] items-end h-fit">
-        {
-          thoughtVersions.map((version) => (
-            <VersionItem
-              key={version._id}
-              version={version}
-              selectedVersion={selected || (selectedVersion?._id || selected)}
-              handleClick={(e) => onVersionClick(e, version._id, version.isCore)}
-            />
-          ))
-        }
-      </div>
+    <div className="relative">
+      {/* for mobile */}
+      <button 
+        ref={mobileBtn}
+        onTouchStart={() => toggleDisplayVersions(true)}
+        className="absolute lg:hidden flex justify-center items-center top-0 right-0 z-1 w-[2.25rem] aspect-square 
+        border-[1.5px] border-border-gray rounded-[10px] bg-dark-gray overflow-clip">
+        <FourDotsIcon color="#fff" />
+      </button>
 
-      <div className="absolute top-0 right-0 w-[3px] h-full bg-border-gray rounded-3xls">
-        <span ref={spanRef} style={{ height: selectedVersion?.isCore ? "1.3rem" : "2.5rem" }}
-          className="absolute top-0 bg-myBlack w-full block h-[2.5rem]" />
+      <div ref={mainRef} className="relative pr-[2rem] bg-transparent flex items-start 
+        lg:items-center justify-between gap-x-3 p-[0.75rem] lg:p-[unset] lg:pr-[2rem] 
+        rounded-[10px] lg:rounded-none overflow-clip pointer-events-none lg:pointer-events-auto">
+        
+        {/* for mobile */}
+        <button 
+          onTouchStart={() => toggleDisplayVersions(false)}
+          className="opacity-0 lg:hidden flex justify-center items-center">
+          <CloseIcon size={24} />
+        </button>
+
+        {/* ==== Versions ==== */}
+        <div className="opacity-0 lg:opacity-100 flex flex-col gap-y-[0.9375rem] items-end h-fit">
+          {
+            thoughtVersions.map((version) => (
+              <VersionItem
+                key={version._id}
+                version={version}
+                selectedVersion={selected || (selectedVersion?._id || selected)}
+                handleClick={(e) => onVersionClick(e, version._id, version.isCore)}
+              />
+            ))
+          }
+        </div>
+
+        <div className="opacity-0 lg:opacity-100 absolute top-0 right-0 w-[3px] h-full bg-border-gray rounded-3xls">
+          <span ref={spanRef} style={{ height: selectedVersion?.isCore ? "1.3rem" : "2.5rem" }}
+            className="absolute top-0 bg-myBlack w-full block h-[2.5rem]" />
+        </div>
       </div>
     </div>
   )

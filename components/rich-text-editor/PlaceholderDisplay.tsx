@@ -46,7 +46,7 @@ export const PlaceholderDisplay = ({ placeholderRef, placeholderState }: Props) 
         <span>
           {getPlaceholderText()}
         </span>
-        <span className="absolute -bottom-[150%]">
+        <span className="absolute -bottom-[150%] text-nowrap">
           {`Write or type '/' for commands...`}
         </span>
       </div>

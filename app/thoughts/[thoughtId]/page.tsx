@@ -14,7 +14,7 @@ import MicrophoneIcon from "@/public/icons/MicrophoneIcon";
 import PlusIcon from "@/public/icons/PlusIcon";
 import TextIcon from "@/public/icons/TextIcon";
 import { useGSAP } from "@gsap/react";
-import { useAction, useConvexAuth, useMutation, useQuery } from "convex/react";
+import { useAction, useMutation, useQuery } from "convex/react";
 import gsap from "gsap";
 import { use, useCallback, useEffect, useReducer, useRef, useState } from "react";
 import DeleteIcon from "@/public/icons/DeleteIcon";
@@ -27,8 +27,9 @@ import { Descendant, Editor } from "slate";
 import { slateToPlainText } from "@/components/rich-text-editor/slateEditorFunctions";
 import { getRandomKeyphrase } from "@/components/utility/ai-helpers";
 import { useShareThoughtContext } from "@/components/contexts/ShareThoughtContext";
-import { useRouter } from "next/navigation";
 import ExploreIcon from "@/public/icons/ExploreIcon";
+import HamburgerMenu from "@/public/icons/HamburgerMenu";
+import { useNavigationContext } from "@/components/contexts/NavigationContext";
 
 const initialAudioModalState: AudioModalState = {
   display: false,
@@ -52,15 +53,18 @@ const audioModalReducer = (
   }
 }
 
+interface Props {
+  params: Promise<{ thoughtId: Id<"thoughts"> }>;
+}
+
 export default function ThoughtDocument(
-  { params }: { params: Promise<{ thoughtId: Id<"thoughts"> }> 
-}) {
+  { params}: Props) {
+  const mainRef = useRef(null);
   const [tab, setTab] = useState(0);
   const { thoughtId } = use(params);
   const placeholderRef = useRef(null);
   const editorState = useSlateEditorState();
-  const router = useRouter();
-  const currentUser = useConvexAuth();
+
   const { 
     slateStatus, 
     setSlateStatus, 
@@ -91,15 +95,6 @@ export default function ThoughtDocument(
   // toast notification
   const { setToast } = useToastContext();
 
-  // reroute to login if user is not signed in
-  useEffect(() => {
-    if (currentUser.isLoading) return;
-    if (!currentUser.isAuthenticated) {
-      // TODO: uncomment
-      router.replace("/login");
-    }
-  }, [router, currentUser.isLoading, currentUser.isAuthenticated]);
-
   // Single handler for all editor changes
   const handleEditorChange = useCallback((editor: Editor) => {
     editorState.setEditor(editor);
@@ -108,6 +103,9 @@ export default function ThoughtDocument(
 
   // share thought state
   const {shareThoughtActions} = useShareThoughtContext();
+
+  // navigation display context for mobile
+  const {showNavigation, setShowNavigation} = useNavigationContext();
 
   // give the shareThoughtContext access to the thoughtId
   useEffect(() => {
@@ -261,18 +259,25 @@ export default function ThoughtDocument(
     }
   }
 
-  // close audio modal
+  // close audio modal and close navigation on mobile
   useEffect(() => {
     const handleMouseDown = () => {
-      if (isRecording.current) return;
+      if (audioState.startRecording === false) return;
       audioDispatch({type: "DISPLAY", display: false})
+    }
+
+    const handleTouchstart = () => {
+      if (!showNavigation) return;
+      setShowNavigation(false);
     }
     
     window.addEventListener("mousedown", handleMouseDown);
-  }, [])
+    window.addEventListener("touchstart", handleTouchstart);
+  }, [audioState.startRecording, showNavigation])
 
   // handle refine idea
   const handleRefineThought = async () => {
+    if (thoughtId === "new") return;
     const thoughtToPlainText = slateToPlainText(currentContent);
     setSlateStatus("loading");
     try {
@@ -318,8 +323,52 @@ export default function ThoughtDocument(
     return versions.length < 9 ? "Version 0" + versionNumber : "Version " + versionNumber;
    }
 
+  // move document for when navigation is displayed
+   const navOverlay = useRef(null);
+   const firstRender = useRef(true);
+   useGSAP(() => {
+    if (!mainRef.current || !navOverlay.current) return;
+    if (window.innerWidth > 1020) return;
+
+    gsap.to(mainRef.current, {
+      x: showNavigation ? 0 : -320,
+      duration: firstRender.current ? 0 : .4, 
+      ease: "power2.out"
+    })
+
+    gsap.to(navOverlay.current, {
+      opacity: showNavigation ? 1 : 0,
+      duration: .4
+    })
+
+    firstRender.current = false;
+
+   }, {dependencies: [showNavigation, navOverlay, mainRef, window.innerWidth]})
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1020) {
+        gsap.set(mainRef.current, {x: -320});
+        return;
+      } 
+      gsap.set(mainRef.current, { x: 0 });
+      gsap.set(navOverlay.current, {opacity: 0});
+    }
+    window.addEventListener("resize", handleResize);
+  }, [])
+
   return (
-    <div className="w-full h-full lg:w-[unset] lg:h-[unset]">
+    <div ref={mainRef} 
+      style={{
+        pointerEvents: window.innerWidth < 1020 && showNavigation ?
+         "none" : "all" // stops buttons from being when trying to close navigation on mobile
+      }}
+      className="relative lg:static w-full h-full lg:w-[unset] lg:h-[unset]">
+      <span 
+        ref={navOverlay} 
+        className="absolute left-0 top-0 w-full h-full lg:hidden bg-myBlack/40 
+           z-[10] opacity-0 pointer-events-none" />
+
       <div className="hidden lg:block relative">
         <span
           className="absolute z-0 h-[83vh] w-[40.125rem] rounded-2xl bg-[#DCDCDC] 
@@ -331,24 +380,29 @@ export default function ThoughtDocument(
 
       <div className="flex justify-center items-center w-full h-full lg:h-[83vh] lg:w-[unset]">
         <div className="relative h-full w-full lg:w-[42.375rem] bg-myWhite border 
-          border-border-gray/50 rounded-2xl pt-[4.6rem]">
+          border-border-gray/50 lg:rounded-2xl pt-[4.6rem]">
 
           {/* Header */}
           <div className="absolute top-0 left-0 w-full px-[1.125rem] h-[4.25rem] flex 
             justify-between items-center">
 
             {/* Version Title */}
-            {
-              selectedVersion?.isCore || thoughtId === "new" ? 
-              <h3 className="text-title text-fade-gray">Core</h3>
-              : 
-                <div className="flex flex-row text-dark-gray-label items-center gap-1 text-label-14 
-                  px-[0.8rem] py-1 rounded-[20px] bg-myGray min-w-fit">
-                  <span className="hidden md:block">Parent | </span>
-                  <span className="md:hidden block">P | </span>
-                <span className="text-myBlack">{getParentVersionLabel()}</span>
-              </div>
-            }
+            <div className="flex justify-center items-center gap-x-[1rem]">
+              <button onClick={() => setShowNavigation(prev => !prev)}>
+                <HamburgerMenu />
+              </button>
+              {
+                selectedVersion?.isCore || thoughtId === "new" ? 
+                <h3 className="text-title text-fade-gray">Core</h3>
+                : 
+                  <div className="flex flex-row text-dark-gray-label items-center gap-1 text-label-14 
+                    px-[0.8rem] py-1 rounded-[20px] bg-myGray min-w-fit">
+                    <span className="hidden md:block">Parent | </span>
+                    <span className="md:hidden block">P | </span>
+                  <span className="text-myBlack">{getParentVersionLabel()}</span>
+                </div>
+              }
+            </div>
 
             <span className="flex items-center gap-x-1.5">
               <SlateStatusDisplay />
@@ -360,7 +414,9 @@ export default function ThoughtDocument(
                 handleClick={handleRefineThought} />
 
               {/* add version button */}
-              <ClassicButton icon={<PlusIcon />} handleClick={() => handleAddVersion(currentContent)} />
+              <ClassicButton 
+                icon={<PlusIcon />} 
+                handleClick={() => handleAddVersion(currentContent)} />
             </span>
           </div>
 
