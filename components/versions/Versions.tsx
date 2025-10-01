@@ -23,6 +23,7 @@ export default function Versions() {
   const [selected, setSelected] = useState<Id<"versions">>("" as Id<"versions">);
   const spanRef = useRef(null);
   const mainRef = useRef(null);
+  const mobileBtn = useRef(null); // for mobile
   const { slateStatus, setSlateStatus, currentContent, setVersionSwitched } = useSlateStatusContext();
 
   // convex queries
@@ -207,9 +208,14 @@ export default function Versions() {
       duration: .2
     })
 
-  }, { dependencies: [showNavigation, mainRef] })
+    gsap.to(mobileBtn.current, {
+      opacity: showNavigation ? 0 : 1,
+      pointerEvents: showNavigation ? "none" : "all",
+      duration: .1
+    })
 
-  const mobileBtn = useRef(null);
+  }, { dependencies: [showNavigation, mainRef, mobileBtn] })
+
   const toggleDisplayVersions = (display: boolean) => {
     if (!mainRef.current) return;
     const container = mainRef.current as HTMLDivElement;
