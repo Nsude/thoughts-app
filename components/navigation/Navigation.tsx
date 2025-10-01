@@ -343,7 +343,7 @@ export default function Navigation() {
         {/* Shared Thoughts */}
         <div
           style={{ opacity: reversedSharedThoughts.length > 0 && tab !== 1 ? 1 : 0 }}
-          className={`${hideOnCollapse} w-full h-[14%] mt-[2.5rem]`}>
+          className={`${hideOnCollapse} hidden lg:inline-block w-full h-[14%] mt-[2.5rem]`}>
           <span
             style={{ opacity: (tab === 0 && reversedSharedThoughts.length > 0) ? 1 : 0 }}
             className="block mb-[0.75rem] text-fade-gray">Shared</span>
