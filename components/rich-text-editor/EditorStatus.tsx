@@ -22,10 +22,13 @@ export default function SlateStatusDisplay () {
   if (slateStatus === "idle") return null;
 
   return (
-    <div className="text-dark-gray-label flex items-center gap-x-1 mr-2 text-nowrap">
-      <span style={{
-        opacity: slateStatus === "saved" || slateStatus === "unsaved_change" ? 0 : 1
-      }}> <LoadingIcon /> </span>
+    <div className="flex-row-reverse lg:flex-row text-dark-gray-label flex 
+      items-center gap-x-1 mr-2 text-nowrap">
+      <span 
+        style={{
+          opacity: slateStatus === "saved" || slateStatus === "unsaved_change" ? 0 : 1
+        }}
+      > <LoadingIcon /> </span>
       <span style={{
         color: slateStatus === "saved" ? "var(--black)" : 
         slateStatus === "unsaved_change" ? "var(--accent)" : ""

@@ -40,17 +40,17 @@ const initialAudioModalState: AudioModalState = {
 }
 
 const audioModalReducer = (
-  state: AudioModalState, 
-  action: AudioModalAction):AudioModalState => {
-  switch(action.type) {
+  state: AudioModalState,
+  action: AudioModalAction): AudioModalState => {
+  switch (action.type) {
     case "DISPLAY":
       return { ...state, display: action.display }
     case "START_RECORDING":
       return { ...state, startRecording: action.start };
     case "PRESSED_BUTTON":
-      return {...state, targetId: action.targetId};
+      return { ...state, targetId: action.targetId };
     case "STATUS":
-      return {...state, status: action.status}
+      return { ...state, status: action.status }
   }
 }
 
@@ -59,21 +59,21 @@ interface Props {
 }
 
 export default function ThoughtDocument(
-  { params}: Props) {
+  { params }: Props) {
   const mainRef = useRef(null);
   const [tab, setTab] = useState(0);
   const { thoughtId } = use(params);
   const placeholderRef = useRef(null);
   const editorState = useSlateEditorState();
 
-  const { 
-    slateStatus, 
-    setSlateStatus, 
-    currentContent, 
+  const {
+    slateStatus,
+    setSlateStatus,
+    currentContent,
     setCurrentContent,
     setAllowContent
   } = useSlateStatusContext();
-  const {confirmAction} = useConfirmation();
+  const { confirmAction } = useConfirmation();
 
   // audio modal state
   const [audioState, audioDispatch] = useReducer(audioModalReducer, initialAudioModalState);
@@ -103,10 +103,10 @@ export default function ThoughtDocument(
   }, [editorState]);
 
   // share thought state
-  const {shareThoughtActions} = useShareThoughtContext();
+  const { shareThoughtActions } = useShareThoughtContext();
 
   // navigation display context for mobile
-  const {showNavigation, setShowNavigation} = useNavigationContext();
+  const { showNavigation, setShowNavigation } = useNavigationContext();
 
   // give the shareThoughtContext access to the thoughtId
   useEffect(() => {
@@ -173,8 +173,8 @@ export default function ThoughtDocument(
   // handle delete version from thought document delete button
   const handleDeleteVersion = async () => {
     const confirmDelete = await confirmAction();
-    if (!confirmDelete) return; 
-    
+    if (!confirmDelete) return;
+
     try {
       setSlateStatus("deleting");
       await deleteVersion({ thoughtId: thoughtId })
@@ -195,8 +195,8 @@ export default function ThoughtDocument(
 
   // handle record tab clicked 
   const isRecording = useRef(false);
-  const handleRecordTabClicked = useCallback( async () => {
-    if (!audioState.display) audioDispatch({type: "DISPLAY", display: true}); 
+  const handleRecordTabClicked = useCallback(async () => {
+    if (!audioState.display) audioDispatch({ type: "DISPLAY", display: true });
     startRecording();
 
   }, [audioState.display])
@@ -226,8 +226,8 @@ export default function ThoughtDocument(
       return;
     };
 
-    audioDispatch({type: "PRESSED_BUTTON", targetId: "upload-button"});
-    audioDispatch({type: "STATUS", status: "loading"});
+    audioDispatch({ type: "PRESSED_BUTTON", targetId: "upload-button" });
+    audioDispatch({ type: "STATUS", status: "loading" });
 
     try {
       if (!recordedBlob) throw new Error("Client Error: Blob does not exit");
@@ -237,19 +237,19 @@ export default function ThoughtDocument(
       // upload
       const response = await fetch(uploadUrl, {
         method: "POST",
-        headers: {"Content-Type": recordedBlob.type},
+        headers: { "Content-Type": recordedBlob.type },
         body: recordedBlob
       })
 
       // set transcribed audio to current slate content
-      const {storageId} = await response.json();
-      const audioTranscribedToslateContent = await transcribeAudio({storageId});
+      const { storageId } = await response.json();
+      const audioTranscribedToslateContent = await transcribeAudio({ storageId });
       setAllowContent(true);
       setCurrentContent(audioTranscribedToslateContent);
 
-      audioDispatch({type: "STATUS", status: "idle"});
-      audioDispatch({type: "DISPLAY", display: false});
-      
+      audioDispatch({ type: "STATUS", status: "idle" });
+      audioDispatch({ type: "DISPLAY", display: false });
+
     } catch (error) {
       console.error(error);
       setToast({
@@ -264,14 +264,14 @@ export default function ThoughtDocument(
   useEffect(() => {
     const handleMouseDown = () => {
       if (audioState.startRecording === false) return;
-      audioDispatch({type: "DISPLAY", display: false})
+      audioDispatch({ type: "DISPLAY", display: false })
     }
 
     const handleOutsideNavigationClick = () => {
       if (!showNavigation) return;
       setShowNavigation(false);
     }
-    
+
     window.addEventListener("mousedown", handleMouseDown);
     window.addEventListener("click", handleOutsideNavigationClick);
   }, [audioState.startRecording, showNavigation])
@@ -282,7 +282,7 @@ export default function ThoughtDocument(
     const thoughtToPlainText = slateToPlainText(currentContent);
     setSlateStatus("loading");
     try {
-      const refinedText = await refineThought({userIdea: thoughtToPlainText});
+      const refinedText = await refineThought({ userIdea: thoughtToPlainText });
       await handleAddVersion(refinedText);
       setSlateStatus("idle");
     } catch (error) {
@@ -300,7 +300,7 @@ export default function ThoughtDocument(
   const handleSurpriseMe = async () => {
     setSlateStatus("loading");
     try {
-      const content = await surpriseMe({keyPhrase: getRandomKeyphrase()});
+      const content = await surpriseMe({ keyPhrase: getRandomKeyphrase() });
       setAllowContent(true);
       setCurrentContent(content);
 
@@ -317,23 +317,23 @@ export default function ThoughtDocument(
   }
 
   // get the right text for the parent version
-  const getParentVersionLabel = ():string => {
+  const getParentVersionLabel = (): string => {
     if (!versions) return "";
     if (selectedVersion?.parentVersionNumber === 1 || !selectedVersion?.parentVersionNumber) return "Core Version";
     const versionNumber = selectedVersion?.parentVersionNumber;
     return versions.length < 9 ? "Version 0" + versionNumber : "Version " + versionNumber;
-   }
+  }
 
   // move document for when navigation is displayed
-   const navOverlay = useRef(null);
-   const firstRender = useRef(true);
-   useGSAP(() => {
+  const navOverlay = useRef(null);
+  const firstRender = useRef(true);
+  useGSAP(() => {
     if (!mainRef.current || !navOverlay.current) return;
     if (window.innerWidth > 1020) return;
 
     gsap.to(mainRef.current, {
       x: showNavigation ? 0 : -320,
-      duration: firstRender.current ? 0 : .25, 
+      duration: firstRender.current ? 0 : .25,
       ease: "power2.out"
     })
 
@@ -344,29 +344,29 @@ export default function ThoughtDocument(
 
     firstRender.current = false;
 
-   }, {dependencies: [showNavigation, navOverlay, mainRef, window.innerWidth]})
+  }, { dependencies: [showNavigation, navOverlay, mainRef, window.innerWidth] })
 
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 1020) {
-        gsap.set(mainRef.current, {x: -320});
+        gsap.set(mainRef.current, { x: -320 });
         return;
-      } 
+      }
       gsap.set(mainRef.current, { x: 0 });
-      gsap.set(navOverlay.current, {opacity: 0});
+      gsap.set(navOverlay.current, { opacity: 0 });
     }
     window.addEventListener("resize", handleResize);
   }, [])
 
   return (
-    <div ref={mainRef} 
+    <div ref={mainRef}
       style={{
         pointerEvents: window.innerWidth < 1020 && showNavigation ?
-         "none" : "all" // stops buttons from being when trying to close navigation on mobile
+          "none" : "all" // stops buttons from being when trying to close navigation on mobile
       }}
       className="relative lg:static w-full h-full lg:w-[unset] lg:h-[unset]">
-      <span 
-        ref={navOverlay} 
+      <span
+        ref={navOverlay}
         className="absolute left-0 top-0 w-full h-full lg:hidden bg-myBlack/40 
            z-[10] opacity-0 pointer-events-none" />
 
@@ -389,7 +389,7 @@ export default function ThoughtDocument(
 
             {/* Version Title */}
             <div className="flex justify-center items-center gap-x-[1rem]">
-              <button 
+              <button
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowNavigation(prev => !prev);
@@ -397,31 +397,34 @@ export default function ThoughtDocument(
                 className="inline-flex lg:hidden">
                 <HamburgerMenu />
               </button>
+
               {
-                selectedVersion?.isCore || thoughtId === "new" ? 
-                <h3 className="text-title text-fade-gray">Core</h3>
-                : 
+                selectedVersion?.isCore || thoughtId === "new" ?
+                  <h3 className="text-title text-fade-gray">Core</h3>
+                  :
                   <div className="flex flex-row text-dark-gray-label items-center gap-1 text-label-14 
                     px-[0.8rem] py-1 rounded-[20px] bg-myGray min-w-fit">
                     <span className="hidden md:block">Parent | </span>
                     <span className="md:hidden block">P | </span>
-                  <span className="text-myBlack">{getParentVersionLabel()}</span>
-                </div>
+                    <span className="text-myBlack">{getParentVersionLabel()}</span>
+                  </div>
               }
             </div>
 
             <span className="flex items-center gap-x-1.5">
-              <SlateStatusDisplay />
+              <div className="hidden lg:inline-flex">
+                <SlateStatusDisplay />
+              </div>
 
               {/* refine idea button */}
               <GradientBorderButton
-                icon={<ExploreIcon />} 
-                text="Refine" 
+                icon={<ExploreIcon />}
+                text="Refine"
                 handleClick={handleRefineThought} />
 
               {/* add version button */}
-              <ClassicButton 
-                icon={<PlusIcon />} 
+              <ClassicButton
+                icon={<PlusIcon />}
                 handleClick={() => handleAddVersion(currentContent)} />
             </span>
           </div>
@@ -446,8 +449,8 @@ export default function ThoughtDocument(
           <div className="absolute bottom-[0.9375rem] left-1/2 -translate-x-1/2">
             <TabButton
               tabIcon1={
-                !isRecording.current ? 
-                <MicrophoneIcon /> : <StopIcon />
+                !isRecording.current ?
+                  <MicrophoneIcon /> : <StopIcon />
               }
               tabIcon2={<TextIcon />}
               handleTab1Click={!isRecording.current ? handleRecordTabClicked : stopRecording}
@@ -456,14 +459,14 @@ export default function ThoughtDocument(
             />
 
             {/* Audio Input Component */}
-            <AudioInputModal 
+            <AudioInputModal
               display={audioState.display}
               startRecording={audioState.startRecording}
               handleExceedRecordLimit={() => stopRecording()}
               uploadAudio={(audioBlob) => handleTranscribeAudio(audioBlob)}
               targetId={audioState.targetId}
               status={audioState.status}
-              />
+            />
           </div>
 
           {/* Suprise Me & delete version */}

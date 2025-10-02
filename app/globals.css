@@ -37,7 +37,7 @@
   --color-dark-gray-fg: var(--dark-gray-fg);
   --color-dark-gray-label: var(--dark-gray-label);
   --color-sec-accent: var(--sec-accent);
-  /* --button-gradient: var(--button-gradient) */
+  --button-gradient: var(--button-gradient)
 
   /* TYPOGRAPHY */
   --text-label-small: 0.75rem;
