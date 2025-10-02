@@ -263,7 +263,7 @@ export default function Versions() {
       {/* for mobile */}
       <button 
         ref={mobileBtn}
-        onTouchStart={() => toggleDisplayVersions(true)}
+        onClick={() => toggleDisplayVersions(true)}
         className="absolute lg:hidden flex justify-center items-center top-0 right-0 z-1 w-[2.25rem] aspect-square 
         border-[1.5px] border-border-gray rounded-[10px] bg-dark-gray overflow-clip">
         <FourDotsIcon color="#fff" />
@@ -275,7 +275,7 @@ export default function Versions() {
         
         {/* for mobile */}
         <button 
-          onTouchStart={() => toggleDisplayVersions(false)}
+          onClick={() => toggleDisplayVersions(false)}
           className="opacity-0 lg:hidden flex justify-center items-center">
           <CloseIcon size={24} />
         </button>

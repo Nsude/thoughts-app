@@ -266,13 +266,13 @@ export default function ThoughtDocument(
       audioDispatch({type: "DISPLAY", display: false})
     }
 
-    const handleTouchstart = () => {
+    const handleOutsideNavigationClick = () => {
       if (!showNavigation) return;
       setShowNavigation(false);
     }
     
     window.addEventListener("mousedown", handleMouseDown);
-    window.addEventListener("touchstart", handleTouchstart);
+    window.addEventListener("click", handleOutsideNavigationClick);
   }, [audioState.startRecording, showNavigation])
 
   // handle refine idea
@@ -389,7 +389,10 @@ export default function ThoughtDocument(
             {/* Version Title */}
             <div className="flex justify-center items-center gap-x-[1rem]">
               <button 
-                onClick={() => setShowNavigation(prev => !prev)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowNavigation(prev => !prev);
+                }}
                 className="inline-flex lg:hidden">
                 <HamburgerMenu />
               </button>
