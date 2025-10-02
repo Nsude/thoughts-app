@@ -35,18 +35,6 @@ export default function InlineMenu() {
 
   }, [editor.selection, editor, openMenu])
 
-  // clear menu when block is empty
-  useEffect(() => {
-    if (!openMenu) return;
-
-    const {selection} = editor;
-    if (!selection || Range.isExpanded(selection)) return;
-
-    const {offset} = selection.anchor;
-    if (offset === 0) setOpenMenu(false);
-
-  }, [editor.selection, editor, openMenu]);
-
 
   // check if the "/" is on its own
   const isSlashIndependent = useCallback((): boolean => {
@@ -91,16 +79,19 @@ export default function InlineMenu() {
       switch(key.toLowerCase()) {
         case "/":
           if (!isIndependent) return;
+          console.log("open menu ✅✅");
           setOpenMenu(true);
           break;
         case "backspace":
+          console.log("close menu ❌❌");
           setOpenMenu(false);
           break;
         case "escape":
+          console.log("close menu ❌❌");
           setOpenMenu(false);
           break
         default:
-          if (!isIndependent) setOpenMenu(false);
+          setOpenMenu(false);
           break;
       }
       
@@ -112,6 +103,7 @@ export default function InlineMenu() {
 
   // hide/display inline menu
   useGSAP(() => {
+    console.log("open menu", openMenu)
     if (!mainRef.current) return;
     const main = mainRef.current as HTMLDivElement;
 
