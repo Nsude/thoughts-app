@@ -250,7 +250,7 @@ export default function Navigation() {
       onTouchStart={(e) => e.stopPropagation()}
       className="
         relative min-w-[20rem] w-[20rem] lg:w-[19%] lg:min-w-[18rem] h-full bg-myWhite z-[5] 
-        border-r-1 border-border-gray/50 text-nowrap overflow-hidden">
+        border-r-1 border-border-gray/50 text-nowrap">
       {/* search & logo */}
       <div className="p-[0.9375rem] w-full h-full">
 
