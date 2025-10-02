@@ -37,7 +37,7 @@ export default function OptionsModal({
   const { confirmAction } = useConfirmation();
   const { setCurrentContent } = useSlateStatusContext();
   const { setToast } = useToastContext();
-  const deleteThought = useMutation(api.thoughts.deleleThought);
+  const deleteThought = useMutation(api.thoughts.deleteThought);
 
   const mainRef = useRef(null);
   const firstCall = useRef(true);
@@ -102,6 +102,12 @@ export default function OptionsModal({
       if (isDisplayed) router.replace("/thoughts/new");
 
     } catch (error) {
+      setToast({
+        title: "Unauthorized Action",
+        msg: "You can't delete a thought you don't own",
+        isError: true,
+        showToast: true
+      })
       console.error("Error deleting thought: ", error);
     }
   };

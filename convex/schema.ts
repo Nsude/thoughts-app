@@ -34,6 +34,7 @@ const schema = defineSchema({
     thoughtLink: v.optional(v.string())
   })
     .index("by_owner", ["owner"])
+    .index("by_collaborators", ["collaborators"])
     .index("by_owner_privacy", ["owner", "isPrivate"]),
 
   // ===== VERSIONS =====

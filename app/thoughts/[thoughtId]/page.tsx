@@ -79,7 +79,7 @@ export default function ThoughtDocument(
 
   // convex mutations & queries
   const createVersion = useMutation(api.thoughts.createVersion);
-  const deleteVersion = useMutation(api.thoughts.deleleVersion);
+  const deleteVersion = useMutation(api.thoughts.deleteVersion);
   const versions = useQuery(api.thoughts.getThoughtVersions,
     thoughtId !== "new" ? { thoughtId } : "skip"
   );

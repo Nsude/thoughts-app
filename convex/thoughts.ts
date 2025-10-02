@@ -150,7 +150,7 @@ export const getUserThoughts = query({
 
     const collaboratedThoughts = await ctx.db
       .query("thoughts")
-      .filter((q) => q.eq(q.field("collaborators"), [user._id]))
+      .withIndex("by_collaborators", (q) => q.eq("collaborators", [user._id]))
       .collect();
 
     // Merge and deduplicate (in case someone is both owner + collaborator)
@@ -205,7 +205,7 @@ const updateVersionNumbersInternal = async (
 };
 
 // delete a version
-export const deleleVersion = mutation({
+export const deleteVersion = mutation({
   args: { thoughtId: v.id("thoughts") },
   handler: async (ctx, { thoughtId }) => {
     const thought = await ctx.db.get(thoughtId);
@@ -220,9 +220,21 @@ export const deleleVersion = mutation({
 });
 
 // delete a thought
-export const deleleThought = mutation({
+export const deleteThought = mutation({
   args: { thoughtId: v.id("thoughts") },
   handler: async (ctx, { thoughtId }) => {
+    const user = await getCurrentUserHelper(ctx);
+    if (!user) return;
+
+    const thought = await ctx.db.get(thoughtId);
+    if (!thought) return;
+
+    if (thought.owner !== user._id) {
+      const collaborators = (thought.collaborators || []).filter(u => u !== user._id);
+      await ctx.db.patch(thoughtId, {collaborators: collaborators});
+      return;
+    };
+
     await ctx.db.delete(thoughtId);
   },
 });
@@ -234,21 +246,18 @@ export const renameThought = mutation({
     thoughtId: v.id("thoughts"),
   },
   handler: async (ctx, { newTitle, thoughtId }) => {
-    try {
-      const thought = await ctx.db.get(thoughtId);
-      const user = await getCurrentUserHelper(ctx);
-      if (!thought || !user)
-        throw new Error("Rename error, thought file does not exist");
+    const thought = await ctx.db.get(thoughtId);
+    const user = await getCurrentUserHelper(ctx);
+    if (!thought || !user) return;
 
-      await ctx.db.patch(thoughtId, {
-        description: newTitle,
-        lastModified: {
-          modifiedBy: user._id,
-          date: Date.now(),
-        },
-      });
-    } catch (error) {
-      console.error(error);
-    }
+    if (thought.owner !== user._id) throw new Error("unauthorized action");
+
+    await ctx.db.patch(thoughtId, {
+      description: newTitle,
+      lastModified: {
+        modifiedBy: user._id,
+        date: Date.now(),
+      },
+    });
   },
 });

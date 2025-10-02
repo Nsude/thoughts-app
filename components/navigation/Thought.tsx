@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useShareThoughtContext } from "../contexts/ShareThoughtContext";
+import { useToastContext } from "../contexts/ToastContext";
 
 interface Props {
   handleClick: () => void;
@@ -33,6 +34,7 @@ export default function Thought({
   // mutation
   const renameThought = useMutation(api.thoughts.renameThought);
   const {state: {display}} = useShareThoughtContext();
+  const {setToast} = useToastContext();
 
   // clear previous title !IMPORTANT
   useEffect(() => {
@@ -107,6 +109,12 @@ export default function Thought({
       await renameThought({ thoughtId: _id, newTitle: title })
     } catch (error) {
       console.log("Error renaming thought: ", error);
+      setToast({
+        title: "Unauthorized Action",
+        msg: "You can't rename a thought you don't own",
+        isError: true,
+        showToast: true
+      })
     }
   }
 
