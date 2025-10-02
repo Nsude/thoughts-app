@@ -412,7 +412,7 @@ export default function ThoughtDocument(
             </div>
 
             <span className="flex items-center gap-x-1.5">
-              <div className="hidden lg:inline-flex">
+              <div className="hidden md:inline-flex">
                 <SlateStatusDisplay />
               </div>
 
