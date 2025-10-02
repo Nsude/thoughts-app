@@ -14,6 +14,13 @@
   --dark-gray-hover: #474747;
   --dark-gray-fg: #575757;
   --dark-gray-label: #888888;
+
+  --button-gradient: 90deg,
+    #FE7A33 0%,
+    #8A38F5 22%,
+    #FFA10B 47%,
+    #35FFC6 73%,
+    #8A38F5 100%
 }
 
 @theme inline {
@@ -30,6 +37,7 @@
   --color-dark-gray-fg: var(--dark-gray-fg);
   --color-dark-gray-label: var(--dark-gray-label);
   --color-sec-accent: var(--sec-accent);
+  /* --button-gradient: var(--button-gradient) */
 
   /* TYPOGRAPHY */
   --text-label-small: 0.75rem;

@@ -35,18 +35,6 @@ export default function InlineMenu() {
 
   }, [editor.selection, editor, openMenu])
 
-  // clear menu when block is empty
-  useEffect(() => {
-    if (!openMenu) return;
-
-    const {selection} = editor;
-    if (!selection || Range.isExpanded(selection)) return;
-
-    const {offset} = selection.anchor;
-    if (offset === 0) setOpenMenu(false);
-
-  }, [editor.selection, editor, openMenu]);
-
 
   // check if the "/" is on its own
   const isSlashIndependent = useCallback((): boolean => {
@@ -100,7 +88,7 @@ export default function InlineMenu() {
           setOpenMenu(false);
           break
         default:
-          if (!isIndependent) setOpenMenu(false);
+          setOpenMenu(false);
           break;
       }
       
