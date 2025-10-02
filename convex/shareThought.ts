@@ -57,29 +57,33 @@ export const makePrivate = mutation({
   },
 });
 
-export const addSharedThoughtToDashboard = mutation({
+export const updateThoughtCollaborators = mutation({
   args: {token: v.string()},
   handler: async (ctx, {token}) => {
+    const user = await getCurrentUserHelper(ctx);
+    if (!user) throw new Error("this user is not signed in");
+    const {_id: userId} = user;
+
     const shared = await ctx.db
       .query("sharedThoughts")
       .withIndex("with_token", (q) => q.eq("token", token))
       .unique();
-    
+
     if (!shared) throw new Error("token is invalid");
-    
+
     const thought = await ctx.db.get(shared.thoughtId);
     if (!thought) throw new Error("ThoughtId is invalid");
 
-    const alreadyExists = await ctx.db
-      .query("thoughts")
-      .withIndex("by_id", (q) => q.eq("_id", thought._id))
-      .unique();
-
-    if (alreadyExists) {
-      return {thoughtId: alreadyExists._id, title: alreadyExists.description};
+    // If already a collaborator, just return
+    if (thought.owner === userId || thought.collaborators?.includes(userId)) {
+      return { thoughtId: thought._id, title: thought.description };
     }
 
-    await ctx.db.insert("thoughts", {...thought});
-    return {thoughtId: thought._id, title: thought.description};
+    // Add them as a collaborator
+    await ctx.db.patch(thought._id, {
+      collaborators: [...(thought.collaborators ?? []), userId],
+    });
+
+    return { thoughtId: thought._id, title: thought.description };
   }
 })

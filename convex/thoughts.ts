@@ -140,21 +140,25 @@ export const setSelectedVersion = mutation({
 // fetch user thoughts
 export const getUserThoughts = query({
   handler: async (ctx) => {
-    try {
-      const user = await getCurrentUserHelper(ctx);
-      if (!user) throw new Error("this user is not signed in");
+    const user = await getCurrentUserHelper(ctx);
+    if (!user) throw new Error("this user is not signed in");
 
-      let thoughts = await ctx.db
-        .query("thoughts")
-        .withIndex("by_owner", (q) => q.eq("owner", user._id))
-        .collect();
+    const ownedThoughts = await ctx.db
+      .query("thoughts")
+      .withIndex("by_owner", (q) => q.eq("owner", user._id))
+      .collect();
 
-      if (!thoughts) return [];
+    const collaboratedThoughts = await ctx.db
+      .query("thoughts")
+      .filter((q) => q.eq(q.field("collaborators"), [user._id]))
+      .collect();
 
-      return thoughts;
-    } catch (error) {
-      console.error("Error fetching thoughts: ", error);
-    }
+    // Merge and deduplicate (in case someone is both owner + collaborator)
+    const thoughtsMap = new Map();
+    const allThoughts = [...ownedThoughts, ...collaboratedThoughts];
+    allThoughts.forEach( (t) => thoughtsMap.set(t._id, t) );
+
+    return Array.from(thoughtsMap.values());
   },
 });
 

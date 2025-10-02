@@ -17,12 +17,12 @@ export default function AddSharedThought({ params }: { params: Promise<{ token: 
   const router = useRouter();
 
   // convex mutations 
-  const addSharedThoughtToDashboard = useMutation(api.shareThought.addSharedThoughtToDashboard);
+  const updateThoughtCollaborators = useMutation(api.shareThought.updateThoughtCollaborators);
 
   useEffect(() => {
     const updateThoughts = async () => {
       try {
-        const response = await addSharedThoughtToDashboard({ token });
+        const response = await updateThoughtCollaborators({ token });
         router.replace(`/thoughts/${(response).thoughtId}`);
         setToast({
           title: "Shared Thought",
@@ -53,7 +53,7 @@ export default function AddSharedThought({ params }: { params: Promise<{ token: 
       updateThoughts();
     }
 
-  }, [currentUser, addSharedThoughtToDashboard, router, setToast, token])
+  }, [currentUser, updateThoughtCollaborators, router, setToast, token])
 
   return (
     <div className="relative w-full h-screen flex flex-col justify-center items-center">

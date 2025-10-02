@@ -388,7 +388,9 @@ export default function ThoughtDocument(
 
             {/* Version Title */}
             <div className="flex justify-center items-center gap-x-[1rem]">
-              <button onClick={() => setShowNavigation(prev => !prev)}>
+              <button 
+                onClick={() => setShowNavigation(prev => !prev)}
+                className="inline-flex lg:hidden">
                 <HamburgerMenu />
               </button>
               {
