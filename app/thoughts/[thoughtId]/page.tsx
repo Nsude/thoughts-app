@@ -30,6 +30,7 @@ import { useShareThoughtContext } from "@/components/contexts/ShareThoughtContex
 import ExploreIcon from "@/public/icons/ExploreIcon";
 import HamburgerMenu from "@/public/icons/HamburgerMenu";
 import { useNavigationContext } from "@/components/contexts/NavigationContext";
+import GradientBorderButton from "@/components/buttons/GradientBorderButton";
 
 const initialAudioModalState: AudioModalState = {
   display: false,
@@ -413,7 +414,7 @@ export default function ThoughtDocument(
               <SlateStatusDisplay />
 
               {/* refine idea button */}
-              <ClassicButton 
+              <GradientBorderButton
                 icon={<ExploreIcon />} 
                 text="Refine" 
                 handleClick={handleRefineThought} />

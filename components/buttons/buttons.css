@@ -135,3 +135,35 @@ button.my-audioControlBtn:disabled {
 .collpase-signout-btn {
   opacity: 0;
 }
+
+/* Gradient botton  */
+@keyframes gradient-border {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 300% 300%;
+  animation: gradient-border 5s ease infinite;
+}
+
+.animate-gradient .inner-span {
+  transition: background .25s linear;
+}
+
+.animate-gradient:hover .inner-span{
+  background: var(--accent);
+}
+
+.animate-gradient:hover {
+  background: var(--accent);
+}

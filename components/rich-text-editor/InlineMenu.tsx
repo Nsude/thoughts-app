@@ -79,15 +79,12 @@ export default function InlineMenu() {
       switch(key.toLowerCase()) {
         case "/":
           if (!isIndependent) return;
-          console.log("open menu ✅✅");
           setOpenMenu(true);
           break;
         case "backspace":
-          console.log("close menu ❌❌");
           setOpenMenu(false);
           break;
         case "escape":
-          console.log("close menu ❌❌");
           setOpenMenu(false);
           break
         default:
@@ -103,7 +100,6 @@ export default function InlineMenu() {
 
   // hide/display inline menu
   useGSAP(() => {
-    console.log("open menu", openMenu)
     if (!mainRef.current) return;
     const main = mainRef.current as HTMLDivElement;
 
