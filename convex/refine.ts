@@ -263,6 +263,7 @@ EXPANSION APPROACH:
 - When relevant, work through practical considerations
 - Consider different dimensions or approaches to the topic
 - Let the thinking flow organically from the initial seed
+- Most importantly, be concise, as concise as possible (by concise, I mean no long texts, just straight to the point, and only explore very useful avenues)
 
 FORMATTING GUIDELINES: ${formatingGuideLines}
 
