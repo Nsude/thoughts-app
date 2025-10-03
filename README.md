@@ -3,6 +3,15 @@ The thoughts web app is designed to be a thinking companion of some sort, levera
 
 ---
 
+### Features:
+- Rich Text Editor
+- Thought Branching: You can create multiple versions of a thought without losing the parent thought.
+- Audio Input & Transcriptions 
+- AI-Powered Thought Refinement
+- Real-time Collaboration: You can share your thoughts to anyone, and if they do not have account yet, they are redirected to create one then redirected to the shared thought.
+
+---
+
 ### Tech Stack & Key components
 1. NextJs: Although I'd never used NextJS until this project; reading through it's docs, I knew it was perfect for the application. The introduction of server side components, file based routing (which is not as complicated as complicated as it might sound), and built-in SEO capabilities sold me.
 
@@ -20,17 +29,22 @@ The thoughts web app is designed to be a thinking companion of some sort, levera
 
 About [Convex](https://docs.convex.dev)
 
-[x] When deploying a [convex app on vercel](https://docs.convex.dev/production/hosting/vercel), be sure to override the build command on vercel to be `npx convex deploy --cmd 'npm run build'` instead of the default `next build`.
-
-This ensures that your backend schemas, mutations and queries are deployed alongside the frontend hence the `-cmd npm run build`.
+When deploying a [convex app on vercel](https://docs.convex.dev/production/hosting/vercel), be sure to override the build command on vercel to be `npx convex deploy --cmd 'npm run build'` instead of the default `next build`. This ensures that your backend schemas, mutations and queries are deployed alongside the frontend hence the `-cmd npm run build`.
 
 Then you need to create a production deploy key on convex found in `settings -> URL & Deploy Key`, then set that deploy key as an enviroment variable in vercel.
 
 Also be sure to include the necessary production env variables on both convex and vercel. They are however, some variables that are only used by either convex or vercel; in that case you can just include that on the necessary platform.
 
+`✨ Noob Tip` 
+```
+You don't need to create a different project on convex for your production enviroment, 
+the convex team already thought of that and allows a project to have dev and prod env.
+
+```
+---
 
 `💡IMPORTANT` <br>
-[x] When using Github OAuth for authentification with convex, the Authorization call back URL shouldn't be set to the `.cloud` default endpoint that comes from the provided deployment URL from convex. 
+When using Github OAuth for authentification with convex, the Authorization call back URL shouldn't be set to the `.cloud` default endpoint that comes from the provided deployment URL from convex. 
 
 ```
 Deployment URL: https://gaitle-abena-396.convex.cloud
@@ -39,7 +53,7 @@ Github Authorization callback URL: https://gaitle-abena-396.convex.site
 
 The reason for this is that the `.cloud` endpoint is reserved for backend API calls `(mutations, queries, actions, etc)` and does not have routes like `/api/auth/...`, that is set on the `.site` endpoint which hosts your app's HTTP endpoints.
 
-[x] Be sure to include `NEXT_PUBLIC_CONVEX_URL: deplyment url from convex` as an environment variable on vercel, then `SITE_URL: domain url from vercel` on convex.
+Be sure to include `NEXT_PUBLIC_CONVEX_URL: deplyment url from convex` as an environment variable on vercel, then `SITE_URL: domain url from vercel` on convex.
 
 
 `💡IMPORTANT` <br>
@@ -52,7 +66,6 @@ Now the next-auth-secret on the other hand, is a special key used by vercel to e
 ---
 
 About [Slate](https://docs.slatejs.org):
-
 As opposed to other rich text editors, _slate_ provides a more flexible approach, they provide you with the tools you need to build whatever, it's then up to you what you do with them. This ofcourse is a gift and a curse as it has a bit of a learning curve, but it's relatively well documented and once you get a grasp of the concepts, it's incredibly easy to work with.
 
 ---
@@ -63,6 +76,7 @@ About [NextJS](https://nextjs.org/docs):
 
 - React state's are not very reliable when used for synchronous operations, use refs in addition to the states so you can trigger a rerender and still have your application working.
 
+--- 
 
 About [Gemini Models](https://ai.google.dev/gemini-api/docs/models)
 
@@ -73,7 +87,7 @@ curl "https://generativelanguage.googleapis.com/v1beta/models?key=$Your_GEMINI_A
 
 ```
 
-Then choose a model from there that best fits your needs, you can find more info about these models from the [Gemini's Docs](https://ai.google.dev/gemini-api/docs/models).
+Then choose a model from there that best fits your needs, you can find more info about these models from the [Gemini's Docs](https://ai.google.dev/gemini-api/docs/models)
 
 This helps you avoid runtime errors such as: <br>
 

@@ -203,9 +203,8 @@ export default function Versions() {
   useGSAP(() => {
     if (!mainRef.current) return;
     gsap.to(mainRef.current, {
-      opacity: showNavigation ? 0 : 1,
-      pointerEvents: showNavigation ? "none" : "all",
-      duration: .2
+      opacity: 0,
+      duration: .25
     })
 
     gsap.to(mobileBtn.current, {
@@ -223,6 +222,7 @@ export default function Versions() {
     const duration = .25;
 
     gsap.to(container, { 
+      opacity: 1,
       background: display ? "#2c2c2c" : "transparent", 
       pointerEvents: display ? "all" : "none" ,
       duration
