@@ -128,26 +128,13 @@ export default function SlateEditor({ handleClick, onChange, thoughtId }: Props)
         dispatch({ type: "SAVE_SUCCESS" });
         setSlateStatus("saved");
 
-        // If a remote update arrived while we had unsaved changes, we may now be able to apply it.
-        // Apply remote if it's newer than the lastSavedContent and there are no unsaved local edits.
-        if (lastRemoteContent.current && hasContentChanged(lastSavedContent.current, lastRemoteContent.current)) {
-          // only apply remote if currently there are no unsaved local changes
-          if (state.isInitialised && !state.hasUnsavedContent) {
-            isApplyingRemoteChange.current = true;
-            editor.children = lastRemoteContent.current;
-            editor.onChange();
-            lastSavedContent.current = lastRemoteContent.current;
-            setTimeout(() => { isApplyingRemoteChange.current = false; }, 100);
-          }
-        }
-
       } catch (error) {
         pendingSaves.current = Math.max(0, pendingSaves.current - 1);
         pendingSaveSnapshot.current = null;
         console.error("Error saving content: ", error);
         setSlateStatus("error");
       }
-    }, 300); // debounced for near-real-time saves
+    }, 550); // debounced for near-real-time saves
 
     return fn;
   }, [thoughtId, selectedVersion?._id, hasContentChanged, state.isInitialised, state.hasUnsavedContent]);
