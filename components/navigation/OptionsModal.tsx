@@ -120,6 +120,7 @@ export default function OptionsModal({
 
   return (
     <div
+      onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
       ref={mainRef}
       className="
