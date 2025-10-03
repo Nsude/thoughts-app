@@ -293,7 +293,7 @@ Continue developing this thought naturally. Return ONLY the JSON array, no expla
           ],
           generationConfig: {
             temperature: 0.3, // Lower temperature for more consistent formatting
-            maxOutputTokens: 2048, // max character limit
+            maxOutputTokens: 4096, // max character limit
           },
         }),
       }

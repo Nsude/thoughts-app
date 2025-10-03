@@ -101,3 +101,17 @@ This helps you avoid runtime errors such as: <br>
 }
 
 ```
+
+`💡IMPORTANT`
+```
+
+The temperature parameter parsed to the generationConfig object of a request to an LLM
+controls the how strictly the LLM follows your instructions without getting creative.
+
+Most LLMS go up to 3, but 0.1 - 0.5 is great for the most reliable responses.
+
+Also, the maxOutputTokens parameter can break your logic if it's set too low and the 
+LLM doesn't have enough characters left to fit your content structure, so always set 
+it to a little more that you need.
+
+```
