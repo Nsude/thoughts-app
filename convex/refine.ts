@@ -210,7 +210,7 @@ export const formatingGuideLines = `
     - Use heading (level: 2) for main sections
     - Use bold only for critical terms or key metrics
     - Use bullet lists for challenges, solutions, or opportunities
-    - Always add empty paragraph after lists
+    - Always add empty paragraph after lists, and before headings
     - Use heading (level: 3) for things like solutions, implemetation details, "scaling opportunities", potential drawbacks, and any other thing that would come off a title
     - Use italic for intriguing considerations or "what if" scenarios
     - Do not add spacing after heading if what follows the heading block is a list
