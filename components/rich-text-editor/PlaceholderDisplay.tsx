@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+
 // ✅ SEPARATE: Dedicated placeholder component
 interface Props {
   placeholderRef: React.RefObject<HTMLDivElement | null>;
@@ -10,6 +12,10 @@ interface Props {
 }
 
 export const PlaceholderDisplay = ({ placeholderRef, placeholderState }: Props) => {
+  useEffect(() => {
+    console.log(placeholderState.show)
+  }, [placeholderState.show])
+  
   const getPlaceholderText = () => {
     if (placeholderState.type === 'heading') {
       return `Heading ${placeholderState.headingLevel}`;

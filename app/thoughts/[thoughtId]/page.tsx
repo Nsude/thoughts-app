@@ -124,7 +124,7 @@ export default function ThoughtDocument(
       ease: easeInOutCubic
     })
 
-  }, { dependencies: [tab] });
+  }, { dependencies: [tab, placeholderRef] });
 
 
   // handle add versions
