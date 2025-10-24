@@ -25,6 +25,7 @@ The thoughts web app is designed to be a thinking companion of some sort, levera
 
 <details>
   <summary>✨ About [Convex](https://docs.convex.dev)</summary> <br>
+  
   When deploying a [convex app on vercel](https://docs.convex.dev/production/hosting/vercel), be sure to override the build command on vercel to be `npx convex deploy --cmd 'npm run build'` instead of the default `next build`. This ensures that your backend schemas, mutations and queries are deployed alongside the frontend hence the `-cmd npm run build`.
   
   Then you need to create a production deploy key on convex found in `settings -> URL & Deploy Key`, then set that deploy key as an enviroment variable in vercel.
@@ -70,6 +71,7 @@ The thoughts web app is designed to be a thinking companion of some sort, levera
 
 <details>
   <summary>✨ About [NextJS](https://nextjs.org/docs)</summary> <br>
+  
   - When rendering lists in _NextJS/React_, you probably shouldn't use the index as the key prop, it is quite unreliable. If the list is updated in any way that affects it's length, that becomes problematic in very weird ways (and ofcourse I didn't make this rookie mistake... just sharing it 🥲).
   
   - React state's are not very reliable when used for synchronous operations, use refs in addition to the states so you can trigger a rerender and still have your application working.
@@ -78,6 +80,7 @@ The thoughts web app is designed to be a thinking companion of some sort, levera
 
 <details>
   <summary>✨ About [Gemini Models](https://ai.google.dev/gemini-api/docs/models)</summary> <br>
+  
   To get a list of the models available to you, run this command in the terminal: <br>
   
   ```
