@@ -65,16 +65,12 @@ The thoughts web app is designed to be a thinking companion of some sort, levera
 </details>
 
 
-#
-
 <details>
   <summary>About [Slate](https://docs.slatejs.org)</summary> <br>
   
   As opposed to other rich text editors, _slate_ provides a more flexible approach, they provide you with the tools you need to build whatever, it's then up to you what you do with them. This ofcourse is a gift and a curse as it has a bit of a learning curve, but it's relatively well documented and once you get a grasp of the concepts, it's incredibly easy to work with.
 </details>
 
-
-#
 
 <details>
   <summary>About [NextJS](https://nextjs.org/docs)</summary> <br>
@@ -83,8 +79,6 @@ The thoughts web app is designed to be a thinking companion of some sort, levera
   - React state's are not very reliable when used for synchronous operations, use refs in addition to the states so you can trigger a rerender and still have your application working.
 </details>
 
-
-#
 
 <details>
   <summary>About [Gemini Models](https://ai.google.dev/gemini-api/docs/models)</summary> <br>
