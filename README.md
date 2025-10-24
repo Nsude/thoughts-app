@@ -13,7 +13,7 @@ The thoughts web app is designed to be a thinking companion of some sort, levera
 #
 
 ### Tech Stack & Key components
-1. NextJs: Although I'd never used NextJS until this project; reading through it's docs, I knew it was perfect for the application. The introduction of server side components, file based routing (which is not as complicated as complicated as it might sound), and built-in SEO capabilities sold me.
+1. NextJs: Although I'd never used NextJS until this project; reading through it's docs, I knew it was perfect for the application. The introduction of server side components, file based routing (which is not as complicated as it might sound), and built-in SEO capabilities sold me.
 
 2. Convex: For my auth, backend and database needs, I opted to use convex; yet another technology I hadn't used before now (yeah save it, I know).
 
@@ -28,7 +28,7 @@ The thoughts web app is designed to be a thinking companion of some sort, levera
 ## My Learnings
 
 <details>
-  <summary>About [Convex](https://docs.convex.dev)</summary> <br>
+  <summary>✨ About [Convex](https://docs.convex.dev)</summary> <br>
   When deploying a [convex app on vercel](https://docs.convex.dev/production/hosting/vercel), be sure to override the build command on vercel to be `npx convex deploy --cmd 'npm run build'` instead of the default `next build`. This ensures that your backend schemas, mutations and queries are deployed alongside the frontend hence the `-cmd npm run build`.
   
   Then you need to create a production deploy key on convex found in `settings -> URL & Deploy Key`, then set that deploy key as an enviroment variable in vercel.
@@ -66,14 +66,14 @@ The thoughts web app is designed to be a thinking companion of some sort, levera
 
 
 <details>
-  <summary>About [Slate](https://docs.slatejs.org)</summary> <br>
+  <summary>✨ About [Slate](https://docs.slatejs.org)</summary> <br>
   
   As opposed to other rich text editors, _slate_ provides a more flexible approach, they provide you with the tools you need to build whatever, it's then up to you what you do with them. This ofcourse is a gift and a curse as it has a bit of a learning curve, but it's relatively well documented and once you get a grasp of the concepts, it's incredibly easy to work with.
 </details>
 
 
 <details>
-  <summary>About [NextJS](https://nextjs.org/docs)</summary> <br>
+  <summary>✨ About [NextJS](https://nextjs.org/docs)</summary> <br>
   - When rendering lists in _NextJS/React_, you probably shouldn't use the index as the key prop, it is quite unreliable. If the list is updated in any way that affects it's length, that becomes problematic in very weird ways (and ofcourse I didn't make this rookie mistake... just sharing it 🥲).
   
   - React state's are not very reliable when used for synchronous operations, use refs in addition to the states so you can trigger a rerender and still have your application working.
@@ -81,7 +81,7 @@ The thoughts web app is designed to be a thinking companion of some sort, levera
 
 
 <details>
-  <summary>About [Gemini Models](https://ai.google.dev/gemini-api/docs/models)</summary> <br>
+  <summary>✨ About [Gemini Models](https://ai.google.dev/gemini-api/docs/models)</summary> <br>
   To get a list of the models available to you, run this command in the terminal: <br>
   
   ```
@@ -118,3 +118,5 @@ The thoughts web app is designed to be a thinking companion of some sort, levera
   
   ```
 </details>
+
+With 💖💌 from Enugu
