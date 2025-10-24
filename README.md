@@ -1,8 +1,6 @@
 # About The Project
 The thoughts web app is designed to be a thinking companion of some sort, leveraging ai to help users refine their thoughts in real-time, allowing them to create multiple versions of their thoughts, invite other users to brainstorm together, and view publicly available thoughts shared by other users.
 
-#
-
 ### Features:
 - Rich Text Editor
 - Thought Branching: You can create multiple versions of a thought without losing the parent thought.
@@ -10,7 +8,6 @@ The thoughts web app is designed to be a thinking companion of some sort, levera
 - AI-Powered Thought Refinement
 - Real-time Collaboration: You can share your thoughts to anyone, and if they do not have account yet, they are redirected to create one then redirected to the shared thought.
 
-#
 
 ### Tech Stack & Key components
 1. NextJs: Although I'd never used NextJS until this project; reading through it's docs, I knew it was perfect for the application. The introduction of server side components, file based routing (which is not as complicated as it might sound), and built-in SEO capabilities sold me.
@@ -23,7 +20,6 @@ The thoughts web app is designed to be a thinking companion of some sort, levera
 
 5. Resend as my email provider.
 
-#
 
 ## My Learnings
 
@@ -118,5 +114,6 @@ The thoughts web app is designed to be a thinking companion of some sort, levera
   
   ```
 </details>
+
 
 With 💖💌 from Enugu
