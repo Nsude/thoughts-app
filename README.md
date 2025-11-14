@@ -14,7 +14,7 @@ The thoughts web app is designed to be a thinking companion of some sort, levera
 
 2. Convex: For my auth, backend and database needs, I opted to use convex; yet another technology I hadn't used before now (yeah save it, I know).
 
-3. Slate (Rich text editor which I've also never used).
+3. Slate (Rich text editor sandbox).
 
 4. GSAP (for animations).
 
